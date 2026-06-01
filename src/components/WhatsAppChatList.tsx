@@ -186,7 +186,6 @@ export function WhatsAppChatList({ userId, ownerPhone, permissions, onClose, onE
     try {
       const res = await fetchWhatsAppHistory(userId, chat.id, permissions, 50);
       if (res.ok) {
-        // Backend returns newest-first; show chronological (oldest at top).
         setMessages([...res.messages].sort((a, b) => a.timestamp - b.timestamp));
       } else {
         setMsgsError(res.error || 'Failed to load conversation');
@@ -216,26 +215,28 @@ export function WhatsAppChatList({ userId, ownerPhone, permissions, onClose, onE
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[70] flex flex-col h-[100dvh] bg-[#0b141a]"
+        className="fixed inset-0 z-[70] flex flex-col h-[100dvh] bg-wa-bg-main"
       >
+        <div className="wa-chat-bg opacity-[0.05]" />
+        
         {/* Thread header */}
-        <header className="shrink-0 flex items-center gap-3 px-2 sm:px-3 h-[60px] bg-[#202c33] border-b border-black/20">
+        <header className="shrink-0 flex items-center gap-3 px-2 sm:px-3 h-[60px] bg-wa-bg-header border-b border-black/20 z-10 shadow-sm">
           <button
             onClick={() => setActiveChat(null)}
-            className="p-2 -ml-1 rounded-full text-[#aebac1] hover:bg-white/5 transition-colors cursor-pointer"
-            aria-label="Back to chats"
+            className="p-2 -ml-1 rounded-full text-wa-text-secondary hover:bg-white/5 transition-colors cursor-pointer"
+            aria-label="Back"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-6 h-6" />
           </button>
           <Avatar name={name} seed={activeChat.id} isGroup={activeChat.isGroup} size={40} />
           <div className="flex flex-col min-w-0">
-            <span className="text-[15px] font-medium text-[#e9edef] truncate leading-tight">{name}</span>
-            <span className="text-[12px] text-[#8696a0] truncate">{numberLabel}</span>
+            <span className="text-[15px] font-semibold text-wa-text-primary truncate leading-tight">{name}</span>
+            <span className="text-[11px] text-wa-green font-bold uppercase tracking-widest mt-0.5">online</span>
           </div>
         </header>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-3 sm:px-6 py-4 space-y-1.5" style={{ background: '#0b141a' }}>
+        <div className="flex-1 overflow-y-auto px-3 sm:px-6 py-4 space-y-2 z-10">
           {!canReadHistory ? (
             <GateCard
               icon={<Lock className="w-6 h-6" />}
@@ -246,7 +247,7 @@ export function WhatsAppChatList({ userId, ownerPhone, permissions, onClose, onE
             />
           ) : loadingMsgs ? (
             <div className="flex-1 flex items-center justify-center pt-16">
-              <RefreshCw className="w-5 h-5 text-[#8696a0] animate-spin" />
+              <RefreshCw className="w-5 h-5 text-wa-text-secondary animate-spin" />
             </div>
           ) : msgsError ? (
             <GateCard icon={<AlertCircle className="w-6 h-6" />} title="Couldn’t load conversation" body={msgsError} actionLabel="Retry" onAction={() => openChat(activeChat)} />
@@ -254,7 +255,7 @@ export function WhatsAppChatList({ userId, ownerPhone, permissions, onClose, onE
             <GateCard
               icon={<MessageSquare className="w-6 h-6" />}
               title="No messages yet"
-              body="Recent messages sync from your phone as they arrive. Older history may not be available."
+              body="Recent messages sync from your phone as they arrive."
             />
           ) : (
             messages.map((m) => {
@@ -265,30 +266,33 @@ export function WhatsAppChatList({ userId, ownerPhone, permissions, onClose, onE
               return (
                 <div key={m.id}>
                   {showDay && (
-                    <div className="flex justify-center my-3">
-                      <span className="px-3 py-1 rounded-lg bg-[#1d282f] text-[#8696a0] text-[11px] uppercase tracking-wide shadow-sm">
+                    <div className="flex justify-center my-4">
+                      <span className="px-3 py-1 rounded-lg bg-wa-bg-sidebar text-wa-text-secondary text-[10px] font-bold uppercase tracking-widest border border-white/5 shadow-sm">
                         {formatDaySeparator(m.timestamp)}
                       </span>
                     </div>
                   )}
                   <div className={`flex ${m.fromMe ? 'justify-end' : 'justify-start'}`}>
                     <div
-                      className="max-w-[80%] sm:max-w-[65%] rounded-lg px-2.5 py-1.5 shadow-sm"
-                      style={{ background: m.fromMe ? '#005c4b' : '#202c33' }}
+                      className={`relative max-w-[85%] sm:max-w-[70%] rounded-xl px-2.5 py-1.5 shadow-sm ${
+                        m.fromMe 
+                          ? 'bg-wa-bubble-out text-wa-text-primary rounded-tr-none' 
+                          : 'bg-wa-bubble-in text-wa-text-primary rounded-tl-none border border-white/[0.02]'
+                      }`}
                     >
                       {!m.fromMe && activeChat.isGroup && (
-                        <span className="block text-[12px] font-medium mb-0.5" style={{ color: avatarColor(m.from) }}>
+                        <span className="block text-[11px] font-bold mb-0.5" style={{ color: avatarColor(m.from) }}>
                           {senderDigits ? formatPhone(senderDigits) : 'Member'}
                         </span>
                       )}
                       <div className="flex items-end gap-2 flex-wrap">
-                        <span className="text-[14px] text-[#e9edef] whitespace-pre-wrap break-words leading-snug">
+                        <span className="text-[14px] leading-snug whitespace-pre-wrap break-words">
                           {m.isMedia && !m.body ? '📎 Media' : m.body}
                         </span>
-                        <span className="ml-auto flex items-center gap-1 text-[10px] text-[#ffffff8c] shrink-0 translate-y-0.5">
-                          {formatBubbleTime(m.timestamp)}
-                          {m.fromMe && <CheckCheck className="w-3.5 h-3.5 text-[#53bdeb]" />}
-                        </span>
+                        <div className="ml-auto flex items-center gap-1 text-[10px] text-white/50 shrink-0 translate-y-0.5">
+                          <span>{formatBubbleTime(m.timestamp)}</span>
+                          {m.fromMe && <CheckCheck className="w-3.5 h-3.5 text-wa-check-blue" />}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -298,10 +302,10 @@ export function WhatsAppChatList({ userId, ownerPhone, permissions, onClose, onE
           )}
         </div>
 
-        {/* Footer: read-only notice (sending is via Beatrice / voice) */}
-        <footer className="shrink-0 px-4 py-2.5 bg-[#202c33] border-t border-black/20 text-center">
-          <p className="text-[11px] text-[#8696a0]">
-            Read-only preview · Ask Beatrice to reply{numberLabel && !activeChat.isGroup ? ` (${numberLabel})` : ''}
+        {/* Footer: read-only notice */}
+        <footer className="shrink-0 px-4 py-3 bg-wa-bg-header border-t border-black/20 text-center z-10">
+          <p className="text-[11px] text-wa-text-secondary font-medium">
+            Read-only preview · Use Beatrice to reply via voice
           </p>
         </footer>
       </motion.div>
@@ -314,31 +318,30 @@ export function WhatsAppChatList({ userId, ownerPhone, permissions, onClose, onE
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[70] flex flex-col h-[100dvh] bg-[#111b21]"
+      className="fixed inset-0 z-[70] flex flex-col h-[100dvh] bg-wa-bg-main"
     >
       {/* Header */}
-      <header className="shrink-0 flex items-center justify-between gap-2 px-3 h-[60px] bg-[#202c33]">
+      <header className="shrink-0 flex items-center justify-between gap-2 px-3 h-[60px] bg-wa-bg-header shadow-md z-10">
         <div className="flex items-center gap-2 min-w-0">
           <button
             onClick={onClose}
-            className="p-2 -ml-1 rounded-full text-[#aebac1] hover:bg-white/5 transition-colors cursor-pointer"
-            aria-label="Close WhatsApp chats"
+            className="p-2 -ml-1 rounded-full text-wa-text-secondary hover:bg-white/5 transition-colors cursor-pointer"
+            aria-label="Back"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-6 h-6" />
           </button>
           <div className="flex flex-col min-w-0">
-            <span className="text-[16px] font-semibold text-[#e9edef] leading-tight">Chats</span>
+            <span className="text-[18px] font-bold text-wa-text-primary leading-tight">WhatsApp</span>
             {ownerLabel && (
-              <span className="text-[11px] text-[#8696a0] truncate">Your WhatsApp · {ownerLabel}</span>
+              <span className="text-[11px] text-wa-green font-bold uppercase tracking-wider">{ownerLabel}</span>
             )}
           </div>
         </div>
         <button
           onClick={loadChats}
           disabled={loadingChats || !canReadChats}
-          className="p-2 rounded-full text-[#aebac1] hover:bg-white/5 transition-colors cursor-pointer disabled:opacity-40"
-          aria-label="Refresh chats"
-          title="Refresh chats"
+          className="p-2 rounded-full text-wa-text-secondary hover:bg-white/5 transition-colors cursor-pointer disabled:opacity-40"
+          aria-label="Refresh"
         >
           <RefreshCw className={`w-5 h-5 ${loadingChats ? 'animate-spin' : ''}`} />
         </button>
@@ -346,15 +349,15 @@ export function WhatsAppChatList({ userId, ownerPhone, permissions, onClose, onE
 
       {/* Search */}
       {canReadChats && (
-        <div className="shrink-0 px-3 py-2 bg-[#111b21]">
-          <div className="flex items-center gap-3 bg-[#202c33] rounded-lg px-3 h-9">
-            <Search className="w-4 h-4 text-[#8696a0] shrink-0" />
+        <div className="shrink-0 px-3 py-2 bg-wa-bg-main">
+          <div className="flex items-center gap-3 bg-wa-bg-header rounded-xl px-4 h-10 border border-white/5 shadow-inner">
+            <Search className="w-4 h-4 text-wa-text-secondary shrink-0" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search name or number"
-              className="flex-1 bg-transparent text-[14px] text-[#e9edef] placeholder-[#8696a0] focus:outline-none min-w-0"
+              placeholder="Search chats"
+              className="flex-1 bg-transparent text-[14px] text-wa-text-primary placeholder-wa-text-secondary/50 focus:outline-none min-w-0"
             />
           </div>
         </div>
@@ -365,21 +368,21 @@ export function WhatsAppChatList({ userId, ownerPhone, permissions, onClose, onE
         <GateCard
           icon={<Lock className="w-6 h-6" />}
           title="Read Chats is off"
-          body="Enable “Read Chats” so Beatrice can see your conversations and clearly tell who is who."
-          actionLabel="Enable Read Chats"
+          body="Enable “Read Chats” in settings so Beatrice can access your conversations."
+          actionLabel="Enable Permission"
           onAction={() => onEnablePermission('read_chats')}
         />
       ) : loadingChats && chats.length === 0 ? (
         <div className="flex-1 flex items-center justify-center">
-          <RefreshCw className="w-5 h-5 text-[#8696a0] animate-spin" />
+          <RefreshCw className="w-6 h-6 text-wa-green animate-spin" />
         </div>
       ) : chatsError ? (
-        <GateCard icon={<AlertCircle className="w-6 h-6" />} title="Couldn’t load chats" body={chatsError} actionLabel="Retry" onAction={loadChats} />
+        <GateCard icon={<AlertCircle className="w-6 h-6" />} title="Connection error" body={chatsError} actionLabel="Retry" onAction={loadChats} />
       ) : filteredChats.length === 0 ? (
         <GateCard
           icon={<MessageSquare className="w-6 h-6" />}
-          title={search ? 'No matches' : 'No conversations yet'}
-          body={search ? 'Try a different name or number.' : 'Recent chats sync from your phone as messages arrive. Keep WhatsApp connected.'}
+          title={search ? 'No matches' : 'No chats'}
+          body={search ? 'Try searching for something else.' : 'Your recent WhatsApp chats will appear here.'}
         />
       ) : (
         <div className="flex-1 overflow-y-auto">
@@ -389,23 +392,25 @@ export function WhatsAppChatList({ userId, ownerPhone, permissions, onClose, onE
               <button
                 key={chat.id}
                 onClick={() => openChat(chat)}
-                className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-[#202c33] active:bg-[#202c33] transition-colors text-left cursor-pointer"
+                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-wa-bg-header transition-colors text-left cursor-pointer border-b border-white/[0.02]"
               >
-                <Avatar name={name} seed={chat.id} isGroup={chat.isGroup} />
-                <div className="flex-1 min-w-0 border-b border-[#222d34] pb-2.5 -mb-2.5">
+                <Avatar name={name} seed={chat.id} isGroup={chat.isGroup} size={54} />
+                <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-[16px] text-[#e9edef] truncate">{name}</span>
-                    <span className={`text-[12px] shrink-0 ${chat.unreadCount > 0 ? 'text-[#00a884]' : 'text-[#8696a0]'}`}>
+                    <span className="text-[16px] font-semibold text-wa-text-primary truncate">{name}</span>
+                    <span className={`text-[12px] font-medium shrink-0 ${chat.unreadCount > 0 ? 'text-wa-green' : 'text-wa-text-secondary'}`}>
                       {formatListTime(chat.timestamp)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between gap-2 mt-0.5">
-                    <span className="text-[13px] text-[#8696a0] truncate">
-                      {chat.isGroup && <Users className="w-3.5 h-3.5 inline -mt-0.5 mr-1" />}
-                      {chat.lastMessage || ' '}
-                    </span>
+                    <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                       {chat.isGroup && <Users className="w-3.5 h-3.5 text-wa-text-secondary shrink-0" />}
+                       <span className="text-[13px] text-wa-text-secondary truncate leading-relaxed">
+                        {chat.lastMessage || ' '}
+                      </span>
+                    </div>
                     {chat.unreadCount > 0 && (
-                      <span className="shrink-0 min-w-[20px] h-5 px-1.5 rounded-full bg-[#00a884] text-[#111b21] text-[11px] font-bold flex items-center justify-center">
+                      <span className="shrink-0 min-w-[20px] h-5 px-1.5 rounded-full bg-wa-green text-wa-bg-main text-[11px] font-black flex items-center justify-center shadow-lg">
                         {chat.unreadCount > 99 ? '99+' : chat.unreadCount}
                       </span>
                     )}
@@ -414,9 +419,10 @@ export function WhatsAppChatList({ userId, ownerPhone, permissions, onClose, onE
               </button>
             );
           })}
-          <div className="px-4 py-3 text-center">
-            <p className="text-[11px] text-[#667781]">
-              Showing recent conversations synced from your phone · names only (no profile photos)
+          <div className="px-8 py-10 text-center opacity-30">
+            <Lock size={14} className="mx-auto mb-2" />
+            <p className="text-[10px] uppercase tracking-widest font-bold leading-relaxed">
+              End-to-end encrypted · Beatrice Cloud
             </p>
           </div>
         </div>

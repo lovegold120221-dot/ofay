@@ -3700,39 +3700,38 @@ ${historyContext}
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#050505] text-black dark:text-white flex flex-col h-[100dvh] overflow-y-auto select-none relative">
+    <div className="min-h-screen bg-wa-bg-main text-wa-text-primary flex flex-col h-[100dvh] overflow-y-auto select-none relative">
       <audio ref={bgAudioRef} src="/office.mp3" loop crossOrigin="anonymous" className="hidden" />
       <div
-        className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(208,167,139,0.03),transparent_75%)] pointer-events-none z-0 dark:block hidden"
+        className="wa-chat-bg opacity-[0.04]"
       />
 
-      <header className="sticky top-0 w-full bg-black/70 backdrop-blur-2xl border-b border-white/[0.04] px-4 sm:px-6 py-3.5 flex items-center justify-between z-30 shrink-0">
+      <header className="sticky top-0 w-full bg-wa-bg-header border-b border-white/5 px-4 sm:px-6 py-3.5 flex items-center justify-between z-30 shrink-0 shadow-sm">
         <div className="flex items-center">
             <button
               onClick={() => { markUserSpeechActivity(); setShowSettings(true); }}
-              className="p-1.5 -ml-1.5 rounded-xl text-white/90 hover:text-white hover:bg-white/5 transition-all duration-300 active:scale-90"
+              className="p-1.5 -ml-1.5 rounded-full text-wa-text-secondary hover:text-white hover:bg-white/5 transition-all duration-300 active:scale-90"
               aria-label="Open Settings"
             >
-
-              <Settings className="w-[35px] h-[35px]" strokeWidth={1.5} />
+              <Settings className="w-[28px] h-[28px]" strokeWidth={1.5} />
             </button>
         </div>
 
         <div className="text-center flex flex-col items-center">
-          <h1 className="text-base sm:text-lg font-['SF_Pro_Display',system-ui,sans-serif] font-semibold tracking-tight text-white">{personaName}</h1>
-          <p className="text-[7px] text-white/25 tracking-[0.25em] uppercase font-['SF_Pro_Text',system-ui,sans-serif] font-medium">eburon ai</p>
+          <h1 className="text-base font-semibold tracking-tight text-wa-text-primary">{personaName}</h1>
+          <p className="text-[9px] text-wa-green font-bold tracking-widest uppercase">online</p>
         </div>
 
         <div className="flex items-center gap-2">
           <button
             onClick={() => { markUserSpeechActivity(); setShowProfilePage(true); }}
-            className="w-[43px] h-[43px] rounded-full bg-white/[0.03] border border-white/[0.06] overflow-hidden flex items-center justify-center hover:bg-white/[0.07] hover:border-white/[0.15] transition-all duration-300 active:scale-90"
+            className="w-[40px] h-[40px] rounded-full bg-wa-bg-sidebar border border-white/5 overflow-hidden flex items-center justify-center hover:border-white/10 transition-all duration-300 active:scale-90"
             aria-label="User Profile"
           >
             {user.photoURL ? (
-              <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover opacity-85 hover:opacity-100 transition-opacity" />
+              <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover" />
             ) : (
-              <span className="text-white/70 text-base font-['SF_Pro_Text',system-ui,sans-serif] font-semibold">{user.displayName?.charAt(0) || 'M'}</span>
+              <span className="text-white/70 text-sm font-semibold">{user.displayName?.charAt(0) || 'M'}</span>
             )}
           </button>
         </div>
@@ -3816,19 +3815,19 @@ ${historyContext}
         </div>
       </main>
 
-      <footer className="sticky bottom-0 w-full h-[72px] sm:h-[92px] bg-black/80 backdrop-blur-2xl border-t border-white/5 z-20 px-4 sm:px-6 box-border select-none shrink-0">
+      <footer className="sticky bottom-0 w-full h-[72px] sm:h-[84px] bg-wa-bg-header border-t border-white/5 z-20 px-4 sm:px-6 box-border select-none shrink-0 shadow-lg">
         <div className="relative w-full h-full flex items-center justify-between">
 
           <button
             onClick={() => { markUserSpeechActivity(); setShowChatPage(true); }}
-            className="flex flex-col items-center justify-center transition-all duration-300 text-white/55 hover:text-white/90 active:scale-95"
+            className="flex flex-col items-center justify-center transition-all duration-300 text-wa-text-secondary hover:text-wa-text-primary active:scale-95"
           >
-            <MessageSquare className="w-[35px] h-[35px] mb-1" strokeWidth={1.5} />
-            <span className="text-[9px] font-['SF_Pro_Text',system-ui,sans-serif] font-semibold tracking-normal">Chat</span>
+            <MessageSquare className="w-[28px] h-[28px] mb-1" strokeWidth={1.5} />
+            <span className="text-[10px] font-medium tracking-tight">Chats</span>
           </button>
 
           {/* Center Voice Button with Visualizer */}
-          <div className="absolute left-1/2 -translate-x-1/2 bottom-[36px] sm:bottom-[48px] flex items-center gap-4 sm:gap-8 z-30">
+          <div className="absolute left-1/2 -translate-x-1/2 bottom-[24px] sm:bottom-[32px] flex items-center gap-4 sm:gap-6 z-30">
             <VisualizerBars volumes={volumes.slice(0, 5)} side="left" />
             
             <motion.button
@@ -3836,10 +3835,10 @@ ${historyContext}
               disabled={connecting}
               aria-label={isActive ? "Stop Voice Assistant" : "Start Voice Assistant"}
               title={isActive ? "Stop Voice Assistant" : "Start Voice Assistant"}
-              className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-[#a3d944] via-[#4dbd79] to-[#29abe2] flex items-center justify-center shadow-2xl transition-all duration-300 border-2 border-white/10 hover:brightness-105 active:scale-95"
+              className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-wa-green flex items-center justify-center shadow-xl shadow-wa-green/20 transition-all duration-300 border border-white/10 hover:brightness-110 active:scale-95"
             >
               {connecting ? (
-                <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 animate-spin text-white" />
+                <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 animate-spin text-wa-bg-main" />
               ) : isActive ? (
                 <div className="relative flex items-center justify-center">
                   <motion.div
@@ -3847,12 +3846,12 @@ ${historyContext}
                   transition={{ repeat: Infinity, duration: 2 }}
                   className="z-10"
                 >
-                  <Square className="w-6 h-6 sm:w-8 sm:h-8 fill-red-500 text-red-500 rounded-none" strokeWidth={1} />
+                  <Square className="w-5 h-5 sm:w-6 sm:h-6 fill-white text-white rounded-none" strokeWidth={1} />
                 </motion.div>
 
                 </div>
               ) : (
-                <Mic className="w-7 h-7 sm:w-9 sm:h-9 text-white/90 drop-shadow-md" strokeWidth={1.5} />
+                <Mic className="w-6 h-6 sm:w-8 sm:h-8 text-wa-bg-main" strokeWidth={2} />
               )}
             </motion.button>
 
@@ -3861,10 +3860,10 @@ ${historyContext}
 
           <button
             onClick={handleTapVideo}
-            className="flex flex-col items-center justify-center transition-all duration-300 text-white/55 hover:text-white/90 active:scale-95"
+            className="flex flex-col items-center justify-center transition-all duration-300 text-wa-text-secondary hover:text-wa-text-primary active:scale-95"
           >
-            <Video className="w-[35px] h-[35px] mb-1" strokeWidth={1.5} />
-            <span className="text-[9px] font-['SF_Pro_Text',system-ui,sans-serif] font-semibold tracking-normal">Video</span>
+            <Video className="w-[28px] h-[28px] mb-1" strokeWidth={1.5} />
+            <span className="text-[10px] font-medium tracking-tight">Status</span>
           </button>
         </div>
       </footer>

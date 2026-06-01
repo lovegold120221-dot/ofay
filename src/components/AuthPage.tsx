@@ -291,6 +291,7 @@ export function AuthPage({ onGoogleToken, onLogin }: AuthPageProps) {
                       value={authLanguage}
                       onChange={e => { setAuthLanguage(e.target.value); try { localStorage.setItem('beatrice_language', e.target.value); } catch {} }}
                       className="w-full bg-transparent text-white/60 placeholder-white/25 text-sm px-4 py-3.5 outline-none appearance-none cursor-pointer font-['SF_Pro_Text',system-ui,sans-serif]"
+                      aria-label="Language selection"
                     >
                       {LANGUAGES.map(l => (
                         <option key={l.code} value={l.code}>{l.label}</option>

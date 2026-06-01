@@ -93,8 +93,12 @@ class _BeatriceAppState extends ConsumerState<BeatriceApp> {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
-        primaryColor: const Color(0xFFD0A78B),
-        scaffoldBackgroundColor: const Color(0xFF050505),
+        primaryColor: const Color(0xFF00A884),
+        scaffoldBackgroundColor: const Color(0xFF0B141A),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF202C33),
+          elevation: 1,
+        ),
         useMaterial3: true,
       ),
       home: StreamBuilder(

@@ -129,36 +129,43 @@ export function ChatPage({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-[#161312] flex flex-col h-[100dvh]"
+      className="fixed inset-0 z-50 bg-wa-bg-main flex flex-col h-[100dvh] text-wa-text-primary"
     >
-      {/* ── Header ── */}
-      <header className="sticky top-0 w-full bg-[#161312]/95 backdrop-blur-md border-b border-zinc-800/60 px-2 sm:px-3 py-2 sm:py-2.5 flex items-center justify-between z-20 shrink-0 min-h-[48px] sm:min-h-[52px]">
-        <button
-          onClick={onClose}
-          className="p-1.5 sm:p-2 -ml-1 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-all"
-          aria-label="Close Chat"
-        >
-          <X className="w-[18px] h-[18px] sm:w-5 sm:h-5" />
-        </button>
+      <div className="wa-chat-bg opacity-[0.06]" />
 
-        <div className="text-center flex flex-col items-center">
-          <h1 className="text-sm sm:text-base font-semibold tracking-wide text-[#d0a78b]">Conversations</h1>
-          <div className="flex items-center gap-1.5 -mt-px">
-            <div className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.6)] animate-pulse' : 'bg-zinc-600'}`} />
-            <span className="text-xs text-zinc-500 tracking-wider uppercase">
-              {isActive ? 'online' : 'offline'}
-            </span>
+      {/* ── Header ── */}
+      <header className="sticky top-0 w-full bg-wa-bg-header border-b border-black/20 px-2 sm:px-3 py-2 sm:py-2.5 flex items-center justify-between z-20 shrink-0 min-h-[48px] sm:min-h-[60px] shadow-sm">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onClose}
+            className="p-2 -ml-1 rounded-full text-wa-text-secondary hover:bg-white/5 transition-all"
+            aria-label="Back"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          
+          <div className="w-10 h-10 rounded-full bg-wa-bg-sidebar border border-white/5 flex items-center justify-center shrink-0 overflow-hidden">
+            <span className="text-white/70 text-sm font-semibold">{personaName.charAt(0)}</span>
+          </div>
+
+          <div className="flex flex-col min-w-0">
+            <h1 className="text-[15px] font-semibold text-wa-text-primary truncate leading-tight">{personaName}</h1>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className="text-[11px] text-wa-green font-bold uppercase tracking-wider">
+                {isActive ? 'online' : 'offline'}
+              </span>
+            </div>
           </div>
         </div>
 
         <button
           onClick={() => setSidebarOpen(prev => !prev)}
-          className="p-1.5 sm:p-2 -mr-1 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-all relative"
-          aria-label="Toggle Sessions"
+          className="p-2 -mr-1 rounded-full text-wa-text-secondary hover:bg-white/5 transition-all relative"
+          aria-label="History"
         >
-          <Menu className="w-[18px] h-[18px] sm:w-5 sm:h-5" />
+          <Menu className="w-5 h-5" />
           {sessions.length > 0 && !sidebarOpen && (
-            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#d0a78b] border border-[#161312]" />
+            <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-wa-green border border-wa-bg-header" />
           )}
         </button>
       </header>
@@ -166,7 +173,7 @@ export function ChatPage({
       {/* ── Main Area ── */}
       <div className="flex flex-1 overflow-hidden relative">
 
-        {/* ── Sessions Sidebar (overlay on mobile, alongside on desktop) ── */}
+        {/* ── Sessions Sidebar ── */}
         <AnimatePresence>
           {sidebarOpen && (
             <>
@@ -175,40 +182,38 @@ export function ChatPage({
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="fixed inset-0 bg-black/50 z-30 md:hidden"
+                  className="fixed inset-0 bg-black/60 z-30 md:hidden"
                   onClick={() => setSidebarOpen(false)}
                 />
               )}
               <motion.aside
-                initial={isMobile.current ? { x: -280, opacity: 0 } : { width: 0, opacity: 0 }}
-                animate={isMobile.current ? { x: 0, opacity: 1 } : { width: 240, opacity: 1 }}
-                exit={isMobile.current ? { x: -280, opacity: 0 } : { width: 0, opacity: 0 }}
-                transition={{ duration: 0.2, ease: 'easeInOut' }}
+                initial={isMobile.current ? { x: -300, opacity: 0 } : { width: 0, opacity: 0 }}
+                animate={isMobile.current ? { x: 0, opacity: 1 } : { width: 280, opacity: 1 }}
+                exit={isMobile.current ? { x: -300, opacity: 0 } : { width: 0, opacity: 0 }}
+                transition={{ duration: 0.25, ease: 'easeOut' }}
                 className={
                   isMobile.current
-                    ? 'fixed left-0 top-0 bottom-0 w-[280px] z-40 bg-[#161312] border-r border-zinc-800/60 flex flex-col'
-                    : 'border-r border-zinc-800/60 overflow-hidden shrink-0 bg-black/20 flex flex-col'
+                    ? 'fixed left-0 top-0 bottom-0 w-[300px] z-40 bg-wa-bg-sidebar border-r border-white/5 flex flex-col shadow-2xl'
+                    : 'border-r border-white/5 overflow-hidden shrink-0 bg-black/10 flex flex-col'
                 }
               >
-                <div className={isMobile.current ? 'w-[280px] h-full flex flex-col' : 'w-[240px] h-full flex flex-col'}>
-                  <div className="px-3 sm:px-4 py-2.5 sm:py-3 border-b border-zinc-800/40 flex items-center justify-between shrink-0">
-                    <h2 className="text-xs uppercase tracking-widest text-zinc-500 font-bold">Sessions</h2>
+                <div className="h-full flex flex-col">
+                  <div className="px-4 py-4 border-b border-white/5 flex items-center justify-between shrink-0 bg-wa-bg-header">
+                    <h2 className="text-sm font-bold text-wa-green tracking-widest uppercase">History</h2>
                     {isMobile.current && (
                       <button
                         onClick={() => setSidebarOpen(false)}
-                        className="p-1 rounded-lg text-zinc-500 hover:text-white hover:bg-zinc-800/50 transition-all"
-                        aria-label="Close sidebar"
-                        title="Close sidebar"
+                        className="p-1 rounded-full text-wa-text-secondary hover:bg-white/5 transition-all"
                       >
-                        <X className="w-4 h-4" />
+                        <X className="w-5 h-5" />
                       </button>
                     )}
                   </div>
-                  <div className="flex-1 overflow-y-auto px-2 py-2 space-y-1">
+                  <div className="flex-1 overflow-y-auto py-2 space-y-px">
                     {sessions.length === 0 && (
-                      <p className="text-sm text-zinc-600 text-center px-3 py-8">
-                        No conversations yet
-                      </p>
+                      <div className="text-center py-12 px-6">
+                        <p className="text-sm text-wa-text-secondary">No conversation history yet</p>
+                      </div>
                     )}
                     {sessions.map(session => (
                       <button
@@ -217,35 +222,25 @@ export function ChatPage({
                           onSelectSession(session.id);
                           if (isMobile.current) setSidebarOpen(false);
                         }}
-                        className={`w-full text-left px-3 py-2.5 rounded-xl transition-all ${
+                        className={`w-full text-left px-4 py-3.5 border-b border-white/[0.02] transition-colors ${
                           session.id === selectedSessionId
-                            ? 'bg-[#d0a78b]/10 border border-[#d0a78b]/20'
-                            : 'hover:bg-zinc-800/40 border border-transparent'
+                            ? 'bg-wa-bg-header'
+                            : 'hover:bg-white/[0.03]'
                         }`}
                       >
                         <div className="flex items-center justify-between mb-1">
-                          <span className={`text-xs font-semibold uppercase tracking-wider ${
-                            session.id === selectedSessionId ? 'text-[#d0a78b]' : 'text-zinc-400'
+                          <span className={`text-[13px] font-semibold ${
+                            session.id === selectedSessionId ? 'text-wa-green' : 'text-wa-text-primary'
                           }`}>
                             {formatSessionDate(session.startTime)}
                           </span>
-                          <span className="text-xs text-zinc-600">
-                            {session.count} msgs
+                          <span className="text-[11px] text-wa-text-secondary font-medium">
+                            {session.count} messages
                           </span>
                         </div>
-                        <p className="text-sm text-zinc-500 truncate leading-relaxed">
-                          {session.preview || 'Empty session'}
+                        <p className="text-[13px] text-wa-text-secondary truncate leading-relaxed">
+                          {session.preview || 'New conversation'}
                         </p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-xs text-zinc-600">
-                            {session.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </span>
-                          {session.id === (messages.length > 0 ? messages[messages.length - 1]?.sessionId : null) && (
-                            <span className="text-xs uppercase tracking-widest text-emerald-500 font-bold">
-                              current
-                            </span>
-                          )}
-                        </div>
                       </button>
                     ))}
                   </div>
@@ -255,55 +250,20 @@ export function ChatPage({
           )}
         </AnimatePresence>
 
-        {/* ── Floating sidebar toggle (when closed) ── */}
-        {!sidebarOpen && (
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="absolute left-2 top-2 z-10 p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-zinc-800/50 transition-all"
-            aria-label="Open Sessions"
-          >
-            <ChevronLeft className="w-4 h-4 rotate-180" />
-          </button>
-        )}
-
         {/* ── Messages Area ── */}
         <div className="flex-1 flex flex-col min-w-0 relative">
-          {/* Session info bar */}
-          {currentSession && (
-            <div className="px-3 sm:px-4 py-1.5 sm:py-2 border-b border-zinc-800/40 bg-black/10 shrink-0">
-              <p className="text-xs text-zinc-500 uppercase tracking-wider flex items-center gap-2">
-                <span>{formatSessionDate(currentSession.startTime)}</span>
-                <span className="text-zinc-700">&middot;</span>
-                <span>{currentSession.count} messages</span>
-                {currentSession.id === (messages.length > 0 ? messages[messages.length - 1]?.sessionId : null) && isActive && (
-                  <>
-                    <span className="text-zinc-700">&middot;</span>
-                    <span className="text-emerald-500 flex items-center gap-1">
-                      <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-                      Live
-                    </span>
-                  </>
-                )}
-              </p>
-            </div>
-          )}
-
+          
           {/* Messages */}
           <div
             ref={scrollRef}
-            className="flex-1 overflow-y-auto px-3 sm:px-4 py-3 sm:py-4 space-y-3 sm:space-y-4 scroll-smooth"
+            className="flex-1 overflow-y-auto px-3 sm:px-6 py-4 space-y-2 scroll-smooth"
           >
             {messages.length === 0 && (
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center px-6">
-                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-zinc-900/60 border border-zinc-800/40 flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                    <MessageSquare className="w-5 h-5 sm:w-6 sm:h-6 text-zinc-600" />
-                  </div>
-                  <p className="text-zinc-500 text-sm sm:text-base">No messages in this session.</p>
-                  {isActive && (
-                    <p className="text-zinc-600 text-xs sm:text-sm mt-1">Type a message or use voice to start.</p>
-                  )}
+              <div className="flex flex-col items-center justify-center h-full text-center px-10">
+                <div className="w-16 h-16 rounded-full bg-wa-bg-sidebar border border-white/5 flex items-center justify-center mb-4 text-wa-text-secondary/30">
+                  <MessageSquare size={32} />
                 </div>
+                <p className="text-wa-text-secondary text-sm">Select a session or start a new one to see messages.</p>
               </div>
             )}
 
@@ -311,61 +271,56 @@ export function ChatPage({
               {messages.map((msg, i) => (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.15 }}
+                  className={`flex mb-1 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[88%] sm:max-w-[80%] rounded-2xl px-3 sm:px-4 py-2 sm:py-3 ${
+                    className={`relative max-w-[85%] sm:max-w-[70%] rounded-xl px-2.5 py-1.5 shadow-sm ${
                       msg.role === 'user'
-                        ? 'bg-[#d0a78b]/15 border border-[#d0a78b]/20 text-zinc-200'
-                        : 'bg-zinc-900/80 border border-zinc-800 text-zinc-300'
+                        ? 'bg-wa-bubble-out text-wa-text-primary rounded-tr-none'
+                        : 'bg-wa-bubble-in text-wa-text-primary rounded-tl-none border border-white/[0.02]'
                     }`}
                   >
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className={`text-xs font-semibold uppercase tracking-wider ${msg.role === 'user' ? 'text-[#d0a78b]' : 'text-zinc-400'}`}>
-                        {msg.role === 'user' ? userName : personaName}
-                      </span>
-                      <span className="text-xs text-zinc-600">
-                        {formatTime(msg.timestamp)}
-                      </span>
-                    </div>
-                    <div className={`text-sm sm:text-base leading-relaxed prose prose-invert prose-sm max-w-none ${msg.role === 'model' ? 'text-zinc-300' : ''}`}>
+                    <div className="text-[14px] leading-relaxed break-words whitespace-pre-wrap">
                       {msg.role === 'model' ? (
-                        <ReactMarkdown>{msg.text}</ReactMarkdown>
+                        <div className="prose prose-invert prose-sm max-w-none prose-p:my-0 prose-pre:bg-black/20">
+                          <ReactMarkdown>{msg.text}</ReactMarkdown>
+                        </div>
                       ) : (
-                        <p className="whitespace-pre-wrap break-words">{msg.text}</p>
+                        msg.text
                       )}
                     </div>
+                    
+                    <div className="mt-1 flex items-center justify-end gap-1.5">
+                      <span className="text-[10px] text-white/50 font-medium">
+                        {formatTime(msg.timestamp)}
+                      </span>
+                      {msg.role === 'user' && (
+                        <span className="text-wa-check-blue">
+                          <CheckCheck size={14} />
+                        </span>
+                      )}
+                    </div>
+
                     {msg.attachmentUrl && (
-                      <div className="mt-2 pt-2 border-t border-white/10">
-                        {msg.attachmentUrl.match(/\.(jpeg|jpg|gif|png|webp)/i) || msg.attachmentUrl.includes('image') ? (
-                          <div className="relative rounded-lg overflow-hidden border border-zinc-700 max-w-sm">
-                            <img
-                              src={msg.attachmentUrl}
-                              alt={msg.attachmentName || 'Attachment'}
-                              className="w-full h-auto object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                              onClick={() => window.open(msg.attachmentUrl, '_blank')}
-                            />
-                            {msg.attachmentName && (
-                              <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-2 py-1 text-[10px] text-zinc-300 truncate">
-                                {msg.attachmentName}
-                              </div>
-                            )}
-                          </div>
+                      <div className="mt-2 pt-2 border-t border-white/5">
+                        {msg.attachmentUrl.match(/\.(jpeg|jpg|gif|png|webp)/i) ? (
+                          <img
+                            src={msg.attachmentUrl}
+                            alt="Attachment"
+                            className="rounded-lg max-w-full h-auto cursor-pointer border border-white/10"
+                            onClick={() => window.open(msg.attachmentUrl, '_blank')}
+                          />
                         ) : (
-                          <a
-                            href={msg.attachmentUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-black/30 border border-zinc-700 hover:bg-black/50 transition-colors group"
+                          <button
+                            onClick={() => window.open(msg.attachmentUrl, '_blank')}
+                            className="flex items-center gap-2 text-[12px] text-wa-green hover:underline bg-black/20 p-2 rounded-lg w-full"
                           >
-                            <Paperclip className="w-3.5 h-3.5 text-zinc-400 group-hover:text-[#d0a78b]" />
-                            <span className="text-xs text-zinc-300 group-hover:text-white truncate max-w-[200px]">
-                              {msg.attachmentName || 'View Attachment'}
-                            </span>
-                          </a>
+                            <Paperclip size={14} />
+                            <span className="truncate">{msg.attachmentName || 'Attachment'}</span>
+                          </button>
                         )}
                       </div>
                     )}
@@ -376,58 +331,54 @@ export function ChatPage({
             <div ref={bottomRef} />
           </div>
 
-          {/* Scroll to bottom button */}
+          {/* Scroll to bottom */}
           <AnimatePresence>
             {showScrollBtn && (
               <motion.button
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
                 onClick={scrollToBottom}
-                className="absolute bottom-20 left-1/2 -translate-x-1/2 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-400 flex items-center justify-center shadow-lg z-10 hover:bg-zinc-700 transition-colors"
+                className="absolute bottom-24 right-4 w-9 h-9 rounded-full bg-wa-bg-header border border-white/10 text-wa-text-secondary flex items-center justify-center shadow-lg z-10 hover:text-wa-text-primary"
               >
-                <ArrowDown className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <ArrowDown size={18} />
               </motion.button>
             )}
           </AnimatePresence>
 
           {/* ── Input footer ── */}
-          <footer className="sticky bottom-0 w-full bg-[#161312]/95 backdrop-blur-md border-t border-zinc-800/60 px-2 sm:px-3 py-2 sm:py-2.5 z-10 shrink-0">
-            <form onSubmit={onSend} className="flex gap-1.5 sm:gap-2 items-center">
-              <button
-                type="button"
-                onClick={handleFileAttach}
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-zinc-900/90 border border-zinc-800 text-zinc-500 hover:text-[#d0a78b] hover:border-[#d0a78b]/30 flex items-center justify-center shrink-0 transition-all"
-                aria-label="Attach file"
-              >
-                <Paperclip className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              </button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                className="hidden"
-                accept="image/*,.pdf,.doc,.docx,.txt"
-                aria-label="Attach file"
-                title="Attach file"
-                onChange={handleFileChange}
-              />
-              <input
-                ref={inputRef}
-                type="text"
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                placeholder={isActive ? `Message ${personaName}...` : 'Session not active. Start voice first.'}
-                disabled={!isActive}
-                className="flex-1 bg-zinc-900/90 text-xs sm:text-sm text-white px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl border border-zinc-800 focus:outline-none focus:border-[#d0a78b]/50 placeholder-zinc-500 disabled:opacity-50 min-w-0"
-              />
+          <footer className="sticky bottom-0 w-full bg-wa-bg-header/95 backdrop-blur-md px-3 py-3 z-10 shrink-0">
+            <form onSubmit={onSend} className="flex gap-2 items-center max-w-4xl mx-auto">
+              <div className="flex-1 flex gap-2 items-center bg-wa-bg-sidebar rounded-full px-3 py-1.5 border border-white/[0.05]">
+                <button
+                  type="button"
+                  onClick={handleFileAttach}
+                  className="p-1.5 text-wa-text-secondary hover:text-wa-text-primary transition-colors"
+                >
+                  <Paperclip size={20} />
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  placeholder={isActive ? "Message..." : "Start session to chat"}
+                  disabled={!isActive}
+                  className="flex-1 bg-transparent text-[15px] text-wa-text-primary outline-none py-1 placeholder-wa-text-secondary/50"
+                />
+              </div>
               <button
                 type="submit"
                 disabled={!isActive || !chatInput.trim()}
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#d0a78b] text-black flex items-center justify-center hover:bg-[#ebd0bc] transition-colors disabled:opacity-30 shrink-0"
-                aria-label="Send message"
-                title="Send message"
+                className="w-11 h-11 rounded-full bg-wa-green text-wa-bg-main flex items-center justify-center shadow-md active:scale-95 disabled:opacity-40 transition-all"
               >
-                <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <Send size={20} strokeWidth={2.5} />
               </button>
             </form>
           </footer>

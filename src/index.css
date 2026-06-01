@@ -1,8 +1,21 @@
 @import "tailwindcss";
 
+@theme {
+  --color-wa-bg-main: #0b141a;
+  --color-wa-bg-sidebar: #111b21;
+  --color-wa-bg-header: #202c33;
+  --color-wa-green: #00a884;
+  --color-wa-bubble-out: #005c4b;
+  --color-wa-bubble-in: #202c33;
+  --color-wa-text-primary: #e9edef;
+  --color-wa-text-secondary: #8696a0;
+  --color-wa-text-timestamp: #aebac1;
+  --color-wa-check-blue: #53bdeb;
+}
+
 @layer base {
   .dark {
-    @apply bg-[#050505] text-white;
+    @apply bg-[#0b141a] text-[#e9edef];
   }
 }
 

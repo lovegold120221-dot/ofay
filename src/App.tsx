@@ -16,6 +16,7 @@ import { AuthPage } from './components/AuthPage';
 import { BeatriceAgent } from './components/BeatriceAgent';
 import { AdminPortal } from './components/AdminPortal';
 import { InstallBanner } from './components/InstallBanner';
+import { TestWhatsAppPage } from './components/TestWhatsAppPage';
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -160,6 +161,17 @@ export default function App() {
     setGoogleToken(token);
   }, []);
 
+  const normalizedPath = typeof window !== 'undefined'
+    ? window.location.pathname.replace(/\/+$/, '') || '/'
+    : '/';
+
+  const isTestWhatsApp = normalizedPath === '/test-whatsapp';
+  const isAdminPortal = normalizedPath === '/adminportal';
+
+  if (isTestWhatsApp) {
+    return <TestWhatsAppPage />;
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#050505] text-white flex items-center justify-center">
@@ -172,9 +184,6 @@ export default function App() {
       </div>
     );
   }
-
-  const isAdminPortal = typeof window !== 'undefined'
-    && window.location.pathname.replace(/\/+$/, '') === '/adminportal';
 
   return (
     <>
