@@ -32,11 +32,35 @@ function formatPhone(digits: string): string {
 
 const OUTBOUND_WHATSAPP_ACTIONS = new Set([
   'sendMessage',
-  'sendGroupMessage',
-  'sendMedia',
+  'sendImage',
+  'sendFile',
+  'sendVideo',
+  'sendSticker',
+  'sendContact',
+  'sendLocation',
   'sendAudio',
+  'sendPoll',
+  'sendPresence',
+  'sendChatPresence',
+  'sendLink',
   'sendReaction',
   'sendButtons',
+  'deleteMessage',
+  'revokeMessage',
+  'updateMessage',
+  'markAsRead',
+  'createGroup',
+  'joinGroup',
+  'manageParticipants',
+  'setGroupPhoto',
+  'setGroupName',
+  'setGroupLocked',
+  'setGroupAnnounce',
+  'setGroupTopic',
+  'changeAvatar',
+  'changePushName',
+  'pinChat',
+  'disappearingMessages',
 ]);
 
 function isOutboundWhatsAppAction(action: unknown): boolean {
@@ -2626,32 +2650,32 @@ ${historyContext}
                 },
                 {
                   name: "whatsapp_action",
-                    description: "Execute real WhatsApp operations via the configured WhatsApp backend. ONLY call this when the user has expressed a clear, direct intent to perform a specific WhatsApp operation. Read-only actions may run immediately when requested. Outbound actions (sendMessage, sendGroupMessage, sendMedia, sendAudio, sendReaction, sendButtons) may ONLY be called after you showed the preview and the latest user reply was exactly SEND or Approved. Only actions enabled in permission toggles will work.",
+                  description: "Execute high-fidelity WhatsApp operations. Read-only actions run immediately. Outbound/modifying actions REQUIRE a preview followed by the user replying SEND.",
                   parameters: {
                     type: Type.OBJECT,
                     properties: {
-                       action: { type: Type.STRING, description: "The WhatsApp action: readChats, getContacts, getGroups, getMessageHistory, getCalls, sendMessage, sendGroupMessage, sendMedia, sendAudio, sendReaction, sendButtons. IMPORTANT: For getContacts, contacts include savedName/name and whatsappProfileName/notify. Always show BOTH names when listing contacts. For readChats, getMessageHistory, and getCalls: messages/calls include a fromMe boolean field." },
-                       to: { type: Type.STRING, description: "Recipient JID (e.g., 1234567890@s.whatsapp.net) or international phone number (e.g., 447700900000). CRITICAL: Always include the country code. If the user provides a local number, you MUST prepend the country code from their own WhatsApp number (waPhone). Prefer using the full JID found in getContacts." },
-
-                       text: { type: Type.STRING, description: "Message text (for sendMessage, sendGroupMessage, sendButtons). IMPORTANT — Before previewing a WhatsApp send, first call getMessageHistory with limit 2000 to read the user's real WhatsApp history with that recipient. Look for messages with fromMe:true and write in that user's WhatsApp style. After the user approves, send EXACTLY the previewed text without changes." },
-                       mediaUrl: { type: Type.STRING, description: "URL of the media attachment to send (if any). Required if mediaType is provided." },
-                       mediaType: { type: Type.STRING, description: "Type of media attachment (image, video, or document)." },
-                       url: { type: Type.STRING, description: "OpenAPI-compatible media/audio URL for sendMedia or sendAudio." },
-                       type: { type: Type.STRING, description: "OpenAPI-compatible media type: image, video, or document." },
-                       caption: { type: Type.STRING, description: "Caption for the media attachment." },
-                       ptt: { type: Type.BOOLEAN, description: "For sendAudio: true to send as push-to-talk voice note." },
-                       messageId: { type: Type.STRING, description: "For sendReaction: ID of the message to react to." },
-                       emoji: { type: Type.STRING, description: "For sendReaction: emoji reaction to send." },
-                       buttons: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { id: { type: Type.STRING }, text: { type: Type.STRING } } }, description: "For sendButtons: button choices with id and text." },
-                       footer: { type: Type.STRING, description: "For sendButtons: optional footer text." },
-                      name: { type: Type.STRING, description: "Contact/group name (for addContact, getMessageHistory). For addContact: Baileys/WhatsApp Web does NOT support adding contacts — it will return an error. Tell the user to save the contact on their phone instead." },
-
-                      number: { type: Type.STRING, description: "Contact phone number (for addContact)" },
-                      chatId: { type: Type.STRING, description: "Chat JID or phone number (for getMessageHistory, readGroupChat)" },
-                      groupId: { type: Type.STRING, description: "Group JID ending in @g.us (for sendGroupMessage, readGroupChat)" },
-                      groupName: { type: Type.STRING, description: "Group identifier if the exact group JID is known" },
-                      contactId: { type: Type.STRING, description: "Contact JID or phone number (for getMessageHistory)" },
-                      limit: { type: Type.NUMBER, description: "Maximum records to return. Use 2000 for getMessageHistory when learning the user's WhatsApp style before sending." }
+                       action: { 
+                         type: Type.STRING, 
+                         enum: [
+                           "readChats", "getContacts", "getGroups", "getMessageHistory", "getCalls",
+                           "sendMessage", "sendImage", "sendFile", "sendVideo", "sendSticker", 
+                           "sendContact", "sendLocation", "sendAudio", "sendPoll", "sendLink",
+                           "sendReaction", "sendButtons", "deleteMessage", "revokeMessage", 
+                           "updateMessage", "markAsRead", "createGroup", "joinGroup", 
+                           "manageParticipants", "setGroupPhoto", "setGroupName", "setGroupTopic",
+                           "groupInfo", "changeAvatar", "changePushName", "userCheck", "pinChat"
+                         ],
+                         description: "The specific WhatsApp capability to execute." 
+                       },
+                       to: { type: Type.STRING, description: "Recipient JID (e.g. 12345@s.whatsapp.net) or group JID (e.g. 12345@g.us)." },
+                       text: { type: Type.STRING, description: "Message text, caption, or link." },
+                       mediaUrl: { type: Type.STRING, description: "URL for files/images/video/audio." },
+                       ptt: { type: Type.BOOLEAN, description: "True for push-to-talk voice note." },
+                       emoji: { type: Type.STRING, description: "Emoji for reaction." },
+                       messageId: { type: Type.STRING, description: "ID of the target message." },
+                       pollOptions: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Options for a poll." },
+                       limit: { type: Type.NUMBER, description: "Fetch limit (max 2000 for history)." },
+                       name: { type: Type.STRING, description: "New name for group or user profile." }
                     },
                     required: ["action"]
                   }
@@ -3698,7 +3722,7 @@ ${historyContext}
   };
 
   return (
-    <div className="min-h-screen bg-wa-bg-main text-wa-text-primary flex flex-col h-[100dvh] overflow-y-auto select-none relative">
+    <div className="min-h-screen bg-wa-bg-main text-wa-text-primary flex flex-col h-[100dvh] overflow-hidden select-none relative">
       <audio ref={bgAudioRef} src="/office.mp3" loop crossOrigin="anonymous" className="hidden" />
       <div
         className="wa-chat-bg opacity-[0.04]"
