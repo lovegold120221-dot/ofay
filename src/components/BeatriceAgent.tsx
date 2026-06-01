@@ -857,6 +857,8 @@ export function BeatriceAgent({
     view_message_history: true,
     make_calls: true,
     make_whatsapp_calls: true,
+    manage_media: true,
+    send_reactions: true,
   });
   const waPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -2038,29 +2040,25 @@ WHATSAPP OWNER IDENTITY & ADDRESSING RULES:
 - The getContacts tool returns contacts with TWO name fields: 'name' (saved name) and 'notify' (public push name). Always show BOTH.
 - In message history, the 'fromMe' boolean field differentiates between your outgoing messages (true) and incoming replies (false).
 
-MASTER E PROTOCOL (WhatsApp Confirmation):
-When the user asks you to send a WhatsApp message, you MUST:
-1. Prepare the message first. Extract the current userId, recipient name, recipient WhatsApp JID/phone/contact name, final message text, and whether the user has approved sending.
-2. Never invent a recipient. If the recipient is not known, use getContacts or ask for the exact recipient before previewing.
-3. Show this EXACT confirmation spoken and written:
-   "Send this WhatsApp message to [recipient]?
-   [message]
-   Reply SEND to approve."
-4. ONLY after the user explicitly replies "SEND" or "Approved", call whatsapp_action with action "sendMessage" and params:
+MASTER E PROTOCOL (WhatsApp Mastery):
+When the user asks you to interact with WhatsApp:
+1.  **Read Context First:** Before drafting any outbound message, you MUST call getMessageHistory (limit: 2000) for that contact. Analyze the user's past messages (where fromMe: true) to learn their tone, emoji usage, and unique writing style. 
+2.  **Draft with Nuance:** Create a response that sounds EXACTLY like the user, not a robot.
+3.  **Mandatory Preview:** Show a written preview of the recipient and the message text.
+4.  **Confirmation flow:** Speak and write the exact phrase: "Reply SEND to approve."
+5.  **Execution:** ONLY call whatsapp_action if the user explicitly says "SEND" or "Approved". Use these exact params:
    {
      "userId": "${user.uid}",
      "tool": "sendMessage",
-     "params": {
-       "to": "[recipient chatId or phone]",
-       "text": "[final approved message]"
-     },
-     "permissions": {
-       "requireUserApproval": true,
-       "approvedByUser": true,
-       "mode": "delegated_send"
-     }
+     "params": { "to": "[jid]", "text": "[approved text]" },
+     "permissions": { "requireUserApproval": true, "approvedByUser": true, "mode": "delegated_send" }
    }
-5. Never change the approved message.
+
+Advanced Tools Supported:
+- sendMessage, sendMedia (images/video), sendAudio (voice notes), sendReaction (emojis), sendButtons.
+- getCalls, getGroups, getContacts.
+
+SAFETY: Never invent contacts. For groups, use @g.us. Always confirm delivery result.
 6. Never send without approval unless the message belongs to a pre-approved automation rule.
 7. Always return the backend delivery result to the user.
 

@@ -8,6 +8,7 @@ import '../widgets/cloud_visualizer.dart';
 import '../widgets/visualizer_bars.dart';
 import 'settings_page.dart';
 import 'website_viewer_page.dart';
+import 'whatsapp_chats_page.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -104,7 +105,12 @@ class HomePage extends ConsumerWidget {
                 children: [
                   _IconButton(
                     icon: LucideIcons.messageCircle,
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const WhatsAppChatsPage()),
+                      );
+                    },
                   ),
                   
                   // Main Activation Button with Visualizer Bars

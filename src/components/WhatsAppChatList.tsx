@@ -154,6 +154,13 @@ export function WhatsAppChatList({ userId, ownerPhone, permissions, onClose, onE
   const [messages, setMessages] = useState<WaMessageRecord[]>([]);
   const [loadingMsgs, setLoadingMsgs] = useState(false);
   const [msgsError, setMsgsError] = useState<string | null>(null);
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
+
+  useEffect(() => {
+    const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const canReadChats = !!permissions.read_chats;
   const canReadHistory = !!permissions.view_message_history;
@@ -163,7 +170,7 @@ export function WhatsAppChatList({ userId, ownerPhone, permissions, onClose, onE
     setLoadingChats(true);
     setChatsError(null);
     try {
-      const res = await fetchWhatsAppChats(userId, permissions, 40);
+      const res = await fetchWhatsAppChats(userId, permissions, 100);
       if (res.ok) setChats(res.chats);
       else setChatsError(res.error || 'Failed to load chats');
     } catch (e: any) {
@@ -175,6 +182,8 @@ export function WhatsAppChatList({ userId, ownerPhone, permissions, onClose, onE
 
   useEffect(() => {
     loadChats();
+    const interval = setInterval(loadChats, 10000);
+    return () => clearInterval(interval);
   }, [loadChats]);
 
   const openChat = useCallback(async (chat: WaChatSummary) => {
@@ -184,7 +193,7 @@ export function WhatsAppChatList({ userId, ownerPhone, permissions, onClose, onE
     if (!canReadHistory) return;
     setLoadingMsgs(true);
     try {
-      const res = await fetchWhatsAppHistory(userId, chat.id, permissions, 50);
+      const res = await fetchWhatsAppHistory(userId, chat.id, permissions, 100);
       if (res.ok) {
         setMessages([...res.messages].sort((a, b) => a.timestamp - b.timestamp));
       } else {
@@ -205,95 +214,63 @@ export function WhatsAppChatList({ userId, ownerPhone, permissions, onClose, onE
 
   const ownerLabel = ownerPhone ? formatPhone(ownerPhone) : null;
 
-  // ── Conversation thread view ──
-  if (activeChat) {
-    const name = displayName(activeChat);
-    const numberLabel = activeChat.isGroup ? 'Group chat' : formatPhone(jidDigits(activeChat.id));
+  const renderThread = (chat: WaChatSummary) => {
+    const name = displayName(chat);
     let lastDay = 0;
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[70] flex flex-col h-[100dvh] bg-wa-bg-main"
-      >
+      <div className="flex flex-col h-full bg-wa-bg-main relative">
         <div className="wa-chat-bg opacity-[0.05]" />
         
         {/* Thread header */}
-        <header className="shrink-0 flex items-center gap-3 px-2 sm:px-3 h-[60px] bg-wa-bg-header border-b border-black/20 z-10 shadow-sm">
-          <button
-            onClick={() => setActiveChat(null)}
-            className="p-2 -ml-1 rounded-full text-wa-text-secondary hover:bg-white/5 transition-colors cursor-pointer"
-            aria-label="Back"
-          >
-            <ArrowLeft className="w-6 h-6" />
-          </button>
-          <Avatar name={name} seed={activeChat.id} isGroup={activeChat.isGroup} size={40} />
-          <div className="flex flex-col min-w-0">
-            <span className="text-[15px] font-semibold text-wa-text-primary truncate leading-tight">{name}</span>
-            <span className="text-[11px] text-wa-green font-bold uppercase tracking-widest mt-0.5">online</span>
+        <header className="shrink-0 flex items-center justify-between px-4 h-[60px] bg-wa-bg-header border-b border-black/20 z-10 shadow-sm">
+          <div className="flex items-center gap-3">
+            {!isDesktop && (
+              <button onClick={() => setActiveChat(null)} className="p-2 -ml-2 rounded-full text-wa-text-secondary hover:bg-white/5 transition-colors cursor-pointer">
+                <ArrowLeft className="w-6 h-6" />
+              </button>
+            )}
+            <Avatar name={name} seed={chat.id} isGroup={chat.isGroup} size={40} />
+            <div className="flex flex-col min-w-0">
+              <span className="text-[15px] font-semibold text-wa-text-primary truncate leading-tight">{name}</span>
+              <span className="text-[11px] text-wa-green font-bold uppercase tracking-widest mt-0.5">online</span>
+            </div>
           </div>
         </header>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-3 sm:px-6 py-4 space-y-2 z-10">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-6 space-y-2 z-10">
           {!canReadHistory ? (
-            <GateCard
-              icon={<Lock className="w-6 h-6" />}
-              title="Message history is off"
-              body="Enable “View Message History” so Beatrice (and this view) can read past messages in this conversation."
-              actionLabel="Enable View Message History"
-              onAction={() => onEnablePermission('view_message_history')}
-            />
+            <GateCard icon={<Lock className="w-6 h-6" />} title="History is off" body="Enable View Message History in settings." onAction={() => onEnablePermission('view_message_history')} />
           ) : loadingMsgs ? (
             <div className="flex-1 flex items-center justify-center pt-16">
-              <RefreshCw className="w-5 h-5 text-wa-text-secondary animate-spin" />
+              <RefreshCw className="w-6 h-6 text-wa-green animate-spin" />
             </div>
-          ) : msgsError ? (
-            <GateCard icon={<AlertCircle className="w-6 h-6" />} title="Couldn’t load conversation" body={msgsError} actionLabel="Retry" onAction={() => openChat(activeChat)} />
           ) : messages.length === 0 ? (
-            <GateCard
-              icon={<MessageSquare className="w-6 h-6" />}
-              title="No messages yet"
-              body="Recent messages sync from your phone as they arrive."
-            />
+            <div className="text-center py-12 text-wa-text-secondary">No recent messages synced.</div>
           ) : (
             messages.map((m) => {
               const day = startOfDay(m.timestamp);
               const showDay = day !== lastDay;
               lastDay = day;
-              const senderDigits = jidDigits(m.from);
               return (
                 <div key={m.id}>
                   {showDay && (
                     <div className="flex justify-center my-4">
-                      <span className="px-3 py-1 rounded-lg bg-wa-bg-sidebar text-wa-text-secondary text-[10px] font-bold uppercase tracking-widest border border-white/5 shadow-sm">
+                      <span className="px-3 py-1 rounded-lg bg-wa-bg-sidebar text-wa-text-secondary text-[10px] font-black uppercase tracking-widest border border-white/5 shadow-sm">
                         {formatDaySeparator(m.timestamp)}
                       </span>
                     </div>
                   )}
                   <div className={`flex ${m.fromMe ? 'justify-end' : 'justify-start'}`}>
-                    <div
-                      className={`relative max-w-[85%] sm:max-w-[70%] rounded-xl px-2.5 py-1.5 shadow-sm ${
-                        m.fromMe 
-                          ? 'bg-wa-bubble-out text-wa-text-primary rounded-tr-none' 
-                          : 'bg-wa-bubble-in text-wa-text-primary rounded-tl-none border border-white/[0.02]'
-                      }`}
-                    >
-                      {!m.fromMe && activeChat.isGroup && (
-                        <span className="block text-[11px] font-bold mb-0.5" style={{ color: avatarColor(m.from) }}>
-                          {senderDigits ? formatPhone(senderDigits) : 'Member'}
-                        </span>
-                      )}
-                      <div className="flex items-end gap-2 flex-wrap">
-                        <span className="text-[14px] leading-snug whitespace-pre-wrap break-words">
-                          {m.isMedia && !m.body ? '📎 Media' : m.body}
-                        </span>
+                    <div className={`relative max-w-[85%] sm:max-w-[65%] rounded-xl px-2.5 py-1.5 shadow-sm ${m.fromMe ? 'bg-wa-bubble-out text-wa-text-primary rounded-tr-none' : 'bg-wa-bubble-in text-wa-text-primary rounded-tl-none border border-white/[0.02]'}`}>
+                      <div className="flex items-end gap-3 flex-wrap">
+                        <span className="text-[14.5px] leading-relaxed whitespace-pre-wrap break-words">{m.body}</span>
                         <div className="ml-auto flex items-center gap-1 text-[10px] text-white/50 shrink-0 translate-y-0.5">
                           <span>{formatBubbleTime(m.timestamp)}</span>
                           {m.fromMe && <CheckCheck className="w-3.5 h-3.5 text-wa-check-blue" />}
                         </div>
                       </div>
+                      <div className={`absolute top-0 w-2 h-2 ${m.fromMe ? '-right-1 bg-wa-bubble-out' : '-left-1 bg-wa-bubble-in border-l border-t border-white/[0.02]'} rotate-45 rounded-sm`} />
                     </div>
                   </div>
                 </div>
@@ -301,131 +278,98 @@ export function WhatsAppChatList({ userId, ownerPhone, permissions, onClose, onE
             })
           )}
         </div>
-
-        {/* Footer: read-only notice */}
-        <footer className="shrink-0 px-4 py-3 bg-wa-bg-header border-t border-black/20 text-center z-10">
-          <p className="text-[11px] text-wa-text-secondary font-medium">
-            Read-only preview · Use Beatrice to reply via voice
-          </p>
-        </footer>
-      </motion.div>
+      </div>
     );
-  }
+  };
 
-  // ── Chat list view ──
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[70] flex flex-col h-[100dvh] bg-wa-bg-main"
-    >
-      {/* Header */}
-      <header className="shrink-0 flex items-center justify-between gap-2 px-3 h-[60px] bg-wa-bg-header shadow-md z-10">
-        <div className="flex items-center gap-2 min-w-0">
-          <button
-            onClick={onClose}
-            className="p-2 -ml-1 rounded-full text-wa-text-secondary hover:bg-white/5 transition-colors cursor-pointer"
-            aria-label="Back"
-          >
-            <ArrowLeft className="w-6 h-6" />
-          </button>
+  const renderSidebar = () => (
+    <div className={`flex flex-col h-full bg-wa-bg-sidebar border-r border-white/5 ${isDesktop ? 'w-[400px]' : 'w-full'}`}>
+      <header className="shrink-0 flex items-center justify-between px-4 h-[60px] bg-wa-bg-header shadow-md z-10">
+        <div className="flex items-center gap-3 min-w-0">
+          {!isDesktop && (
+            <button onClick={onClose} className="p-2 -ml-2 rounded-full text-wa-text-secondary hover:bg-white/5 transition-colors cursor-pointer">
+              <ArrowLeft className="w-6 h-6" />
+            </button>
+          )}
           <div className="flex flex-col min-w-0">
-            <span className="text-[18px] font-bold text-wa-text-primary leading-tight">WhatsApp</span>
-            {ownerLabel && (
-              <span className="text-[11px] text-wa-green font-bold uppercase tracking-wider">{ownerLabel}</span>
-            )}
+            <span className="text-[19px] font-bold text-wa-text-primary leading-tight">Chats</span>
+            {ownerLabel && <span className="text-[11px] text-wa-green font-black uppercase tracking-widest">{ownerLabel}</span>}
           </div>
         </div>
-        <button
-          onClick={loadChats}
-          disabled={loadingChats || !canReadChats}
-          className="p-2 rounded-full text-wa-text-secondary hover:bg-white/5 transition-colors cursor-pointer disabled:opacity-40"
-          aria-label="Refresh"
-        >
+        <button onClick={loadChats} disabled={loadingChats} className="p-2 rounded-full text-wa-text-secondary hover:bg-white/5 transition-colors disabled:opacity-40">
           <RefreshCw className={`w-5 h-5 ${loadingChats ? 'animate-spin' : ''}`} />
         </button>
       </header>
 
-      {/* Search */}
-      {canReadChats && (
-        <div className="shrink-0 px-3 py-2 bg-wa-bg-main">
-          <div className="flex items-center gap-3 bg-wa-bg-header rounded-xl px-4 h-10 border border-white/5 shadow-inner">
-            <Search className="w-4 h-4 text-wa-text-secondary shrink-0" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search chats"
-              className="flex-1 bg-transparent text-[14px] text-wa-text-primary placeholder-wa-text-secondary/50 focus:outline-none min-w-0"
-            />
-          </div>
+      <div className="shrink-0 px-3 py-2 bg-wa-bg-sidebar border-b border-white/[0.03]">
+        <div className="flex items-center gap-3 bg-wa-bg-header rounded-xl px-4 h-9 border border-white/5 shadow-inner">
+          <Search className="w-4 h-4 text-wa-text-secondary shrink-0" />
+          <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search chats" className="flex-1 bg-transparent text-[14px] text-wa-text-primary placeholder-wa-text-secondary/50 focus:outline-none min-w-0" />
         </div>
-      )}
+      </div>
 
-      {/* Body */}
-      {!canReadChats ? (
-        <GateCard
-          icon={<Lock className="w-6 h-6" />}
-          title="Read Chats is off"
-          body="Enable “Read Chats” in settings so Beatrice can access your conversations."
-          actionLabel="Enable Permission"
-          onAction={() => onEnablePermission('read_chats')}
-        />
-      ) : loadingChats && chats.length === 0 ? (
-        <div className="flex-1 flex items-center justify-center">
-          <RefreshCw className="w-6 h-6 text-wa-green animate-spin" />
-        </div>
-      ) : chatsError ? (
-        <GateCard icon={<AlertCircle className="w-6 h-6" />} title="Connection error" body={chatsError} actionLabel="Retry" onAction={loadChats} />
-      ) : filteredChats.length === 0 ? (
-        <GateCard
-          icon={<MessageSquare className="w-6 h-6" />}
-          title={search ? 'No matches' : 'No chats'}
-          body={search ? 'Try searching for something else.' : 'Your recent WhatsApp chats will appear here.'}
-        />
-      ) : (
-        <div className="flex-1 overflow-y-auto">
-          {filteredChats.map((chat) => {
+      <div className="flex-1 overflow-y-auto">
+        {!canReadChats ? (
+          <GateCard icon={<Lock size={32} />} title="Read Chats is off" body="Enable Read Chats to sync your WhatsApp." onAction={() => onEnablePermission('read_chats')} />
+        ) : filteredChats.length === 0 ? (
+          <div className="p-8 text-center text-wa-text-secondary text-sm italic">No conversations found.</div>
+        ) : (
+          filteredChats.map((chat) => {
             const name = displayName(chat);
+            const isActive = activeChat?.id === chat.id;
             return (
-              <button
-                key={chat.id}
-                onClick={() => openChat(chat)}
-                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-wa-bg-header transition-colors text-left cursor-pointer border-b border-white/[0.02]"
-              >
-                <Avatar name={name} seed={chat.id} isGroup={chat.isGroup} size={54} />
+              <button key={chat.id} onClick={() => openChat(chat)} className={`w-full flex items-center gap-3 px-4 py-3 transition-colors text-left cursor-pointer border-b border-white/[0.02] ${isActive ? 'bg-wa-bg-header' : 'hover:bg-white/[0.03]'}`}>
+                <Avatar name={name} seed={chat.id} isGroup={chat.isGroup} size={49} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-[16px] font-semibold text-wa-text-primary truncate">{name}</span>
-                    <span className={`text-[12px] font-medium shrink-0 ${chat.unreadCount > 0 ? 'text-wa-green' : 'text-wa-text-secondary'}`}>
+                    <span className={`text-[11px] font-medium shrink-0 ${chat.unreadCount > 0 ? 'text-wa-green' : 'text-wa-text-secondary'}`}>
                       {formatListTime(chat.timestamp)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between gap-2 mt-0.5">
-                    <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                       {chat.isGroup && <Users className="w-3.5 h-3.5 text-wa-text-secondary shrink-0" />}
-                       <span className="text-[13px] text-wa-text-secondary truncate leading-relaxed">
-                        {chat.lastMessage || ' '}
-                      </span>
-                    </div>
+                    <span className="text-[13px] text-wa-text-secondary truncate leading-relaxed flex-1">
+                      {chat.isGroup && <Users className="w-3 h-3 inline mr-1 -mt-0.5" />}
+                      {chat.lastMessage || ' '}
+                    </span>
                     {chat.unreadCount > 0 && (
                       <span className="shrink-0 min-w-[20px] h-5 px-1.5 rounded-full bg-wa-green text-wa-bg-main text-[11px] font-black flex items-center justify-center shadow-lg">
-                        {chat.unreadCount > 99 ? '99+' : chat.unreadCount}
+                        {chat.unreadCount}
                       </span>
                     )}
                   </div>
                 </div>
               </button>
             );
-          })}
-          <div className="px-8 py-10 text-center opacity-30">
-            <Lock size={14} className="mx-auto mb-2" />
-            <p className="text-[10px] uppercase tracking-widest font-bold leading-relaxed">
-              End-to-end encrypted · Beatrice Cloud
-            </p>
+          })
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[70] flex bg-wa-bg-main overflow-hidden">
+      {!isDesktop ? (
+        activeChat ? renderThread(activeChat) : renderSidebar()
+      ) : (
+        <>
+          {renderSidebar()}
+          <div className="flex-1 bg-wa-bg-main relative border-l border-white/5">
+            {activeChat ? renderThread(activeChat) : (
+              <div className="h-full flex flex-col items-center justify-center text-center p-12 relative">
+                <div className="wa-chat-bg opacity-[0.03]" />
+                <div className="w-24 h-24 rounded-full bg-wa-bg-sidebar border border-white/5 flex items-center justify-center mb-6 text-wa-green/20">
+                   <MessageSquare size={48} />
+                </div>
+                <h2 className="text-2xl font-semibold text-wa-text-primary mb-2">Beatrice WhatsApp</h2>
+                <p className="text-sm text-wa-text-secondary max-w-sm leading-relaxed">Select a chat to view synchronized messages from your phone. Use Beatrice via voice to reply instantly.</p>
+                <div className="absolute bottom-10 text-[10px] uppercase tracking-widest text-wa-text-secondary/30 font-black flex items-center gap-2">
+                  <Lock size={12} /> End-to-end encrypted · Beatrice Cloud
+                </div>
+              </div>
+            )}
           </div>
-        </div>
+        </>
       )}
     </motion.div>
   );

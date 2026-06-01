@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Send, ArrowDown, MessageSquare, ChevronLeft, Menu, Paperclip } from 'lucide-react';
+import { X, Send, ArrowDown, MessageSquare, ChevronLeft, Menu, Paperclip, CheckCheck } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 interface ChatMessage {
@@ -171,7 +171,7 @@ export function ChatPage({
       </header>
 
       {/* ── Main Area ── */}
-      <div className="flex flex-1 overflow-hidden relative">
+      <div className="flex-1 flex overflow-hidden relative">
 
         {/* ── Sessions Sidebar ── */}
         <AnimatePresence>
@@ -194,7 +194,7 @@ export function ChatPage({
                 className={
                   isMobile.current
                     ? 'fixed left-0 top-0 bottom-0 w-[300px] z-40 bg-wa-bg-sidebar border-r border-white/5 flex flex-col shadow-2xl'
-                    : 'border-r border-white/5 overflow-hidden shrink-0 bg-black/10 flex flex-col'
+                    : 'border-r border-white/5 overflow-hidden shrink-0 bg-black/10 flex flex-col h-full'
                 }
               >
                 <div className="h-full flex flex-col">
@@ -251,7 +251,7 @@ export function ChatPage({
         </AnimatePresence>
 
         {/* ── Messages Area ── */}
-        <div className="flex-1 flex flex-col min-w-0 relative">
+        <div className="flex-1 flex flex-col h-full min-w-0 relative">
           
           {/* Messages */}
           <div
@@ -347,7 +347,7 @@ export function ChatPage({
           </AnimatePresence>
 
           {/* ── Input footer ── */}
-          <footer className="sticky bottom-0 w-full bg-wa-bg-header/95 backdrop-blur-md px-3 py-3 z-10 shrink-0">
+          <footer className="shrink-0 w-full bg-wa-bg-header/95 backdrop-blur-md px-3 py-3 z-10 border-t border-black/20">
             <form onSubmit={onSend} className="flex gap-2 items-center max-w-4xl mx-auto">
               <div className="flex-1 flex gap-2 items-center bg-wa-bg-sidebar rounded-full px-3 py-1.5 border border-white/[0.05]">
                 <button
