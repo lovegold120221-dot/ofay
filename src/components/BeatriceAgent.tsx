@@ -5,7 +5,7 @@ import { supabase, handleDbError } from '../lib/supabase';
 import { GoogleGenAI, LiveServerMessage, Modality, Type, FunctionDeclaration } from '@google/genai';
 import { AmbientConversationBed, AudioRecorder, AudioStreamer } from '../lib/audio';
 import { listKnowledgeFiles, fetchKnowledgeFileContent } from '../lib/supabaseStorage';
-import { Loader2, Power, Check, Settings, X, Save, Video, MessageSquare } from 'lucide-react';
+import { Loader2, Mic, Square, Check, Settings, X, Save, Video, MessageSquare } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { UnifiedTranscript } from './UnifiedTranscript';
 import { saveOutput, uploadToDrive } from '../lib/workspace';
@@ -63,9 +63,12 @@ const VOICE_ALIASES = [
   { name: "King Midas", id: "Puck" },
 ];
 
-const SILENCE_FILLER_DELAY_MS = 15_000;
+const SILENCE_FILLER_DELAY_MS = 12_000; // Reduced from 15_000
+const AUTO_STOP_SILENCE_MS = 90_000; // 90 seconds auto-stop
 const MAX_CONSECUTIVE_SILENCE_FILLERS = 3;
 const DEFAULT_AMBIENT_VOLUME = 12;
+
+const CHIME_URL = '/start-stop.mp3';
 
 const DOCUMENT_TEMPLATE_FILES = [
   { key: 'contract', filename: 'contract-sample.html', description: 'Executive employment agreement with editor and preview layout, A4 paper, signature canvas, dynamic data binding, and print styles.' },
@@ -185,6 +188,12 @@ BOSS/ASSISTANT DYNAMIC:
 - If a tool result is pending or takes time, keep talking briefly and normally.
 - If you are typing a long message or search, you can sound slightly distracted for a second, then snap back.
 - Make it clear you are doing the work as you speak, but do not overperform it.
+
+FUNNY FACT RULE:
+If you are certain the user is NOT from Belgium, occasionally (and naturally) share a witty, relatable fact to keep the conversation light.
+- Style: Dry, ironic humor. E.g., if a fact is surprising, say "That is villain origin story energy," or if mundane but weird, "Low-budget superhero mode."
+- IMPORTANT: DO NOT use any previously stated examples or sample facts. Invent entirely new, original, relatable observations about nature, science, or human behavior that sound clever and dry.
+- Belgium Exclusion: If the user IS from Belgium, or if you are unsure, DO NOT share these. If you don't know, it's okay to casually ask where they're from first to be safe, but do not be robotic.
 
 GLOBAL KNOWLEDGE BASE (PERMANENT CONTEXT — KNOW THIS ALWAYS):
 - You are part of Eburon AI, a company founded by Jo Lernout (also known as Joe Lernout).
@@ -321,6 +330,12 @@ Do not overuse fillers:
 - Never make the voice sound drunk, distracted, childish, or fake.
 - NEVER write stage directions for silence.
 
+INTERRUPTION AND TURN-TAKING:
+- Always be ready to be interrupted. If the user starts talking, you must stop immediately.
+- Favor shorter, more interactive conversational chunks. Do not give long monologues unless explicitly asked for a long explanation.
+- If the user interrupts you, acknowledge it gracefully. You don't need to apologize every time, just pivot to what they just said.
+- Use brief, encouraging acknowledgments when the user is telling a long story to show you are listening.
+- Your goal is a low-latency, back-and-forth natural human conversation.
 
 MULTILINGUAL / ENFORCEMENT MODE (UNCENSORED):
 You are natively fluent in every human language.
@@ -680,6 +695,22 @@ Produce one finished standalone file now.
   return extractHtmlArtifact(content);
 };
 
+function VisualizerBars({ volumes, side }: { volumes: number[], side: 'left' | 'right' }) {
+  const bars = side === 'left' ? [...volumes].reverse() : volumes;
+  return (
+    <div className={`flex items-center gap-1 sm:gap-1.5 ${side === 'left' ? 'justify-end' : 'justify-start'} w-16 sm:w-24`}>
+      {bars.map((v, i) => (
+        <motion.div
+          key={i}
+          animate={{ height: Math.max(4, v * 40) }}
+          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          className="w-1 sm:w-1.5 rounded-full bg-gradient-to-b from-[#a3d944] to-[#29abe2] opacity-80"
+        />
+      ))}
+    </div>
+  );
+}
+
 export function BeatriceAgent({
   user,
   googleToken,
@@ -856,6 +887,27 @@ export function BeatriceAgent({
     return Math.max(0, Math.min(20, level)) / 100;
   }, []);
 
+  const playChime = useCallback((url: string) => {
+    const audio = new Audio(url);
+    audio.volume = 0.4;
+    audio.play().catch(e => console.warn("Failed to play chime:", e));
+  }, []);
+
+  useEffect(() => {
+    if (!isActive) return;
+
+    const interval = setInterval(() => {
+      const silenceDuration = Date.now() - lastUserSpeechAtRef.current;
+      // Only stop if user is silent AND agent is not speaking
+      if (silenceDuration >= AUTO_STOP_SILENCE_MS && !isAgentSpeaking) {
+        console.log("Auto-stopping session due to 90s silence");
+        stopSession();
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [isActive]);
+
   const startAmbientBed = useCallback(async () => {
     if (!ambientEnabled) return;
 
@@ -961,18 +1013,26 @@ export function BeatriceAgent({
     if (!sessionRef.current || !isActiveRef.current) return;
     if (silenceFillerCountRef.current >= MAX_CONSECUTIVE_SILENCE_FILLERS) return;
 
+    // Determine delay based on count: 20s, 25s, 30s
+    const delays = [20000, 25000, 30000];
+    const delay = delays[silenceFillerCountRef.current] || 30000;
+
     silenceFillerTimeoutRef.current = setTimeout(() => {
       silenceFillerTimeoutRef.current = null;
 
       if (!sessionRef.current || !isActiveRef.current || isAgentSpeakingRef.current) return;
       if (silenceFillerCountRef.current >= MAX_CONSECUTIVE_SILENCE_FILLERS) return;
       if (lastUserSpeechAtRef.current > lastModelTurnCompleteAtRef.current) return;
-      if (Date.now() - lastModelTurnCompleteAtRef.current < SILENCE_FILLER_DELAY_MS - 250) return;
+      
+      // Safety check: ensure total silence exceeds the intended total delay
+      const totalSilence = Date.now() - lastModelTurnCompleteAtRef.current;
+      const expectedTotalDelay = delays.slice(0, silenceFillerCountRef.current + 1).reduce((a, b) => a + b, 0);
+      if (totalSilence < expectedTotalDelay - 1000) return;
 
       silenceFillerCountRef.current += 1;
       silenceFillerInFlightRef.current = true;
       sendTextToLive(silenceFillerPrompt());
-    }, SILENCE_FILLER_DELAY_MS);
+    }, delay);
   };
 
   const markUserSpeechActivity = () => {
@@ -1021,6 +1081,7 @@ export function BeatriceAgent({
   };
 
   const toggleCamera = async () => {
+    markUserSpeechActivity();
     if (isCameraActive) {
       setCameraStream(null);
       if (videoStreamRef.current) {
@@ -1078,6 +1139,13 @@ export function BeatriceAgent({
       sendTextToLive("The user just turned on their camera. You can now see them. React naturally - greet them like you're on a video call. Make eye contact references, comment on what you see casually, keep it warm and human.");
     } catch (err) {
       console.error("Camera error:", err);
+    }
+  };
+
+  const handleTapVideo = async () => {
+    setShowVideoPage(true);
+    if (!isCameraActive) {
+      await toggleCamera();
     }
   };
 
@@ -1716,7 +1784,7 @@ export function BeatriceAgent({
         const recorderVols = audioRecorderRef.current.getFrequencies(11);
 
         setVolumes(prev => prev.map((v, i) => {
-          let target = Math.max(streamerVols[i] || 0, recorderVols[i] || 0);
+          let target = recorderVols[i] || 0; // Only use user microphone capture, do not animate from Beatrice speaker
           target = Math.min(1, target * 1.8);
           return v + (target - v) * 0.5;
         }));
@@ -3423,11 +3491,12 @@ ${historyContext}
                   conversationBufferRef.current.push(`USER: ${text}`);
                   saveMessage('user', text);
 
-                  if (transcriptTimeoutRef.current) clearTimeout(transcriptTimeoutRef.current);
-                  transcriptTimeoutRef.current = setTimeout(() => {
-                    setUserTranscript('');
-                    setModelTranscript('');
-                  }, 4000);
+                    if (transcriptTimeoutRef.current) clearTimeout(transcriptTimeoutRef.current);
+                    transcriptTimeoutRef.current = setTimeout(() => {
+                      setUserTranscript('');
+                      setModelTranscript('');
+                    }, 2500);
+
                 }
               }
 
@@ -3459,7 +3528,7 @@ ${historyContext}
                     setIsAgentSpeaking(true);
 
                     if (speakingTimeoutRef.current) clearTimeout(speakingTimeoutRef.current);
-                    speakingTimeoutRef.current = setTimeout(() => setIsAgentSpeaking(false), 700);
+                    speakingTimeoutRef.current = setTimeout(() => setIsAgentSpeaking(false), 400); // Reduced from 700ms
                   }
 
                   if ((part as any).text) {
@@ -3473,7 +3542,7 @@ ${historyContext}
                     transcriptTimeoutRef.current = setTimeout(() => {
                       setUserTranscript('');
                       setModelTranscript('');
-                    }, 4000);
+                    }, 2500);
                   }
                 }
               }
@@ -3489,11 +3558,12 @@ ${historyContext}
                   setUserTranscript(text);
                   saveMessage('user', text);
 
-                  if (transcriptTimeoutRef.current) clearTimeout(transcriptTimeoutRef.current);
-                  transcriptTimeoutRef.current = setTimeout(() => {
-                    setUserTranscript('');
-                    setModelTranscript('');
-                  }, 4000);
+                    if (transcriptTimeoutRef.current) clearTimeout(transcriptTimeoutRef.current);
+                    transcriptTimeoutRef.current = setTimeout(() => {
+                      setUserTranscript('');
+                      setModelTranscript('');
+                    }, 2500);
+
                 }
               }
 
@@ -3546,6 +3616,7 @@ ${historyContext}
       setIsActive(true);
       setConnecting(false);
       sessionStartingRef.current = false;
+      playChime(CHIME_URL);
 
       setTimeout(() => {
         sendTextToLive(
@@ -3561,6 +3632,9 @@ ${historyContext}
   };
 
   const stopSession = () => {
+    if (isActiveRef.current) {
+      playChime(CHIME_URL);
+    }
     clearSilenceFillerTimer();
     isActiveRef.current = false;
     isAgentSpeakingRef.current = false;
@@ -3643,11 +3717,12 @@ ${historyContext}
       <header className="sticky top-0 w-full bg-black/70 backdrop-blur-2xl border-b border-white/[0.04] px-4 sm:px-6 py-3.5 flex items-center justify-between z-30 shrink-0">
         <div className="flex items-center">
             <button
-              onClick={() => setShowSettings(true)}
-              className="p-1.5 -ml-1.5 rounded-xl text-white/40 hover:text-white/70 hover:bg-white/5 transition-all duration-300 active:scale-90"
+              onClick={() => { markUserSpeechActivity(); setShowSettings(true); }}
+              className="p-1.5 -ml-1.5 rounded-xl text-white/90 hover:text-white hover:bg-white/5 transition-all duration-300 active:scale-90"
               aria-label="Open Settings"
             >
-              <Settings className="w-5 h-5 sm:w-5 sm:h-5" />
+
+              <Settings className="w-[35px] h-[35px]" strokeWidth={1.5} />
             </button>
         </div>
 
@@ -3658,14 +3733,14 @@ ${historyContext}
 
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setShowProfilePage(true)}
-            className="w-7 h-7 sm:w-7 sm:h-7 rounded-full bg-white/5 border border-white/[0.08] overflow-hidden flex items-center justify-center hover:border-white/20 transition-all duration-300 active:scale-90"
+            onClick={() => { markUserSpeechActivity(); setShowProfilePage(true); }}
+            className="w-[43px] h-[43px] rounded-full bg-white/[0.03] border border-white/[0.06] overflow-hidden flex items-center justify-center hover:bg-white/[0.07] hover:border-white/[0.15] transition-all duration-300 active:scale-90"
             aria-label="User Profile"
           >
             {user.photoURL ? (
-              <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover" />
+              <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover opacity-85 hover:opacity-100 transition-opacity" />
             ) : (
-              <span className="text-white/40 text-[11px] font-['SF_Pro_Text',system-ui,sans-serif] font-semibold">{user.displayName?.charAt(0) || 'M'}</span>
+              <span className="text-white/70 text-base font-['SF_Pro_Text',system-ui,sans-serif] font-semibold">{user.displayName?.charAt(0) || 'M'}</span>
             )}
           </button>
         </div>
@@ -3733,77 +3808,55 @@ ${historyContext}
         <div className="relative w-full h-full flex items-center justify-between">
 
           <button
-            onClick={() => setShowChatPage(true)}
-            className={`absolute left-4 sm:left-[44px] flex flex-col items-center justify-center transition-all duration-300 ${
-              showChatPage
-                ? 'text-[#d0a78b]'
-                : 'text-white/40 hover:text-white/70'
-            }`}
+            onClick={() => { markUserSpeechActivity(); setShowChatPage(true); }}
+            className="flex flex-col items-center justify-center transition-all duration-300 text-white/55 hover:text-white/90 active:scale-95"
           >
-            <MessageSquare className="w-5 h-5 sm:w-5 sm:h-5 mb-0.5" />
+            <MessageSquare className="w-[35px] h-[35px] mb-1" strokeWidth={1.5} />
             <span className="text-[9px] font-['SF_Pro_Text',system-ui,sans-serif] font-semibold tracking-normal">Chat</span>
           </button>
 
-          <button
-            onClick={isActive ? stopSession : startSession}
-            disabled={connecting}
-            aria-label={isActive ? "Stop Voice Assistant" : "Start Voice Assistant"}
-            title={isActive ? "Stop Voice Assistant" : "Start Voice Assistant"}
-            className={`absolute left-1/2 -translate-x-1/2 bottom-[38px] sm:bottom-[52px] w-14 h-14 sm:w-[74px] sm:h-[74px] rounded-full flex flex-col items-center justify-center shadow-2xl transition-all duration-300 border-[3px] z-30 ${
-              isActive
-                ? 'bg-zinc-900 text-[#d0a78b] border-[#d0a78b]/30 shadow-[#d0a78b]/10'
-                : 'bg-[#d0a78b] text-black hover:bg-[#ebd0bc] shadow-lg shadow-[#d0a78b]/30'
-            }`}
-          >
-            {connecting ? (
-              <Loader2 className="w-5 h-5 sm:w-7 sm:h-7 animate-spin" />
-            ) : isActive ? (
-              <div className="absolute inset-0 rounded-full flex items-center justify-center">
-                <canvas
-                  ref={stopCanvasRef}
-                  className="absolute inset-0 w-full h-full pointer-events-none"
-                  width={80}
-                  height={80}
-                />
-                <span className="text-[7px] sm:text-[9px] font-extrabold uppercase tracking-widest z-10 text-[#d0a78b]">
-                  Stop
-                </span>
-              </div>
-            ) : (
-                <>
+          {/* Center Voice Button with Visualizer */}
+          <div className="absolute left-1/2 -translate-x-1/2 bottom-[36px] sm:bottom-[48px] flex items-center gap-4 sm:gap-8 z-30">
+            <VisualizerBars volumes={volumes.slice(0, 5)} side="left" />
+            
+            <motion.button
+              onClick={isActive ? stopSession : startSession}
+              disabled={connecting}
+              aria-label={isActive ? "Stop Voice Assistant" : "Start Voice Assistant"}
+              title={isActive ? "Stop Voice Assistant" : "Start Voice Assistant"}
+              className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-[#a3d944] via-[#4dbd79] to-[#29abe2] flex items-center justify-center shadow-2xl transition-all duration-300 border-2 border-white/10 hover:brightness-105 active:scale-95"
+            >
+              {connecting ? (
+                <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 animate-spin text-white" />
+              ) : isActive ? (
+                <div className="relative flex items-center justify-center">
                   <motion.div
-                    animate={{ 
-                      scale: !isActive ? [1, 1.05, 1] : 1,
-                    }}
-                    transition={{ 
-                      repeat: Infinity, 
-                      duration: 2, 
-                      ease: "easeInOut" 
-                    }}
-                    className="flex items-center justify-center"
-                  >
-                    <Power className="w-7 h-7 sm:w-9 sm:h-9" />
-                  </motion.div>
-                  <span className="text-[7px] sm:text-[9px] font-extrabold uppercase tracking-widest mt-0.5 sm:mt-1">
-                    Start
-                  </span>
-                </>
-            )}
-          </button>
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ repeat: Infinity, duration: 2 }}
+                  className="z-10"
+                >
+                  <Square className="w-6 h-6 sm:w-8 sm:h-8 fill-red-500 text-red-500 rounded-none" strokeWidth={1} />
+                </motion.div>
+
+                </div>
+              ) : (
+                <Mic className="w-7 h-7 sm:w-9 sm:h-9 text-white/90 drop-shadow-md" strokeWidth={1.5} />
+              )}
+            </motion.button>
+
+            <VisualizerBars volumes={volumes.slice(6, 11)} side="right" />
+          </div>
 
           <button
-            onClick={() => setShowVideoPage(true)}
-            className={`absolute right-4 sm:right-[44px] flex flex-col items-center justify-center transition-all duration-300 ${
-              showVideoPage
-                ? 'text-[#d0a78b]'
-                : 'text-white/40 hover:text-white/70'
-            }`}
+            onClick={handleTapVideo}
+            className="flex flex-col items-center justify-center transition-all duration-300 text-white/55 hover:text-white/90 active:scale-95"
           >
-            <Video className="w-5 h-5 sm:w-5 sm:h-5 mb-0.5" />
+            <Video className="w-[35px] h-[35px] mb-1" strokeWidth={1.5} />
             <span className="text-[9px] font-['SF_Pro_Text',system-ui,sans-serif] font-semibold tracking-normal">Video</span>
           </button>
         </div>
       </footer>
+
 
       <canvas ref={canvasRef} className="hidden" />
       <video ref={videoRef} className="hidden" autoPlay playsInline muted />

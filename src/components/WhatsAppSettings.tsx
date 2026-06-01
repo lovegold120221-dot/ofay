@@ -42,7 +42,7 @@ export function WhatsAppSettings({ userId, waPermissions, onTogglePermission }: 
         }
         if (s.status === 'paired' || s.status === 'disconnected' || s.error) {
           if (s.status === 'paired') {
-            await supabase.from('user_settings').upsert({ user_id: userId, whatsapp_paired: true, whatsapp_phone: s.phone || null, whatsapp_permissions: waPermissions, updated_at: new Date().toISOString() });
+            await supabase.from('user_settings').upsert({ user_id: userId, whatsapp_paired: true, whatsapp_phone: s.phone || null, updated_at: new Date().toISOString() });
           }
           if (waPollRef.current) clearInterval(waPollRef.current);
           waPollRef.current = null;
@@ -58,15 +58,6 @@ export function WhatsAppSettings({ userId, waPermissions, onTogglePermission }: 
 
   const loadStatus = async () => {
     try {
-      const { data: settings } = await supabase
-        .from('user_settings')
-        .select('whatsapp_permissions, whatsapp_paired, whatsapp_phone')
-        .eq('user_id', userId)
-        .single();
-      if (settings) {
-        if (settings.whatsapp_permissions) setWaPermissions(prev => ({ ...prev, ...settings.whatsapp_permissions }));
-      }
-
       const s = await getWhatsAppStatus(userId);
       setWaStatus(s.status);
       if (s.qrCode) setWaQrCode(s.qrCode);
@@ -86,22 +77,6 @@ export function WhatsAppSettings({ userId, waPermissions, onTogglePermission }: 
       }
     } catch (e) {
       console.error('Failed to load whatsapp settings:', e);
-    }
-  };
-
-  const toggleWaPermission = async (key: string) => {
-    const nextPermissions = { ...waPermissions, [key]: !waPermissions[key] };
-    setWaPermissions(nextPermissions);
-    try {
-      await supabase.from('user_settings').upsert({
-        user_id: userId,
-        whatsapp_permissions: nextPermissions,
-        whatsapp_paired: waStatus === 'paired',
-        whatsapp_phone: waPhone || null,
-        updated_at: new Date().toISOString()
-      });
-    } catch (error) {
-      console.error('Failed to save WhatsApp permissions:', error);
     }
   };
 
@@ -350,7 +325,7 @@ export function WhatsAppSettings({ userId, waPermissions, onTogglePermission }: 
                   <span className="text-[11px] text-white/40 font-['SF_Pro_Text',system-ui,sans-serif] font-medium leading-relaxed">{p.desc}</span>
                 </div>
                 <button
-                  onClick={() => toggleWaPermission(p.key)}
+                  onClick={() => onTogglePermission(p.key)}
                   aria-pressed={waPermissions[p.key]}
                   aria-label={`Toggle ${p.label} permission`}
                   title={`Toggle ${p.label} permission`}

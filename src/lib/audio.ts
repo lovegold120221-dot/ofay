@@ -71,7 +71,7 @@ export class AudioStreamer {
       
       const currentTime = this.audioContext.currentTime;
       if (this.scheduledTime < currentTime) {
-        this.scheduledTime = currentTime + 0.02; // Small look-ahead safety buffer
+        this.scheduledTime = currentTime + 0.01; // Reduced safety buffer from 0.02 to 0.01
       }
       
       source.start(this.scheduledTime);
@@ -119,11 +119,11 @@ export class AmbientConversationBed {
     
     let buffer: AudioBuffer;
     try {
-      const resp = await fetch('/bgm-office.mp3');
+      const resp = await fetch('/office.mp3');
       const arrayBuffer = await resp.arrayBuffer();
       buffer = await this.audioContext.decodeAudioData(arrayBuffer);
     } catch (e) {
-      console.error('Failed to load bgm-office.mp3', e);
+      console.error('Failed to load office.mp3', e);
       return;
     }
 
@@ -202,7 +202,13 @@ export class AudioRecorder {
 
   async start() {
     this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    this.stream = await navigator.mediaDevices.getUserMedia({ 
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true,
+      } 
+    });
     
     if (!this.audioContext) return;
     
@@ -214,7 +220,7 @@ export class AudioRecorder {
     this.dataArray = new Uint8Array(bufferLength);
     source.connect(this.analyser);
 
-    this.processor = this.audioContext.createScriptProcessor(2048, 1, 1);
+    this.processor = this.audioContext.createScriptProcessor(1024, 1, 1);
     this.processor.onaudioprocess = (e) => {
       const input = e.inputBuffer.getChannelData(0);
       const resampled = this.downsampleBuffer(input, this.audioContext!.sampleRate, 16000);

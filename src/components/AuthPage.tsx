@@ -151,13 +151,13 @@ export function AuthPage({ onGoogleToken, onLogin }: AuthPageProps) {
 
       <div className="w-full max-w-[400px] z-10 flex flex-col items-center">
         {/* Minimal header */}
-        <div className="flex items-center gap-3 mb-10">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#d0a78b]/20 to-amber-900/30 p-[1px]">
-            <div className="w-full h-full rounded-full bg-[#080808] flex items-center justify-center border border-[#d0a78b]/10 overflow-hidden p-1.5">
+        <div className="flex flex-col items-center gap-3 mb-12">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#d0a78b]/20 to-amber-900/30 p-[1px]">
+            <div className="w-full h-full rounded-full bg-[#080808] flex items-center justify-center border border-[#d0a78b]/10 overflow-hidden p-2">
               <img src="https://eburon.ai/icon-eburon.svg" alt="" className="w-full h-full object-contain" />
             </div>
           </div>
-          <span className="text-sm font-light tracking-[0.15em] text-white/40 uppercase font-['SF_Pro_Display',system-ui,sans-serif]">Beatrice</span>
+          <span className="text-xl font-light tracking-[0.2em] text-white/80 uppercase font-['SF_Pro_Display',system-ui,sans-serif]">Beatrice</span>
         </div>
 
         <AnimatePresence mode="wait">
