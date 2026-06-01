@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+@layer base {
+  .dark {
+    @apply bg-[#050505] text-white;
+  }
+}
+
+html, body {
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+@keyframes cloud-drift-1 {
+  0%, 100% { transform: translate(-15%, -15%) scale(1); }
+  50% { transform: translate(15%, 10%) scale(1.15); }
+}
+@keyframes cloud-drift-2 {
+  0%, 100% { transform: translate(15%, 15%) scale(1.1); }
+  50% { transform: translate(-10%, -15%) scale(0.9); }
+}
+@keyframes cloud-drift-3 {
+  0%, 100% { transform: translate(-10%, 20%) scale(0.95); }
+  50% { transform: translate(10%, -10%) scale(1.2); }
+}
+@keyframes orb-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.25; }
+  50% { transform: scale(1.05); opacity: 0.35; }
+}
+.blob-1 { animation: cloud-drift-1 12s ease-in-out infinite; }
+.blob-2 { animation: cloud-drift-2 14s ease-in-out infinite; }
+.blob-3 { animation: cloud-drift-3 10s ease-in-out infinite; }
+.orb-pulse-active { animation: orb-pulse 4s ease-in-out infinite; }
+.dot-pattern {
+  background-image: radial-gradient(circle, #f59e0b 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+.transcript-mask {
+  -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+}
+.orb-glow {
+  background: radial-gradient(circle, rgba(208, 167, 139, var(--glow-alpha, 0.06)) 0%, transparent 70%);
+  transform: scale(var(--glow-scale, 1));
+}
+
+@keyframes fade-to-clear {
+  0% {
+    opacity: 0;
+    filter: blur(15px);
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0px);
+    transform: scale(1);
+  }
+}
+
+.animate-clear {
+  animation: fade-to-clear 10s ease-in-out 0.5s forwards;
+}
+
+.task-loader-box {
+  width: 300px;
+  aspect-ratio: 3 / 4;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+  box-sizing: border-box;
+  background: linear-gradient(145deg, #ffffff, #e6e6e6);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  text-align: center;
+  opacity: 0;
+  filter: blur(15px);
+}

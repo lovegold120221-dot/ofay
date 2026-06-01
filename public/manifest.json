@@ -1,0 +1,32 @@
+{
+  "name": "Beatrice - Eburon AI",
+  "short_name": "Beatrice",
+  "description": "Premium Authenticated Voice Intelligence Assistant by Eburon AI.",
+  "id": "ai.eburon.beatrice",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/icon-eburon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Open Chat",
+      "short_name": "Chat",
+      "description": "Open Beatrice Voice Assistant",
+      "url": "/",
+      "icons": [{ "src": "/icon-eburon.svg", "sizes": "any" }]
+    }
+  ]
+}
