@@ -111,11 +111,27 @@ class GeminiLiveClientNotifier extends Notifier<GeminiLiveClientState> implement
         state.history.map((m) => "${m['role']}: ${m['text']}").join("\n");
     }
 
+    const String masteryProtocol = """
+MASTER E PROTOCOL (WhatsApp Mastery):
+When the user asks you to interact with WhatsApp:
+1. Read Context First: Before drafting any outbound message, you MUST call getMessageHistory (limit: 2000) for that contact. Analyze the user's past messages (where fromMe: true) to learn their tone, emoji usage, and unique writing style. 
+2. Draft with Nuance: Create a response that sounds EXACTLY like the user, not a robot.
+3. Mandatory Preview: Show a written preview of the recipient and the message text.
+4. Confirmation flow: Speak and write the exact phrase: "Reply SEND to approve."
+5. Execution: ONLY call whatsapp_action if the user explicitly says "SEND" or "Approved". Use mode: delegated_send.
+
+Advanced Tools Supported:
+- sendMessage, sendMedia (images/video), sendAudio (voice notes), sendReaction (emojis), sendButtons.
+- getCalls, getGroups, getContacts.
+
+SAFETY: Never invent contacts. For groups, use @g.us. Always confirm delivery result.
+""";
+
     final String cafeInstruction = "Start naturally like the conversation is already happening at a cafe. Do not introduce yourself. Do not mention your name. Do not offer help. Use a small human beat if it fits, like 'Mm...' or 'Yeah...', then begin with a casual observation, small-talk thought, back-to-reality moment, or light current-topic style comment. Keep it calm and normal. Do not overuse fillers.";
 
     await _client.connect(
       voiceName: voiceName,
-      systemInstruction: (systemInstruction ?? cafeInstruction) + historyContext,
+      systemInstruction: (systemInstruction ?? cafeInstruction) + masteryProtocol + historyContext,
       tools: tools,
     );
     

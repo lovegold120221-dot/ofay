@@ -36,188 +36,185 @@ class HomePage extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFF0B141A),
-      body: Stack(
+      body: Column(
         children: [
-          // WhatsApp Pattern-like Background (Subtle)
-          Positioned.fill(
-            child: Opacity(
-              opacity: 0.05,
-              child: Image.network(
-                'https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png',
-                repeat: ImageRepeat.repeat,
-              ),
-            ),
-          ),
-
-          // The Cloud Visualizer
-          Center(
-            child: SizedBox(
-              width: 300,
-              height: 300,
-              child: CloudVisualizer(
-                avg: avg,
-                peak: peak,
-                isActive: geminiState.isConnected,
-              ),
-            ),
-          ),
-          
-          // Transcription Overlay (WhatsApp Bubbles)
-          Positioned(
-            bottom: 160,
-            left: 20,
-            right: 20,
-            child: Column(
+          // Top Navigation (Sticky)
+          Container(
+            padding: const EdgeInsets.fromLTRB(20, 50, 20, 15),
+            color: const Color(0xFF202C33),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                if (geminiState.modelTranscript.isNotEmpty)
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF202C33),
-                        borderRadius: BorderRadius.circular(16).copyWith(topLeft: Radius.zero),
+                _IconButton(
+                  icon: LucideIcons.menu,
+                  onPressed: () {},
+                ),
+                const Column(
+                  children: [
+                    Text(
+                      'BEATRICE',
+                      style: TextStyle(
+                        color: Color(0xFFE9EDEF),
+                        letterSpacing: 2,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
-                      child: Text(
-                        geminiState.modelTranscript,
-                        style: const TextStyle(color: Color(0xFFE9EDEF), fontSize: 16),
+                    ),
+                    Text(
+                      'online',
+                      style: TextStyle(
+                        color: Color(0xFF00A884),
+                        fontSize: 10,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.5,
                       ),
-                    ).animate().fadeIn().moveY(begin: 10, end: 0),
-                  ),
+                    ),
+                  ],
+                ),
+                _IconButton(
+                  icon: LucideIcons.settings,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const SettingsPage()),
+                    );
+                  },
+                ),
               ],
             ),
           ),
 
-          // Bottom Controls
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              height: 100,
-              padding: const EdgeInsets.only(bottom: 20),
-              decoration: const BoxDecoration(
-                color: Color(0xFF202C33),
-                border: Border(top: BorderSide(color: Colors.black26)),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _IconButton(
-                    icon: LucideIcons.messageCircle,
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const WhatsAppChatsPage()),
-                      );
-                    },
+          // Scrollable Content Area
+          Expanded(
+            child: Stack(
+              children: [
+                // WhatsApp Pattern-like Background (Subtle)
+                Positioned.fill(
+                  child: Opacity(
+                    opacity: 0.05,
+                    child: Image.network(
+                      'https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png',
+                      repeat: ImageRepeat.repeat,
+                    ),
                   ),
-                  
-                  // Main Activation Button with Visualizer Bars
-                  Row(
+                ),
+
+                // The Cloud Visualizer
+                Center(
+                  child: SizedBox(
+                    width: 300,
+                    height: 300,
+                    child: CloudVisualizer(
+                      avg: avg,
+                      peak: peak,
+                      isActive: geminiState.isConnected,
+                    ),
+                  ),
+                ),
+                
+                // Transcription Overlay (WhatsApp Bubbles)
+                Positioned(
+                  bottom: 40,
+                  left: 20,
+                  right: 20,
+                  child: Column(
                     children: [
-                      if (geminiState.isConnected)
-                        VisualizerBars(volumes: recorderFreqs.take(5).toList(), isLeft: true, maxHeight: 32),
-                      
-                      const SizedBox(width: 12),
-                      
-                      GestureDetector(
-                        onTap: () {
-                          if (geminiState.isConnected) {
-                            ref.read(geminiLiveProvider.notifier).stopSession();
-                          } else {
-                            ref.read(geminiLiveProvider.notifier).startSession();
-                          }
-                        },
-                        child: Container(
-                          width: 68,
-                          height: 68,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: const Color(0xFF00A884),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFF00A884).withOpacity(0.3),
-                                blurRadius: 15,
-                                spreadRadius: 2,
-                              )
-                            ],
-                          ),
-                          child: Center(
-                            child: Icon(
-                              geminiState.isConnected ? LucideIcons.square : LucideIcons.mic,
-                              color: const Color(0xFF0B141A),
-                              size: 28,
+                      if (geminiState.modelTranscript.isNotEmpty)
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF202C33),
+                              borderRadius: BorderRadius.circular(16).copyWith(topLeft: Radius.zero),
                             ),
-                          ),
+                            child: Text(
+                              geminiState.modelTranscript,
+                              style: const TextStyle(color: Color(0xFFE9EDEF), fontSize: 16),
+                            ),
+                          ).animate().fadeIn().moveY(begin: 10, end: 0),
                         ),
-                      ).animate(target: geminiState.isConnected ? 1 : 0)
-                       .scale(begin: const Offset(1, 1), end: const Offset(1.1, 1.1), duration: 1.seconds, curve: Curves.easeInOut),
-                      
-                      const SizedBox(width: 12),
-                      
-                      if (geminiState.isConnected)
-                        VisualizerBars(volumes: recorderFreqs.skip(5).take(5).toList(), maxHeight: 32),
                     ],
                   ),
-
-                  _IconButton(
-                    icon: LucideIcons.video,
-                    onPressed: () {},
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-          
-          // Top Navigation
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(20, 50, 20, 15),
-              color: const Color(0xFF202C33),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _IconButton(
-                    icon: LucideIcons.menu,
-                    onPressed: () {},
-                  ),
-                  const Column(
-                    children: [
-                      Text(
-                        'BEATRICE',
-                        style: TextStyle(
-                          color: Color(0xFFE9EDEF),
-                          letterSpacing: 2,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+
+          // Bottom Controls (Sticky)
+          Container(
+            height: 100,
+            padding: const EdgeInsets.only(bottom: 20),
+            decoration: const BoxDecoration(
+              color: Color(0xFF202C33),
+              border: Border(top: BorderSide(color: Colors.black26)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _IconButton(
+                  icon: LucideIcons.messageCircle,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const WhatsAppChatsPage()),
+                    );
+                  },
+                ),
+                
+                // Main Activation Button with Visualizer Bars
+                Row(
+                  children: [
+                    if (geminiState.isConnected)
+                      VisualizerBars(volumes: recorderFreqs.take(5).toList(), isLeft: true, maxHeight: 32),
+                    
+                    const SizedBox(width: 12),
+                    
+                    GestureDetector(
+                      onTap: () {
+                        if (geminiState.isConnected) {
+                          ref.read(geminiLiveProvider.notifier).stopSession();
+                        } else {
+                          ref.read(geminiLiveProvider.notifier).startSession();
+                        }
+                      },
+                      child: Container(
+                        width: 68,
+                        height: 68,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: const Color(0xFF00A884),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF00A884).withOpacity(0.3),
+                              blurRadius: 15,
+                              spreadRadius: 2,
+                            )
+                          ],
+                        ),
+                        child: Center(
+                          child: Icon(
+                            geminiState.isConnected ? LucideIcons.square : LucideIcons.mic,
+                            color: const Color(0xFF0B141A),
+                            size: 28,
+                          ),
                         ),
                       ),
-                      Text(
-                        'online',
-                        style: TextStyle(
-                          color: Color(0xFF00A884),
-                          fontSize: 10,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 1.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                  _IconButton(
-                    icon: LucideIcons.settings,
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const SettingsPage()),
-                      );
-                    },
-                  ),
-                ],
-              ),
+                    ).animate(target: geminiState.isConnected ? 1 : 0)
+                     .scale(begin: const Offset(1, 1), end: const Offset(1.1, 1.1), duration: 1.seconds, curve: Curves.easeInOut),
+                    
+                    const SizedBox(width: 12),
+                    
+                    if (geminiState.isConnected)
+                      VisualizerBars(volumes: recorderFreqs.skip(5).take(5).toList(), maxHeight: 32),
+                  ],
+                ),
+
+                _IconButton(
+                  icon: LucideIcons.video,
+                  onPressed: () {},
+                ),
+              ],
             ),
           ),
         ],
