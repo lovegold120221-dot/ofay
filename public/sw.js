@@ -15,6 +15,13 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  // Ignore API calls and ngrok tunnels
+  if (event.request.url.includes('/api/') || 
+      event.request.url.includes('ngrok') || 
+      event.request.url.includes('localhost')) {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((response) => {
       return response || fetch(event.request);
