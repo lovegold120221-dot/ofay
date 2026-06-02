@@ -45,9 +45,28 @@ class HomePage extends ConsumerWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _IconButton(
-                  icon: LucideIcons.menu,
-                  onPressed: () {},
+                // User Avatar (Left)
+                GestureDetector(
+                  onTap: () {
+                    // Open profile or menu
+                  },
+                  child: Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withOpacity(0.05),
+                      border: Border.all(color: Colors.white.withOpacity(0.1)),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: (geminiState.avatarUrl != null || geminiState.googlePhotoUrl != null)
+                      ? Image.network(
+                          geminiState.avatarUrl ?? geminiState.googlePhotoUrl!, 
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => const Icon(LucideIcons.user, color: Colors.white24, size: 20),
+                        )
+                      : const Icon(LucideIcons.user, color: Colors.white24, size: 20),
+                  ),
                 ),
                 const Column(
                   children: [

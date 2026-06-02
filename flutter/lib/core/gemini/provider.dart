@@ -26,6 +26,8 @@ class GeminiLiveClientState {
   final bool isAgentSpeaking;
   final String userTranscript;
   final String modelTranscript;
+  final String? avatarUrl;
+  final String? googlePhotoUrl;
   final List<Map<String, String>> history;
 
   GeminiLiveClientState({
@@ -34,6 +36,8 @@ class GeminiLiveClientState {
     this.isAgentSpeaking = false,
     this.userTranscript = '',
     this.modelTranscript = '',
+    this.avatarUrl,
+    this.googlePhotoUrl,
     this.history = const [],
   });
 
@@ -43,6 +47,8 @@ class GeminiLiveClientState {
     bool? isAgentSpeaking,
     String? userTranscript,
     String? modelTranscript,
+    String? avatarUrl,
+    String? googlePhotoUrl,
     List<Map<String, String>>? history,
   }) {
     return GeminiLiveClientState(
@@ -51,6 +57,8 @@ class GeminiLiveClientState {
       isAgentSpeaking: isAgentSpeaking ?? this.isAgentSpeaking,
       userTranscript: userTranscript ?? this.userTranscript,
       modelTranscript: modelTranscript ?? this.modelTranscript,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      googlePhotoUrl: googlePhotoUrl ?? this.googlePhotoUrl,
       history: history ?? this.history,
     );
   }
@@ -65,20 +73,34 @@ class GeminiLiveClientNotifier extends Notifier<GeminiLiveClientState> implement
       apiKey: AppConfig.geminiApiKey,
       delegate: this,
     );
-    _loadHistory();
+    _loadProfile();
     return GeminiLiveClientState();
   }
 
-  Future<void> _loadHistory() async {
-    final userId = ref.read(firebaseServiceProvider).currentUser?.uid;
-    if (userId == null) return;
+  Future<void> _loadProfile() async {
+    final user = ref.read(firebaseServiceProvider).currentUser;
+    if (user == null) return;
 
     try {
       final supabase = ref.read(supabaseServiceProvider).client;
+      
+      // Load Settings (including avatar)
+      final settings = await supabase
+          .from('user_settings')
+          .select('avatar_url')
+          .eq('user_id', user.uid)
+          .maybeSingle();
+
+      state = state.copyWith(
+        googlePhotoUrl: user.photoURL,
+        avatarUrl: settings?['avatar_url']?.toString(),
+      );
+
+      // Load History
       final response = await supabase
           .from('messages')
           .select('role, text')
-          .eq('user_id', userId)
+          .eq('user_id', user.uid)
           .order('created_at', ascending: false)
           .limit(50);
 
@@ -92,7 +114,7 @@ class GeminiLiveClientNotifier extends Notifier<GeminiLiveClientState> implement
 
       state = state.copyWith(history: loadedHistory);
     } catch (e) {
-      print('Failed to load history in Flutter: $e');
+      print('Failed to load profile in Flutter: $e');
     }
   }
 
@@ -146,7 +168,7 @@ SAFETY: Never invent contacts. For groups, use @g.us. Always confirm delivery re
     
     // Preserve history but clear transient state
     state = GeminiLiveClientState(history: state.history);
-    _loadHistory(); // Refresh from DB
+    _loadProfile(); // Refresh from DB
   }
 
   void sendAudio(String base64) => _client.sendAudio(base64);
