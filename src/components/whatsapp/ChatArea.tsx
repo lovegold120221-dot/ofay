@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   MoreVertical, 
   Search, 
@@ -26,7 +27,7 @@ interface ChatAreaProps {
   onMessageChange: (text: string) => void;
   onSend: () => void;
   onSendFile: (file: File) => void;
-  onCall: (type: 'audio' | 'video') => void;
+  onCall: (type: 'audio' | 'video' | 'group') => void;
   sending?: boolean;
 }
 

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import {
   Loader2,
   Send,
+  Smartphone,
 } from 'lucide-react';
 import {
   callWhatsAppTool,
@@ -224,7 +225,7 @@ export function TestWhatsAppPage() {
     }
   };
 
-  const handleCall = async (type: 'audio' | 'video') => {
+  const handleCall = async (type: 'audio' | 'video' | 'group') => {
     const to = selectedChat?.id;
     if (!to) return;
     setNotice(`Initiating ${type} call to ${selectedChat.name || to}... (Requires backend support)`);
