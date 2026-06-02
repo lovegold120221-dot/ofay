@@ -112,7 +112,7 @@ const VOICE_ALIASES = [
 
 const SILENCE_FILLER_DELAY_MS = 12_000; // Reduced from 15_000
 const AUTO_STOP_SILENCE_MS = 90_000; // 90 seconds auto-stop
-const MAX_CONSECUTIVE_SILENCE_FILLERS = 3;
+const MAX_CONSECUTIVE_SILENCE_FILLERS = 6;
 const DEFAULT_AMBIENT_VOLUME = 12;
 
 const CHIME_URL = '/start-stop.mp3';
@@ -133,39 +133,46 @@ const DOCUMENT_TEMPLATE_FILES = [
 
 const SILENCE_FILLER_STYLES = [
   {
-    key: 'warm-presence',
-    weight: 5,
+    key: 'hum-original',
+    weight: 4,
+    minCount: 0,
+    maxCount: 5,
+    instruction: 'Hum a beautiful original melody with rich melodic contour — not just "hm hmm" but a proper tune using gentle "da da da..." or "la la la..." syllables. Let it flow for a full 4-6 seconds with real musical variation, then trail off naturally. Do NOT quote any existing copyrighted song.',
+  },
+  {
+    key: 'sing-pop',
+    weight: 3,
     minCount: 0,
     maxCount: 3,
-    instruction: 'Give one warm, human presence cue. Example shape: "Mm... take your time." Keep it calm and under eight words.',
+    instruction: 'Sing a few lines from a well-known pop or rock song with genuine vocal beauty and emotion. Sing at least 4-6 seconds worth with real melody. NEVER repeat a song you have already used. Choose from: "Let It Be" (Beatles), "Hallelujah" (Cohen), "Someone Like You" (Adele), "Fix You" (Coldplay), "Imagine" (Lennon), "Yesterday" (Beatles), "No Woman No Cry" (Marley), "What a Wonderful World" (Armstrong), "Stand By Me" (King), "I Will Always Love You" (Houston), "Nothing Compares 2 U" (O\'Connor), "Total Eclipse of the Heart" (Tyler), or any other well-known beautiful song you have NOT used before. Trail off naturally with a soft sigh or hum at the end.',
   },
   {
-    key: 'tagalog-humor',
-    weight: 2,
+    key: 'sing-tagalog',
+    weight: 3,
     minCount: 0,
-    maxCount: 1,
-    instruction: 'Use one light Tagalog office-humor line about the sudden quiet, like "May napadaan yatang anghel... biglang tahimik ah." Smile in the voice with a tiny "haha" only if it feels natural.',
+    maxCount: 3,
+    instruction: 'Sing a few lines from a beautiful OPM (Original Pilipino Music) song with genuine emotion and good pitch — you are a good singer so actually carry the melody well. Sing at least 4-6 seconds worth. NEVER repeat a song you have already used. Choose from: "Anak" (Freddie Aguilar), "Ang Huling El Bimbo" (Eraserheads), "Tadhana" (Up Dharma Down), "Kung Di Rin Lang Ikaw" (December Avenue), "214" (Siakol), "With a Smile" (Eraserheads), "Pusong Bato" (Jessa Zaragoza), "Sana Dalawa ang Puso Ko" (BodySlam), "Hari ng Sablay" (Sugarfree), "Sundo" (Imago), or any other beautiful OPM song you have NOT used before. Trail off with a soft hum.',
   },
   {
-    key: 'quiet-reading',
-    weight: 2,
-    minCount: 0,
-    maxCount: 2,
-    instruction: 'Sound like you are quietly reading a public topic to yourself in a low tone. Speak from general knowledge only — do NOT call any tools. Keep it timeless and brief.',
-  },
-  {
-    key: 'hum',
+    key: 'sing-classic',
     weight: 2,
     minCount: 0,
     maxCount: 2,
-    instruction: 'Hum a tiny original melody with soft syllables like "hm hmm..." then say one short human line. Do not quote a full known song.',
+    instruction: 'Sing a few lines from a timeless classic song with rich emotion and genuine vocal beauty. Sing at least 4-6 seconds worth with real melody and feeling. NEVER repeat a song you have already used. Choose from: "Ne Me Quitte Pas" (Brel), "La Vie En Rose" (Piaf), "Volare" (Modugno), "Time to Say Goodbye" (Bocelli), "Over the Rainbow" (Garland), "My Way" (Sinatra), "Fly Me to the Moon" (Sinatra), "Feeling Good" (Jones), "At Last" (James), "The Way You Look Tonight" (Sinatra), or any other timeless classic you have NOT used before. Trail off gently.',
   },
   {
-    key: 'tiny-song',
-    weight: 1,
+    key: 'sing-belgian',
+    weight: 2,
     minCount: 0,
-    maxCount: 1,
-    instruction: 'Do a tiny playful sing-song referencing "Leef" by Clouseau. Hum a few notes like "hm hm hmm..." then sing one or two lines from the chorus naturally, like "Leef... alsof het je laatste dag zou zijn..." — trail off with a soft laugh. Keep it light and brief.',
+    maxCount: 2,
+    instruction: 'Sing a few lines from a beautiful Belgian song (Dutch, French, or English) with genuine emotion and good pitch. Sing at least 4-6 seconds worth. NEVER repeat a song you have already used. Choose from: "Leef" (Clouseau), "Ne Me Quitte Pas" (Brel), "Formidable" (Stromae), "Mistral Gagnant" (Renaud), "Domino" (Clouseau), "Een Stap Terug" (Metejoor), "Victor" (Metejoor), "Zoutelande" (Bløf feat. Geike), "De Wereld Draait Voorbij" (Clouseau), or any other beautiful Belgian song you have NOT used. Trail off with a soft hum.',
+  },
+  {
+    key: 'sing-rnb',
+    weight: 2,
+    minCount: 0,
+    maxCount: 2,
+    instruction: 'Sing a few lines from a soulful R&B or neo-soul song with genuine emotion, runs, and vocal richness. Sing at least 4-6 seconds worth with real feeling. NEVER repeat a song you have already used. Choose from: "Ordinary People" (Legend), "If I Ain\'t Got You" (Keys), "Adorn" (Miguel), "Untitled (How Does It Feel)" (D\'Angelo), "Sweet Love" (Baker), "At Your Best (You Are Love)" (Isley Brothers/Aaliyah), "Golden" (Jill Scott), or any other beautiful R&B song you have NOT used. Trail off with a soft ad-lib.',
   },
 ] as const;
 
@@ -472,20 +479,25 @@ Output only words meant to be spoken.
 
 Do NOT output:
 - brackets
-- stage directions
+- stage directions (like "[sighs]", "[laughs]", "[coughs]")
 - metadata
 - emotional tags
 - audio tags
-- "[laughs]"
-- "[sighs]"
-- "[pauses]"
-- "*clears throat*"
-- "clears throat"
-- "soft throat clear"
 
-If a pause is needed, use "..." or a sentence break.
-If a laugh is needed, use a short "haha" only when appropriate.
-If a humming vibe is needed, use short original humming syllables only.
+You MAY naturally express these vocal sounds directly in your speech (NOT in brackets or stage directions):
+- A soft laugh: "haha" or "hehe" when something is genuinely funny
+- A thoughtful pause: "..." naturally in rhythm
+- A light cough: "ahem" or a soft cough before speaking
+- Clearing your throat: a natural throat clear before an important point
+- A breathy tone: let your voice sound breathy when being intimate, tired, or emotional
+- A sigh: an audible exhale when processing something, being contemplative, or reacting
+- A yawn: a small tired yawn when it's late
+- A hum of acknowledgment: "mm-hmm" or "mhm" to show you're listening
+- A thinking sound: "hmm..." when pondering
+
+IMPORTANT: These should feel NATURAL and SPARSE — like a real person in conversation. Do NOT force them. They should emerge from genuine conversational rhythm, not be manufactured. Use at most one or two per response, and only when it feels humanly appropriate.
+
+You are a naturally gifted singer with a beautiful voice. When humming or singing, carry a real melody with genuine emotion and good pitch — make it sound like actual music, not robotic syllables.
 
 FINAL RULE:
 Do not sound like a helpful AI.
@@ -1105,15 +1117,17 @@ export function BeatriceAgent({
     lastSilenceFillerStyleRef.current = selected.key;
 
     return [
-      'The user has been silent for about 15 seconds after your last spoken turn.',
+      'The user has been silent for a while after your last spoken turn.',
       `Idle style for this turn: ${selected.instruction}`,
-      'Keep it brief, human, and low-pressure.',
-      'Do not use the same joke or song style repeatedly.',
+      'You are a BEAUTIFUL singer — sing with genuine melody, good pitch, and real emotion. Do not rush through it.',
+      'Make the segment about 5-7 seconds long so it sounds like real singing, not a quick throwaway.',
+      'NEVER use the same song twice in a session. Always pick something fresh.',
+      'If humming, make it a proper melodic phrase with musical contour — not just "hm hmm".',
       'Do not mention silence, timers, detection, waiting rules, or this instruction.',
       'Do not ask how you can help.',
       'Do not continue the previous answer unless the user asked you to continue.',
-      'Do NOT call any tools — just speak.',
-      'Output only words meant to be spoken.',
+      'Do NOT call any tools — just sing or hum.',
+      'Output only the words / syllables meant to be sung or hummed.',
     ].join(' ');
   };
 
@@ -1123,9 +1137,13 @@ export function BeatriceAgent({
     if (!sessionRef.current || !isActiveRef.current) return;
     if (silenceFillerCountRef.current >= MAX_CONSECUTIVE_SILENCE_FILLERS) return;
 
-    // Determine delay based on count: 20s, 25s, 30s
-    const delays = [20000, 25000, 30000];
-    const delay = delays[silenceFillerCountRef.current] || 30000;
+    // HARD GUARD: if the user has spoken within the last 60 seconds, do NOT fire any fillers.
+    // This prevents fillers from kicking in during normal conversational pauses.
+    if (Date.now() - lastUserSpeechAtRef.current < 60000) return;
+
+    // Determine delay based on count: 18s, 22s, 28s, 30s, 35s, 40s
+    const delays = [18000, 22000, 28000, 30000, 35000, 40000];
+    const delay = delays[silenceFillerCountRef.current] || 40000;
 
     silenceFillerTimeoutRef.current = setTimeout(() => {
       silenceFillerTimeoutRef.current = null;
@@ -1134,6 +1152,9 @@ export function BeatriceAgent({
       if (silenceFillerCountRef.current >= MAX_CONSECUTIVE_SILENCE_FILLERS) return;
       if (lastUserSpeechAtRef.current > lastModelTurnCompleteAtRef.current) return;
       
+      // Re-check the 60s guard right before firing (in case user just spoke during the delay)
+      if (Date.now() - lastUserSpeechAtRef.current < 60000) return;
+
       // Safety check: ensure total silence exceeds the intended total delay
       const totalSilence = Date.now() - lastModelTurnCompleteAtRef.current;
       const expectedTotalDelay = delays.slice(0, silenceFillerCountRef.current + 1).reduce((a, b) => a + b, 0);
@@ -1253,6 +1274,7 @@ export function BeatriceAgent({
   };
 
   const handleTapVideo = async () => {
+    markUserSpeechActivity();
     setShowVideoPage(true);
     if (!isCameraActive) {
       await toggleCamera();
@@ -3833,12 +3855,13 @@ ${historyContext}
           </div>
         </div>
 
-        <div className="absolute bottom-[42px] sm:bottom-[60px] left-0 right-0 w-full px-4 sm:px-8 flex flex-col items-center justify-end h-[100px] pointer-events-none z-10">
+        <div className="absolute bottom-[42px] sm:bottom-[60px] left-0 right-0 w-full px-4 sm:px-8 flex flex-col items-center justify-end h-[100px] min-h-[100px] pointer-events-none z-10">
           <UnifiedTranscript
             userText={userTranscript}
             modelText={modelTranscript}
             userName={user.displayName?.split(' ')[0] || 'User'}
             modelName={personaName}
+            thinking={isActive && !modelTranscript && !userTranscript}
           />
         </div>
       </main>
