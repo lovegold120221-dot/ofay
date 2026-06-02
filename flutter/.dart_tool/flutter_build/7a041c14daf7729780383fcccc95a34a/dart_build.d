@@ -1,0 +1,1 @@
+ /Users/eburon/Documents/voxx-zero/flutter/.dart_tool/flutter_build/7a041c14daf7729780383fcccc95a34a/dart_build_result.json:  /Users/eburon/Documents/voxx-zero/flutter/.dart_tool/package_config.json /Users/eburon/Documents/voxx-zero/flutter/pubspec.yaml /opt/homebrew/share/flutter/bin/cache/dart-sdk/version
