@@ -174,10 +174,10 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#050505] text-white flex items-center justify-center">
+      <div className="min-h-screen bg-beatrice-bg text-beatrice-text flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-10 h-10 animate-spin text-amber-500/50" />
-          <span className="text-xs font-mono tracking-widest text-amber-500/30 uppercase">
+          <Loader2 className="w-10 h-10 animate-spin text-beatrice-glow/60" />
+          <span className="text-xs font-mono tracking-widest text-beatrice-secondary/50 uppercase">
             Initializing System
           </span>
         </div>

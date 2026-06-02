@@ -72,11 +72,11 @@ export function OnboardingPage({ onComplete }: OnboardingPageProps) {
   const isLast = page === slides.length - 1;
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center p-6 relative overflow-hidden select-none">
+    <div className="min-h-screen bg-beatrice-bg text-beatrice-text flex flex-col items-center justify-center p-6 relative overflow-hidden select-none">
       {/* Ambient glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] bg-[#D6AF93]/[0.06] rounded-full blur-[120px]" />
-        <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 translate-y-1/2 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-amber-700/[0.05] rounded-full blur-[100px]" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] bg-beatrice-glow/[0.06] rounded-full blur-[120px]" />
+        <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 translate-y-1/2 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-beatrice-surface/[0.28] rounded-full blur-[100px]" />
       </div>
 
       <div className="w-full max-w-[400px] z-10 flex flex-col flex-1">
@@ -85,12 +85,12 @@ export function OnboardingPage({ onComplete }: OnboardingPageProps) {
 
         {/* Header logo */}
         <div className="flex items-center justify-center gap-3 mb-16">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#D6AF93]/20 to-amber-900/30 p-[1px]">
-            <div className="w-full h-full rounded-full bg-[#080808] flex items-center justify-center border border-[#D6AF93]/10 overflow-hidden p-1.5">
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-beatrice-glow/20 to-beatrice-deep p-[1px]">
+            <div className="w-full h-full rounded-full bg-beatrice-deep flex items-center justify-center border border-beatrice-glow/10 overflow-hidden p-1.5">
               <img src="https://eburon.ai/icon-eburon.svg" alt="" className="w-full h-full object-contain" draggable={false} />
             </div>
           </div>
-          <span className="text-sm font-light tracking-[0.15em] text-white/40 uppercase font-['SF_Pro_Display',system-ui,sans-serif]">Beatrice</span>
+          <span className="text-sm font-light tracking-[0.15em] text-beatrice-secondary/55 uppercase font-['SF_Pro_Display',system-ui,sans-serif]">Beatrice</span>
         </div>
 
         {/* Card area */}
@@ -107,10 +107,10 @@ export function OnboardingPage({ onComplete }: OnboardingPageProps) {
               <div className="w-24 h-24 mb-8">
                 {current.glyph}
               </div>
-              <h2 className="text-[22px] font-light tracking-wide text-white/85 mb-4 font-['SF_Pro_Display',system-ui,sans-serif]">
+              <h2 className="text-[22px] font-light tracking-wide text-beatrice-text/90 mb-4 font-['SF_Pro_Display',system-ui,sans-serif]">
                 {current.title}
               </h2>
-              <p className="text-white/40 text-[15px] leading-relaxed max-w-xs font-['SF_Pro_Text',system-ui,sans-serif] font-normal">
+              <p className="text-beatrice-secondary text-[15px] leading-relaxed max-w-xs font-['SF_Pro_Text',system-ui,sans-serif] font-normal">
                 {current.subtitle}
               </p>
             </motion.div>
@@ -127,8 +127,8 @@ export function OnboardingPage({ onComplete }: OnboardingPageProps) {
                 onClick={() => setPage(i)}
                 className={`rounded-full transition-all duration-500 cursor-pointer ${
                   i === page
-                    ? 'w-7 h-[6px] bg-[#D6AF93] shadow-[0_0_12px_rgba(208,167,139,0.3)]'
-                    : 'w-[6px] h-[6px] bg-white/15 hover:bg-white/30'
+                    ? 'w-7 h-[6px] bg-beatrice-live shadow-[0_0_12px_rgba(8,185,148,0.32)]'
+                    : 'w-[6px] h-[6px] bg-beatrice-muted/25 hover:bg-beatrice-muted/45'
                 }`}
                 aria-label={`Slide ${i + 1}`}
               />
@@ -139,14 +139,14 @@ export function OnboardingPage({ onComplete }: OnboardingPageProps) {
           {isLast ? (
             <button
               onClick={onComplete}
-              className="w-full py-3.5 rounded-2xl bg-white text-[#050505] text-sm font-semibold tracking-wide shadow-lg shadow-white/10 active:scale-[0.97] transition-all duration-200 cursor-pointer hover:bg-white/90 font-['SF_Pro_Text',system-ui,sans-serif]"
+              className="w-full py-3.5 rounded-2xl bg-beatrice-live text-beatrice-deep text-sm font-semibold tracking-wide shadow-lg shadow-beatrice-live/20 active:scale-[0.97] transition-all duration-200 cursor-pointer hover:bg-beatrice-teal font-['SF_Pro_Text',system-ui,sans-serif]"
             >
               Get Started
             </button>
           ) : (
             <button
               onClick={() => setPage(p => p + 1)}
-              className="w-full py-3.5 rounded-2xl bg-[#D6AF93] text-[#050505] text-sm font-semibold tracking-wide shadow-lg shadow-[#D6AF93]/15 active:scale-[0.97] transition-all duration-200 cursor-pointer hover:bg-[#D6AF93]/90 font-['SF_Pro_Text',system-ui,sans-serif]"
+              className="w-full py-3.5 rounded-2xl bg-beatrice-live text-beatrice-deep text-sm font-semibold tracking-wide shadow-lg shadow-beatrice-live/20 active:scale-[0.97] transition-all duration-200 cursor-pointer hover:bg-beatrice-teal font-['SF_Pro_Text',system-ui,sans-serif]"
             >
               Next
             </button>

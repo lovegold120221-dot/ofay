@@ -126,10 +126,10 @@ export function AuthPage({ onGoogleToken, onLogin }: AuthPageProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#050505] text-white flex items-center justify-center">
+      <div className="min-h-screen bg-beatrice-bg text-beatrice-text flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-10 h-10 animate-spin text-amber-500/50" />
-          <span className="text-xs font-mono tracking-widest text-amber-500/30 uppercase">
+          <Loader2 className="w-10 h-10 animate-spin text-beatrice-glow/60" />
+          <span className="text-xs font-mono tracking-widest text-beatrice-secondary/50 uppercase">
             Initializing System
           </span>
         </div>
@@ -143,22 +143,22 @@ export function AuthPage({ onGoogleToken, onLogin }: AuthPageProps) {
   }
 
   return (
-    <main className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    <main className="min-h-screen bg-beatrice-bg text-beatrice-text flex flex-col items-center justify-center p-6 relative overflow-hidden">
       {/* Softer Apple-style ambient glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[500px] sm:w-[700px] h-[500px] sm:h-[700px] bg-[#d0a78b]/[0.06] rounded-full blur-[150px]" />
-        <div className="absolute bottom-[10%] left-1/2 -translate-x-1/2 w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] bg-amber-700/[0.04] rounded-full blur-[120px]" />
+        <div className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[500px] sm:w-[700px] h-[500px] sm:h-[700px] bg-beatrice-glow/[0.06] rounded-full blur-[150px]" />
+        <div className="absolute bottom-[10%] left-1/2 -translate-x-1/2 w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] bg-beatrice-surface/[0.22] rounded-full blur-[120px]" />
       </div>
 
       <div className="w-full max-w-[400px] z-10 flex flex-col items-center">
         {/* Minimal header */}
         <div className="flex flex-col items-center gap-3 mb-12">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#d0a78b]/20 to-amber-900/30 p-[1px]">
-            <div className="w-full h-full rounded-full bg-[#080808] flex items-center justify-center border border-[#d0a78b]/10 overflow-hidden p-2">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-beatrice-glow/20 to-beatrice-deep p-[1px]">
+            <div className="w-full h-full rounded-full bg-beatrice-deep flex items-center justify-center border border-beatrice-glow/10 overflow-hidden p-2">
               <img src="https://eburon.ai/icon-eburon.svg" alt="" className="w-full h-full object-contain" />
             </div>
           </div>
-          <span className="text-xl font-light tracking-[0.2em] text-white/80 uppercase font-['SF_Pro_Display',system-ui,sans-serif]">Beatrice</span>
+          <span className="text-xl font-light tracking-[0.2em] text-beatrice-text/85 uppercase font-['SF_Pro_Display',system-ui,sans-serif]">Beatrice</span>
         </div>
 
         <AnimatePresence mode="wait">
@@ -171,39 +171,39 @@ export function AuthPage({ onGoogleToken, onLogin }: AuthPageProps) {
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
               className="w-full"
             >
-              <div className="backdrop-blur-2xl bg-white/[0.03] border border-white/[0.06] rounded-3xl p-7 flex flex-col shadow-2xl">
-                <h2 className="text-xl font-light tracking-wide text-white/90 mb-1 font-['SF_Pro_Display',system-ui,sans-serif]">Sign In</h2>
-                <p className="text-white/30 text-xs mb-7 font-['SF_Pro_Text',system-ui,sans-serif]">Welcome back. Access your Beatrice workspace.</p>
+              <div className="backdrop-blur-2xl bg-beatrice-surface/35 border border-white/[0.06] rounded-3xl p-7 flex flex-col shadow-2xl">
+                <h2 className="text-xl font-light tracking-wide text-beatrice-text/90 mb-1 font-['SF_Pro_Display',system-ui,sans-serif]">Sign In</h2>
+                <p className="text-beatrice-secondary/75 text-xs mb-7 font-['SF_Pro_Text',system-ui,sans-serif]">Welcome back. Access your Beatrice workspace.</p>
 
                 <form onSubmit={handleEmailAuth} className="space-y-3 mb-5">
-                  <div className="group rounded-2xl bg-white/[0.04] border border-white/[0.06] focus-within:border-[#d0a78b]/30 focus-within:bg-white/[0.06] transition-all duration-300 has-[:focus]:shadow-[0_0_0_1px_rgba(208,167,139,0.15)]">
+                  <div className="group rounded-2xl bg-white/[0.04] border border-white/[0.06] focus-within:border-beatrice-teal/40 focus-within:bg-white/[0.06] transition-all duration-300 has-[:focus]:shadow-[0_0_0_1px_rgba(18,199,160,0.16)]">
                     <input
                       type="email"
                       placeholder="Email"
                       value={authEmail}
                       onChange={e => setAuthEmail(e.target.value)}
-                      className="w-full bg-transparent text-white/80 placeholder-white/25 text-sm px-4 py-3.5 outline-none font-['SF_Pro_Text',system-ui,sans-serif]"
+                      className="w-full bg-transparent text-beatrice-text/85 placeholder-beatrice-muted/45 text-sm px-4 py-3.5 outline-none font-['SF_Pro_Text',system-ui,sans-serif]"
                       required
                     />
                   </div>
-                  <div className="group rounded-2xl bg-white/[0.04] border border-white/[0.06] focus-within:border-[#d0a78b]/30 focus-within:bg-white/[0.06] transition-all duration-300 has-[:focus]:shadow-[0_0_0_1px_rgba(208,167,139,0.15)]">
+                  <div className="group rounded-2xl bg-white/[0.04] border border-white/[0.06] focus-within:border-beatrice-teal/40 focus-within:bg-white/[0.06] transition-all duration-300 has-[:focus]:shadow-[0_0_0_1px_rgba(18,199,160,0.16)]">
                     <input
                       type="password"
                       placeholder="Password"
                       value={authPassword}
                       onChange={e => setAuthPassword(e.target.value)}
-                      className="w-full bg-transparent text-white/80 placeholder-white/25 text-sm px-4 py-3.5 outline-none font-['SF_Pro_Text',system-ui,sans-serif]"
+                      className="w-full bg-transparent text-beatrice-text/85 placeholder-beatrice-muted/45 text-sm px-4 py-3.5 outline-none font-['SF_Pro_Text',system-ui,sans-serif]"
                       required
                     />
                   </div>
 
                   {authError && (
-                    <p className="text-red-400/90 text-xs text-center font-medium bg-red-500/5 py-2.5 rounded-xl border border-red-500/10 font-['SF_Pro_Text',system-ui,sans-serif]">{authError}</p>
+                    <p className="text-beatrice-danger text-xs text-center font-medium bg-beatrice-danger/10 py-2.5 rounded-xl border border-beatrice-danger/20 font-['SF_Pro_Text',system-ui,sans-serif]">{authError}</p>
                   )}
 
                   <button
                     type="submit"
-                    className="w-full py-3.5 rounded-2xl bg-white text-[#050505] text-sm font-semibold tracking-wide shadow-lg shadow-white/10 active:scale-[0.97] transition-all duration-200 cursor-pointer hover:bg-white/90 font-['SF_Pro_Text',system-ui,sans-serif]"
+                    className="w-full py-3.5 rounded-2xl bg-beatrice-live text-beatrice-deep text-sm font-semibold tracking-wide shadow-lg shadow-beatrice-live/20 active:scale-[0.97] transition-all duration-200 cursor-pointer hover:bg-beatrice-teal font-['SF_Pro_Text',system-ui,sans-serif]"
                   >
                     Sign In
                   </button>
@@ -226,7 +226,7 @@ export function AuthPage({ onGoogleToken, onLogin }: AuthPageProps) {
                     className="w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] hover:border-white/[0.10] text-white/70 hover:text-white/90 text-sm font-medium active:scale-[0.97] transition-all duration-200 cursor-pointer mb-5 font-['SF_Pro_Text',system-ui,sans-serif] disabled:opacity-50"
                   >
                     {loggingIn ? (
-                      <Loader2 className="w-4 h-4 animate-spin text-amber-500/50" />
+                      <Loader2 className="w-4 h-4 animate-spin text-beatrice-glow/60" />
                     ) : (
                       <svg className="w-4 h-4" viewBox="0 0 24 24"><path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
                     )}
@@ -236,13 +236,13 @@ export function AuthPage({ onGoogleToken, onLogin }: AuthPageProps) {
                 <div className="flex items-center justify-between text-xs border-t border-white/[0.04] pt-4">
                   <button
                     onClick={() => { setAuthMode('resetpw'); setAuthError(''); }}
-                    className="text-white/30 hover:text-white/60 transition-colors duration-200 cursor-pointer font-['SF_Pro_Text',system-ui,sans-serif]"
+                    className="text-beatrice-secondary/55 hover:text-beatrice-text/80 transition-colors duration-200 cursor-pointer font-['SF_Pro_Text',system-ui,sans-serif]"
                   >
                     Forgot password?
                   </button>
                   <button
                     onClick={() => { setAuthMode('register'); setAuthError(''); }}
-                    className="text-[#d0a78b]/70 hover:text-[#d0a78b] font-medium transition-colors duration-200 cursor-pointer font-['SF_Pro_Text',system-ui,sans-serif]"
+                    className="text-beatrice-teal/80 hover:text-beatrice-teal font-medium transition-colors duration-200 cursor-pointer font-['SF_Pro_Text',system-ui,sans-serif]"
                   >
                     Create account
                   </button>
@@ -260,66 +260,66 @@ export function AuthPage({ onGoogleToken, onLogin }: AuthPageProps) {
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
               className="w-full"
             >
-              <div className="backdrop-blur-2xl bg-white/[0.03] border border-white/[0.06] rounded-3xl p-7 flex flex-col shadow-2xl">
-                <h2 className="text-xl font-light tracking-wide text-white/90 mb-1 font-['SF_Pro_Display',system-ui,sans-serif]">Create Account</h2>
-                <p className="text-white/30 text-xs mb-7 font-['SF_Pro_Text',system-ui,sans-serif]">Create your account to start using Beatrice.</p>
+              <div className="backdrop-blur-2xl bg-beatrice-surface/35 border border-white/[0.06] rounded-3xl p-7 flex flex-col shadow-2xl">
+                <h2 className="text-xl font-light tracking-wide text-beatrice-text/90 mb-1 font-['SF_Pro_Display',system-ui,sans-serif]">Create Account</h2>
+                <p className="text-beatrice-secondary/75 text-xs mb-7 font-['SF_Pro_Text',system-ui,sans-serif]">Create your account to start using Beatrice.</p>
 
                 <form onSubmit={handleEmailAuth} className="space-y-3 mb-4">
-                  <div className="group rounded-2xl bg-white/[0.04] border border-white/[0.06] focus-within:border-[#d0a78b]/30 focus-within:bg-white/[0.06] transition-all duration-300 has-[:focus]:shadow-[0_0_0_1px_rgba(208,167,139,0.15)]">
+                  <div className="group rounded-2xl bg-white/[0.04] border border-white/[0.06] focus-within:border-beatrice-teal/40 focus-within:bg-white/[0.06] transition-all duration-300 has-[:focus]:shadow-[0_0_0_1px_rgba(18,199,160,0.16)]">
                     <input
                       type="text"
                       placeholder="Your Name"
                       value={authDisplayName}
                       onChange={e => setAuthDisplayName(e.target.value)}
-                      className="w-full bg-transparent text-white/80 placeholder-white/25 text-sm px-4 py-3.5 outline-none font-['SF_Pro_Text',system-ui,sans-serif]"
+                      className="w-full bg-transparent text-beatrice-text/85 placeholder-beatrice-muted/45 text-sm px-4 py-3.5 outline-none font-['SF_Pro_Text',system-ui,sans-serif]"
                       required
                     />
                   </div>
-                  <div className="group rounded-2xl bg-white/[0.04] border border-white/[0.06] focus-within:border-[#d0a78b]/30 focus-within:bg-white/[0.06] transition-all duration-300 has-[:focus]:shadow-[0_0_0_1px_rgba(208,167,139,0.15)]">
+                  <div className="group rounded-2xl bg-white/[0.04] border border-white/[0.06] focus-within:border-beatrice-teal/40 focus-within:bg-white/[0.06] transition-all duration-300 has-[:focus]:shadow-[0_0_0_1px_rgba(18,199,160,0.16)]">
                     <input
                       type="email"
                       placeholder="Email"
                       value={authEmail}
                       onChange={e => setAuthEmail(e.target.value)}
-                      className="w-full bg-transparent text-white/80 placeholder-white/25 text-sm px-4 py-3.5 outline-none font-['SF_Pro_Text',system-ui,sans-serif]"
+                      className="w-full bg-transparent text-beatrice-text/85 placeholder-beatrice-muted/45 text-sm px-4 py-3.5 outline-none font-['SF_Pro_Text',system-ui,sans-serif]"
                       required
                     />
                   </div>
-                  <div className="group rounded-2xl bg-white/[0.04] border border-white/[0.06] focus-within:border-[#d0a78b]/30 focus-within:bg-white/[0.06] transition-all duration-300 has-[:focus]:shadow-[0_0_0_1px_rgba(208,167,139,0.15)]">
+                  <div className="group rounded-2xl bg-white/[0.04] border border-white/[0.06] focus-within:border-beatrice-teal/40 focus-within:bg-white/[0.06] transition-all duration-300 has-[:focus]:shadow-[0_0_0_1px_rgba(18,199,160,0.16)]">
                     <input
                       type="password"
                       placeholder="Password (min 6 chars)"
                       value={authPassword}
                       onChange={e => setAuthPassword(e.target.value)}
-                      className="w-full bg-transparent text-white/80 placeholder-white/25 text-sm px-4 py-3.5 outline-none font-['SF_Pro_Text',system-ui,sans-serif]"
+                      className="w-full bg-transparent text-beatrice-text/85 placeholder-beatrice-muted/45 text-sm px-4 py-3.5 outline-none font-['SF_Pro_Text',system-ui,sans-serif]"
                       required
                     />
                   </div>
 
                   {/* Onboarding Language Choice */}
-                  <div className="relative group rounded-2xl bg-white/[0.04] border border-white/[0.06] focus-within:border-[#d0a78b]/30 transition-all duration-300 has-[:focus]:shadow-[0_0_0_1px_rgba(208,167,139,0.15)]">
+                  <div className="relative group rounded-2xl bg-white/[0.04] border border-white/[0.06] focus-within:border-beatrice-teal/40 transition-all duration-300 has-[:focus]:shadow-[0_0_0_1px_rgba(18,199,160,0.16)]">
                     <select
                       value={authLanguage}
                       onChange={e => { setAuthLanguage(e.target.value); try { localStorage.setItem('beatrice_language', e.target.value); } catch {} }}
-                      className="w-full bg-transparent text-white/60 placeholder-white/25 text-sm px-4 py-3.5 outline-none appearance-none cursor-pointer font-['SF_Pro_Text',system-ui,sans-serif]"
+                      className="w-full bg-transparent text-beatrice-secondary placeholder-beatrice-muted/45 text-sm px-4 py-3.5 outline-none appearance-none cursor-pointer font-['SF_Pro_Text',system-ui,sans-serif]"
                       aria-label="Language selection"
                     >
                       {LANGUAGES.map(l => (
                         <option key={l.code} value={l.code}>{l.label}</option>
                       ))}
                     </select>
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-white/20">
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-beatrice-muted/50">
                       <svg className="fill-current h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
                     </div>
                   </div>
 
                   {authError && (
-                    <p className="text-red-400/90 text-xs text-center font-medium bg-red-500/5 py-2.5 rounded-xl border border-red-500/10 font-['SF_Pro_Text',system-ui,sans-serif]">{authError}</p>
+                    <p className="text-beatrice-danger text-xs text-center font-medium bg-beatrice-danger/10 py-2.5 rounded-xl border border-beatrice-danger/20 font-['SF_Pro_Text',system-ui,sans-serif]">{authError}</p>
                   )}
 
                   <button
                     type="submit"
-                    className="w-full py-3.5 rounded-2xl bg-white text-[#050505] text-sm font-semibold tracking-wide shadow-lg shadow-white/10 active:scale-[0.97] transition-all duration-200 cursor-pointer hover:bg-white/90 font-['SF_Pro_Text',system-ui,sans-serif]"
+                    className="w-full py-3.5 rounded-2xl bg-beatrice-live text-beatrice-deep text-sm font-semibold tracking-wide shadow-lg shadow-beatrice-live/20 active:scale-[0.97] transition-all duration-200 cursor-pointer hover:bg-beatrice-teal font-['SF_Pro_Text',system-ui,sans-serif]"
                   >
                     Create Account
                   </button>
@@ -342,7 +342,7 @@ export function AuthPage({ onGoogleToken, onLogin }: AuthPageProps) {
                     className="w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] hover:border-white/[0.10] text-white/70 hover:text-white/90 text-sm font-medium active:scale-[0.97] transition-all duration-200 cursor-pointer mb-5 font-['SF_Pro_Text',system-ui,sans-serif] disabled:opacity-50"
                   >
                     {loggingIn ? (
-                      <Loader2 className="w-4 h-4 animate-spin text-amber-500/50" />
+                      <Loader2 className="w-4 h-4 animate-spin text-beatrice-glow/60" />
                     ) : (
                       <svg className="w-4 h-4" viewBox="0 0 24 24"><path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
                     )}
@@ -350,10 +350,10 @@ export function AuthPage({ onGoogleToken, onLogin }: AuthPageProps) {
                 </button>
 
                 <div className="flex items-center justify-center text-xs border-t border-white/[0.04] pt-4">
-                  <span className="text-white/30 mr-1.5 font-['SF_Pro_Text',system-ui,sans-serif]">Already have an account?</span>
+                  <span className="text-beatrice-secondary/55 mr-1.5 font-['SF_Pro_Text',system-ui,sans-serif]">Already have an account?</span>
                   <button
                     onClick={() => { setAuthMode('login'); setAuthError(''); }}
-                    className="text-[#d0a78b]/70 hover:text-[#d0a78b] font-medium transition-colors duration-200 cursor-pointer font-['SF_Pro_Text',system-ui,sans-serif]"
+                    className="text-beatrice-teal/80 hover:text-beatrice-teal font-medium transition-colors duration-200 cursor-pointer font-['SF_Pro_Text',system-ui,sans-serif]"
                   >
                     Sign In
                   </button>
@@ -371,37 +371,37 @@ export function AuthPage({ onGoogleToken, onLogin }: AuthPageProps) {
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
               className="w-full"
             >
-              <div className="backdrop-blur-2xl bg-white/[0.03] border border-white/[0.06] rounded-3xl p-7 flex flex-col shadow-2xl">
-                <h2 className="text-xl font-light tracking-wide text-white/90 mb-1 font-['SF_Pro_Display',system-ui,sans-serif]">Reset Password</h2>
-                <p className="text-white/30 text-xs mb-7 font-['SF_Pro_Text',system-ui,sans-serif]">Enter your email and we'll send a recovery link.</p>
+              <div className="backdrop-blur-2xl bg-beatrice-surface/35 border border-white/[0.06] rounded-3xl p-7 flex flex-col shadow-2xl">
+                <h2 className="text-xl font-light tracking-wide text-beatrice-text/90 mb-1 font-['SF_Pro_Display',system-ui,sans-serif]">Reset Password</h2>
+                <p className="text-beatrice-secondary/75 text-xs mb-7 font-['SF_Pro_Text',system-ui,sans-serif]">Enter your email and we'll send a recovery link.</p>
 
                 {resetSent ? (
-                  <div className="bg-emerald-500/8 border border-emerald-500/15 rounded-2xl p-5 flex flex-col items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-400/80">
+                  <div className="bg-beatrice-live/10 border border-beatrice-live/20 rounded-2xl p-5 flex flex-col items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-full bg-beatrice-live/10 flex items-center justify-center text-beatrice-live">
                       <Check className="w-5 h-5" />
                     </div>
-                    <span className="text-xs text-emerald-400/80 text-center font-medium font-['SF_Pro_Text',system-ui,sans-serif]">Reset link sent! Check your email inbox.</span>
+                    <span className="text-xs text-beatrice-live text-center font-medium font-['SF_Pro_Text',system-ui,sans-serif]">Reset link sent! Check your email inbox.</span>
                   </div>
                 ) : (
                   <form onSubmit={handleResetPassword} className="space-y-4 mb-4">
-                    <div className="group rounded-2xl bg-white/[0.04] border border-white/[0.06] focus-within:border-[#d0a78b]/30 focus-within:bg-white/[0.06] transition-all duration-300 has-[:focus]:shadow-[0_0_0_1px_rgba(208,167,139,0.15)]">
+                    <div className="group rounded-2xl bg-white/[0.04] border border-white/[0.06] focus-within:border-beatrice-teal/40 focus-within:bg-white/[0.06] transition-all duration-300 has-[:focus]:shadow-[0_0_0_1px_rgba(18,199,160,0.16)]">
                       <input
                         type="email"
                         placeholder="Email address"
                         value={authEmail}
                         onChange={e => setAuthEmail(e.target.value)}
-                        className="w-full bg-transparent text-white/80 placeholder-white/25 text-sm px-4 py-3.5 outline-none font-['SF_Pro_Text',system-ui,sans-serif]"
+                        className="w-full bg-transparent text-beatrice-text/85 placeholder-beatrice-muted/45 text-sm px-4 py-3.5 outline-none font-['SF_Pro_Text',system-ui,sans-serif]"
                         required
                       />
                     </div>
 
                     {authError && (
-                      <p className="text-red-400/90 text-xs text-center font-medium bg-red-500/5 py-2.5 rounded-xl border border-red-500/10 font-['SF_Pro_Text',system-ui,sans-serif]">{authError}</p>
+                      <p className="text-beatrice-danger text-xs text-center font-medium bg-beatrice-danger/10 py-2.5 rounded-xl border border-beatrice-danger/20 font-['SF_Pro_Text',system-ui,sans-serif]">{authError}</p>
                     )}
 
                     <button
                       type="submit"
-                      className="w-full py-3.5 rounded-2xl bg-white text-[#050505] text-sm font-semibold tracking-wide shadow-lg shadow-white/10 active:scale-[0.97] transition-all duration-200 cursor-pointer hover:bg-white/90 font-['SF_Pro_Text',system-ui,sans-serif]"
+                      className="w-full py-3.5 rounded-2xl bg-beatrice-live text-beatrice-deep text-sm font-semibold tracking-wide shadow-lg shadow-beatrice-live/20 active:scale-[0.97] transition-all duration-200 cursor-pointer hover:bg-beatrice-teal font-['SF_Pro_Text',system-ui,sans-serif]"
                     >
                       Send Reset Link
                     </button>
@@ -411,7 +411,7 @@ export function AuthPage({ onGoogleToken, onLogin }: AuthPageProps) {
                 <div className="flex items-center justify-center text-xs border-t border-white/[0.04] pt-4">
                   <button
                     onClick={() => { setAuthMode('login'); setAuthError(''); setResetSent(false); }}
-                    className="text-white/30 hover:text-white/60 transition-colors duration-200 cursor-pointer font-['SF_Pro_Text',system-ui,sans-serif]"
+                    className="text-beatrice-secondary/55 hover:text-beatrice-text/80 transition-colors duration-200 cursor-pointer font-['SF_Pro_Text',system-ui,sans-serif]"
                   >
                     Back to Sign In
                   </button>
@@ -421,8 +421,8 @@ export function AuthPage({ onGoogleToken, onLogin }: AuthPageProps) {
           )}
         </AnimatePresence>
 
-        <div className="mt-8 flex items-center gap-2 text-[9px] text-white/15 uppercase tracking-[0.2em] font-['SF_Pro_Text',system-ui,sans-serif] font-medium">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/30 animate-pulse" />
+        <div className="mt-8 flex items-center gap-2 text-[9px] text-beatrice-secondary/45 uppercase tracking-[0.2em] font-['SF_Pro_Text',system-ui,sans-serif] font-medium">
+          <span className="w-1.5 h-1.5 rounded-full bg-beatrice-live/70 animate-pulse" />
           Secure Connection
         </div>
       </div>

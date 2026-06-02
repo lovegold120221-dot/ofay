@@ -30,7 +30,7 @@ interface WhatsAppChatListProps {
 
 // ── Helpers ──
 
-const AVATAR_COLORS = ['#0a7d6b', '#4b6fb5', '#9b59b6', '#c0843a', '#a14d57', '#3a8d9e', '#7a8b3a'];
+const AVATAR_COLORS = ['#5630B6', '#1C2A2F', '#08B994', '#12C7A0'];
 
 function jidDigits(jid: string): string {
   return (jid.split('@')[0] || '').replace(/\D/g, '');
@@ -100,7 +100,7 @@ function Avatar({ name, seed, isGroup, size = 49 }: { name: string; seed: string
   return (
     <div
       className="rounded-full flex items-center justify-center shrink-0 text-white font-semibold select-none"
-      style={{ width: size, height: size, background: initials ? bg : '#2a3942', fontSize: size * 0.36 }}
+      style={{ width: size, height: size, background: initials ? bg : '#1C2A2F', fontSize: size * 0.36 }}
       aria-hidden
     >
       {initials ? initials : isGroup ? <Users style={{ width: size * 0.5, height: size * 0.5 }} /> : <User style={{ width: size * 0.5, height: size * 0.5 }} />}
@@ -126,15 +126,15 @@ function GateCard({
   return (
     <div className="flex-1 flex items-center justify-center px-8">
       <div className="text-center max-w-xs">
-        <div className="w-14 h-14 rounded-full bg-[#202c33] flex items-center justify-center mx-auto mb-4 text-[#8696a0]">
+        <div className="w-14 h-14 rounded-full bg-wa-bg-header flex items-center justify-center mx-auto mb-4 text-wa-text-secondary">
           {icon}
         </div>
-        <h3 className="text-[15px] font-semibold text-[#e9edef] mb-1.5">{title}</h3>
-        <p className="text-[13px] text-[#8696a0] leading-relaxed mb-4">{body}</p>
+        <h3 className="text-[15px] font-semibold text-wa-text-primary mb-1.5">{title}</h3>
+        <p className="text-[13px] text-wa-text-secondary leading-relaxed mb-4">{body}</p>
         {actionLabel && onAction && (
           <button
             onClick={onAction}
-            className="px-4 py-2 rounded-full bg-[#00a884] hover:bg-[#06cf9c] text-[#111b21] text-[13px] font-semibold transition-colors cursor-pointer"
+            className="px-4 py-2 rounded-full bg-wa-green hover:bg-beatrice-teal text-wa-bg-main text-[13px] font-semibold transition-colors cursor-pointer"
           >
             {actionLabel}
           </button>

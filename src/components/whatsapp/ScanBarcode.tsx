@@ -11,10 +11,10 @@ interface ScanBarcodeProps {
 
 export const ScanBarcode: React.FC<ScanBarcodeProps> = ({ qrCode, pairingCode, status, onRefresh, loading }) => {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center bg-white p-6 sm:p-12 text-[#41525d]">
+    <div className="flex-1 flex flex-col items-center justify-center bg-wa-bg-sidebar p-6 sm:p-12 text-wa-text-secondary">
       <div className="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
         <div className="space-y-8">
-           <h1 className="text-[28px] font-light leading-tight">
+           <h1 className="text-[28px] font-light leading-tight text-wa-text-primary">
              {pairingCode ? 'Enter this code on your phone:' : 'To use WhatsApp on your computer:'}
            </h1>
            
@@ -26,9 +26,9 @@ export const ScanBarcode: React.FC<ScanBarcodeProps> = ({ qrCode, pairingCode, s
                    <li>Tap <strong>Linked Devices</strong></li>
                    <li>Tap <strong>Link with phone number instead</strong></li>
                 </ol>
-                <div className="bg-[#f0f2f5] p-6 rounded-xl border border-black/5 flex items-center justify-center gap-2 select-all shadow-inner">
+                <div className="bg-wa-bg-header p-6 rounded-xl border border-white/[0.06] flex items-center justify-center gap-2 select-all shadow-inner">
                    {pairingCode.split('').map((char, i) => (
-                      <span key={i} className={`text-3xl font-black font-mono tracking-tighter ${char === '-' ? 'text-gray-300 mx-1' : 'text-wa-green'}`}>
+                      <span key={i} className={`text-3xl font-black font-mono tracking-tighter ${char === '-' ? 'text-wa-text-secondary/50 mx-1' : 'text-wa-green'}`}>
                          {char}
                       </span>
                    ))}
@@ -49,9 +49,9 @@ export const ScanBarcode: React.FC<ScanBarcodeProps> = ({ qrCode, pairingCode, s
         </div>
 
         <div className="flex flex-col items-center gap-6">
-           <div className="relative p-4 bg-white border border-black/5 shadow-sm rounded-sm">
+           <div className="relative p-4 bg-white border border-beatrice-glow/15 shadow-sm rounded-xl">
               {loading && !qrCode && !pairingCode ? (
-                 <div className="w-64 h-64 flex items-center justify-center bg-gray-50">
+                 <div className="w-64 h-64 flex items-center justify-center bg-white">
                     <Loader2 className="w-12 h-12 animate-spin text-wa-green" />
                  </div>
               ) : pairingCode ? (
@@ -66,11 +66,11 @@ export const ScanBarcode: React.FC<ScanBarcodeProps> = ({ qrCode, pairingCode, s
                    className="w-64 h-64 block"
                  />
               ) : (
-                 <div className="w-64 h-64 flex flex-col items-center justify-center bg-gray-50 gap-4 text-center px-4">
+                 <div className="w-64 h-64 flex flex-col items-center justify-center bg-white gap-4 text-center px-4 text-beatrice-deep">
                     <p className="text-sm">Failed to load pairing data. Session might be initializing.</p>
                     <button 
                       onClick={onRefresh}
-                      className="p-2 rounded-full bg-wa-green text-white hover:brightness-110"
+                      className="p-2 rounded-full bg-wa-green text-wa-bg-main hover:brightness-110"
                     >
                       <RefreshCw className="w-5 h-5" />
                     </button>
@@ -79,7 +79,7 @@ export const ScanBarcode: React.FC<ScanBarcodeProps> = ({ qrCode, pairingCode, s
               
               {/* Overlay for initial loading only if we have no pairing data yet */}
               {status === 'init' && !qrCode && !pairingCode && (
-                 <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-20">
+                 <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-20 rounded-xl">
                     <Loader2 className="w-10 h-10 animate-spin text-wa-green" />
                  </div>
               )}
@@ -97,7 +97,7 @@ export const ScanBarcode: React.FC<ScanBarcodeProps> = ({ qrCode, pairingCode, s
             <Smartphone className="w-4 h-4" />
             <span>Link with phone number</span>
          </div>
-         <p className="text-[14px] opacity-60">
+         <p className="text-[14px] text-wa-text-secondary">
             Voxx-Zero WhatsApp Bridge uses secure end-to-end encryption. 
             Your messages are never stored on our servers.
          </p>

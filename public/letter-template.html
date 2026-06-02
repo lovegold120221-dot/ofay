@@ -7,12 +7,12 @@
     <title>Business Letter - Template</title>
     <style>
         :root {
-            --primary: #1e3a5f;
-            --accent: #2563eb;
-            --bg: #f8fafc;
-            --text: #1e293b;
-            --muted: #64748b;
-            --border: #e2e8f0;
+            --primary: #1C2A2F;
+            --accent: #08B994;
+            --bg: #071214;
+            --text: #F2F2F2;
+            --muted: #A6A6AC;
+            --border: rgba(242, 242, 242, 0.12);
             --font-serif: 'Georgia', serif;
             --font-sans: 'Inter', -apple-system, sans-serif
         }
@@ -34,7 +34,7 @@
 
         .editor {
             width: 340px;
-            background: #fff;
+            background: #1C2A2F;
             border-right: 1px solid var(--border);
             padding: 24px;
             overflow-y: auto;
@@ -46,7 +46,7 @@
 
         .editor h2 {
             font-size: 1.1rem;
-            color: var(--primary);
+            color: var(--text);
             border-bottom: 2px solid var(--border);
             padding-bottom: 8px
         }
@@ -74,7 +74,11 @@
             font-size: .9rem;
             outline: none;
             transition: border-color .2s;
-            font-family: var(--font-sans)
+            font-family: var(--font-sans);
+            background: #020606;
+            color: #F2F2F2;
+            background: #020606;
+            color: #F2F2F2
         }
 
         .form-group textarea {
@@ -88,8 +92,8 @@
         }
 
         .btn-print {
-            background: var(--primary);
-            color: #fff;
+            background: var(--accent);
+            color: #020606;
             padding: 12px;
             border: none;
             border-radius: 6px;
@@ -99,7 +103,7 @@
         }
 
         .btn-print:hover {
-            background: #0f2a4a
+            background: #12C7A0
         }
 
         .preview {
@@ -108,7 +112,7 @@
             padding: 40px;
             display: flex;
             justify-content: center;
-            background: #f1f5f9
+            background: #020606
         }
 
         .paper {
@@ -175,7 +179,7 @@
         }
 
         .highlight {
-            background: rgba(37, 99, 235, .06);
+            background:rgba(8,185,148,.08);
             border-bottom: 1px dashed var(--accent);
             padding: 0 2px;
             font-family: var(--font-sans)

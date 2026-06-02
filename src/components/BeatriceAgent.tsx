@@ -598,10 +598,10 @@ const extractHtmlArtifact = (raw: string) => {
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Generated Document</title>
   <style>
-    body { margin: 0; padding: 32px; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f5f1ea; color: #1f1a17; }
-    main { max-width: 900px; margin: 0 auto; background: white; border-radius: 20px; padding: 40px; box-shadow: 0 20px 60px rgba(0,0,0,.08); }
+    body { margin: 0; padding: 32px; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #071214; color: #F2F2F2; }
+    main { max-width: 900px; margin: 0 auto; background: #1C2A2F; border: 1px solid rgba(214,175,147,0.14); border-radius: 20px; padding: 40px; box-shadow: 0 20px 60px rgba(2,6,6,.35); }
     pre { white-space: pre-wrap; font-family: inherit; line-height: 1.55; }
-    @media print { body { background: white; padding: 0; } main { box-shadow: none; border-radius: 0; } }
+    @media print { body { background: white; color: #000000; padding: 0; } main { background: white; color: #000000; box-shadow: none; border-radius: 0; } }
   </style>
 </head>
 <body>
@@ -771,7 +771,7 @@ function VisualizerBars({ volumes, side }: { volumes: number[], side: 'left' | '
           key={i}
           animate={{ height: Math.max(4, v * 40) }}
           transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-          className="w-1 sm:w-1.5 rounded-full bg-gradient-to-b from-[#a3d944] to-[#29abe2] opacity-80"
+          className="w-1 sm:w-1.5 rounded-full bg-gradient-to-b from-beatrice-live to-beatrice-teal opacity-80"
         />
       ))}
     </div>
@@ -1322,8 +1322,8 @@ export function BeatriceAgent({
         }
         return `
         <div style="margin-bottom:12px;">
-          <div style="font-size:11px; color:#D6AF93; text-transform:uppercase; font-weight:bold; letter-spacing:0.5px;">${key.replace(/_/g, ' ')}</div>
-          <div style="font-size:14px; color:#fff; margin-top:2px;">${displayVal}</div>
+          <div style="font-size:11px; color:#12C7A0; text-transform:uppercase; font-weight:bold; letter-spacing:0.5px;">${key.replace(/_/g, ' ')}</div>
+          <div style="font-size:14px; color:#F2F2F2; margin-top:2px;">${displayVal}</div>
         </div>`;
       }).join('');
     
@@ -1345,46 +1345,46 @@ export function BeatriceAgent({
       fileType = 'html';
     } else if (toolName === 'get_user_location' && result) {
       const mapsUrl = `https://www.google.com/maps?q=${result.lat},${result.lng}`;
-      formattedContent = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your Location</title><style>body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0d0a08;color:#f0e6df;display:flex;flex-direction:column;height:100vh}.map-wrap{flex:1;min-height:0}iframe{width:100%;height:100%;border:0}.info{padding:16px 20px;background:#1a1512;border-top:1px solid #2a1f18;text-align:center}p{margin:4px 0;font-size:14px;color:#D6AF93}span{color:#988c84}</style></head><body><div class="map-wrap"><iframe src="${mapsUrl}&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div><div class="info"><p>📍 Your location</p><span>Accuracy: ±${Math.round(result.accuracy)}m</span></div></body></html>`;
+      formattedContent = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your Location</title><style>body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#071214;color:#F2F2F2;display:flex;flex-direction:column;height:100vh}.map-wrap{flex:1;min-height:0}iframe{width:100%;height:100%;border:0}.info{padding:16px 20px;background:#1C2A2F;border-top:1px solid rgba(214,175,147,0.14);text-align:center}p{margin:4px 0;font-size:14px;color:#12C7A0}span{color:#A6A6AC}</style></head><body><div class="map-wrap"><iframe src="${mapsUrl}&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div><div class="info"><p>📍 Your location</p><span>Accuracy: ±${Math.round(result.accuracy)}m</span></div></body></html>`;
       fileType = 'html';
     } else if (toolName === 'list_calendar_events' && result?.items) {
       const events = result.items.map((e: any) => {
         const start = e.start?.dateTime || e.start?.date || 'TBD';
         const t = start.includes('T') ? new Date(start).toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : start;
-        return `<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #2a1f18"><div style="width:4px;height:4px;border-radius:50%;background:#D6AF93;flex-shrink:0"></div><div style="flex:1"><p style="margin:0;font-size:14px;color:#f0e6df">${e.summary || 'Untitled'}</p><p style="margin:2px 0 0;font-size:11px;color:#988c84">${t}</p></div></div>`;
+        return `<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.06)"><div style="width:4px;height:4px;border-radius:50%;background:#D6AF93;flex-shrink:0"></div><div style="flex:1"><p style="margin:0;font-size:14px;color:#F2F2F2">${e.summary || 'Untitled'}</p><p style="margin:2px 0 0;font-size:11px;color:#A6A6AC">${t}</p></div></div>`;
       }).join('');
       const count = result.items.length;
-      formattedContent = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Calendar Events</title><style>body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0d0a08;color:#f0e6df;padding:20px}h2{margin:0 0 4px;font-size:18px;color:#D6AF93}.count{font-size:12px;color:#6b5d53;margin-bottom:16px}.empty{text-align:center;padding:40px 20px;color:#6b5d53}</style></head><body><h2>📅 Upcoming Events</h2><p class="count">${count} event${count !== 1 ? 's' : ''}</p>${events || '<p class="empty">No upcoming events</p>'}</body></html>`;
+      formattedContent = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Calendar Events</title><style>body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#071214;color:#F2F2F2;padding:20px}h2{margin:0 0 4px;font-size:18px;color:#F2F2F2}.count{font-size:12px;color:#8E9AA0;margin-bottom:16px}.empty{text-align:center;padding:40px 20px;color:#8E9AA0}</style></head><body><h2>📅 Upcoming Events</h2><p class="count">${count} event${count !== 1 ? 's' : ''}</p>${events || '<p class="empty">No upcoming events</p>'}</body></html>`;
       fileType = 'html';
     } else if (toolName === 'list_gmail_messages' && result?.messages) {
       const msgs = result.messages.map((m: any) =>
-        `<div style="display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-bottom:1px solid #2a1f18"><div style="width:32px;height:32px;border-radius:50%;background:#2a1f18;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;color:#D6AF93">${(m.from?.[0] || '?').toUpperCase()}</div><div style="flex:1;min-width:0"><p style="margin:0;font-size:13px;color:#f0e6df;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.subject || '(no subject)'}</p><p style="margin:2px 0 0;font-size:11px;color:#988c84">${m.from || ''}</p><p style="margin:2px 0 0;font-size:11px;color:#6b5d53;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.snippet || ''}</p></div></div>`
+        `<div style="display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.06)"><div style="width:32px;height:32px;border-radius:50%;background:#5630B6;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;color:#F2F2F2">${(m.from?.[0] || '?').toUpperCase()}</div><div style="flex:1;min-width:0"><p style="margin:0;font-size:13px;color:#F2F2F2;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.subject || '(no subject)'}</p><p style="margin:2px 0 0;font-size:11px;color:#A6A6AC">${m.from || ''}</p><p style="margin:2px 0 0;font-size:11px;color:#8E9AA0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.snippet || ''}</p></div></div>`
       ).join('');
-      formattedContent = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Recent Emails</title><style>body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0d0a08;color:#f0e6df;padding:20px}h2{margin:0 0 4px;font-size:18px;color:#D6AF93}.count{font-size:12px;color:#6b5d53;margin-bottom:16px}</style></head><body><h2>📬 Recent Emails</h2><p class="count">${result.messages.length} message${result.messages.length !== 1 ? 's' : ''}</p>${msgs}</body></html>`;
+      formattedContent = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Recent Emails</title><style>body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#071214;color:#F2F2F2;padding:20px}h2{margin:0 0 4px;font-size:18px;color:#F2F2F2}.count{font-size:12px;color:#8E9AA0;margin-bottom:16px}</style></head><body><h2>📬 Recent Emails</h2><p class="count">${result.messages.length} message${result.messages.length !== 1 ? 's' : ''}</p>${msgs}</body></html>`;
       fileType = 'html';
     } else if (toolName === 'list_google_tasks' && result?.items) {
       const tasks = result.items.map((t: any) =>
-        `<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid #2a1f18"><div style="width:16px;height:16px;border-radius:50%;border:2px solid #5a4a40;flex-shrink:0"></div><p style="margin:0;font-size:13px;color:#f0e6df">${t.title || 'Untitled'}</p></div>`
+        `<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,0.06)"><div style="width:16px;height:16px;border-radius:50%;border:2px solid #8E9AA0;flex-shrink:0"></div><p style="margin:0;font-size:13px;color:#F2F2F2">${t.title || 'Untitled'}</p></div>`
       ).join('');
-      formattedContent = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tasks</title><style>body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0d0a08;color:#f0e6df;padding:20px}h2{margin:0 0 4px;font-size:18px;color:#D6AF93}.count{font-size:12px;color:#6b5d53;margin-bottom:16px}</style></head><body><h2>📋 Tasks</h2><p class="count">${result.items.length} task${result.items.length !== 1 ? 's' : ''}</p>${tasks}</body></html>`;
+      formattedContent = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tasks</title><style>body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#071214;color:#F2F2F2;padding:20px}h2{margin:0 0 4px;font-size:18px;color:#F2F2F2}.count{font-size:12px;color:#8E9AA0;margin-bottom:16px}</style></head><body><h2>📋 Tasks</h2><p class="count">${result.items.length} task${result.items.length !== 1 ? 's' : ''}</p>${tasks}</body></html>`;
       fileType = 'html';
     } else if (toolName === 'list_drive_files' && result?.files) {
       const files = result.files.map((f: any) =>
-        `<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid #2a1f18"><div style="font-size:16px;flex-shrink:0">📄</div><div style="flex:1;min-width:0"><p style="margin:0;font-size:13px;color:#f0e6df;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${f.name}</p><p style="margin:1px 0 0;font-size:10px;color:#6b5d53">${(f.mimeType || '').split('/').pop()}</p></div></div>`
+        `<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,0.06)"><div style="font-size:16px;flex-shrink:0">📄</div><div style="flex:1;min-width:0"><p style="margin:0;font-size:13px;color:#F2F2F2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${f.name}</p><p style="margin:1px 0 0;font-size:10px;color:#8E9AA0">${(f.mimeType || '').split('/').pop()}</p></div></div>`
       ).join('');
-      formattedContent = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Drive Files</title><style>body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0d0a08;color:#f0e6df;padding:20px}h2{margin:0 0 4px;font-size:18px;color:#D6AF93}.count{font-size:12px;color:#6b5d53;margin-bottom:16px}</style></head><body><h2>📁 Drive Files</h2><p class="count">${result.files.length} file${result.files.length !== 1 ? 's' : ''}</p>${files}</body></html>`;
+      formattedContent = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Drive Files</title><style>body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#071214;color:#F2F2F2;padding:20px}h2{margin:0 0 4px;font-size:18px;color:#F2F2F2}.count{font-size:12px;color:#8E9AA0;margin-bottom:16px}</style></head><body><h2>📁 Drive Files</h2><p class="count">${result.files.length} file${result.files.length !== 1 ? 's' : ''}</p>${files}</body></html>`;
       fileType = 'html';
     } else if (toolName === 'search_youtube' && result?.items) {
       const vids = result.items.map((v: any) =>
-        `<div style="display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-bottom:1px solid #2a1f18"><div style="width:80px;height:45px;border-radius:6px;background-color:#2a1f18;flex-shrink:0;overflow:hidden"><img src="${v.snippet?.thumbnails?.default?.url || ''}" style="width:100%;height:100%;object-fit:cover" alt=""></div><div style="flex:1;min-width:0"><p style="margin:0;font-size:13px;color:#f0e6df">${v.snippet?.title || ''}</p><p style="margin:2px 0 0;font-size:11px;color:#988c84">${v.snippet?.channelTitle || ''}</p></div></div>`
+        `<div style="display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.06)"><div style="width:80px;height:45px;border-radius:6px;background-color:#1C2A2F;flex-shrink:0;overflow:hidden"><img src="${v.snippet?.thumbnails?.default?.url || ''}" style="width:100%;height:100%;object-fit:cover" alt=""></div><div style="flex:1;min-width:0"><p style="margin:0;font-size:13px;color:#F2F2F2">${v.snippet?.title || ''}</p><p style="margin:2px 0 0;font-size:11px;color:#A6A6AC">${v.snippet?.channelTitle || ''}</p></div></div>`
       ).join('');
-      formattedContent = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>YouTube Results</title><style>body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0d0a08;color:#f0e6df;padding:20px}h2{margin:0 0 4px;font-size:18px;color:#D6AF93}.count{font-size:12px;color:#6b5d53;margin-bottom:16px}</style></head><body><h2>▶ YouTube Results</h2><p class="count">${result.items.length} result${result.items.length !== 1 ? 's' : ''}</p>${vids}</body></html>`;
+      formattedContent = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>YouTube Results</title><style>body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#071214;color:#F2F2F2;padding:20px}h2{margin:0 0 4px;font-size:18px;color:#F2F2F2}.count{font-size:12px;color:#8E9AA0;margin-bottom:16px}</style></head><body><h2>▶ YouTube Results</h2><p class="count">${result.items.length} result${result.items.length !== 1 ? 's' : ''}</p>${vids}</body></html>`;
       fileType = 'html';
     } else if (toolName === 'create_google_task' && result) {
-      formattedContent = `<div style="padding:20px; color:#fff;"><h3>✅ Task Created</h3><p>${result.title || 'Untitled'}</p></div>`;
+      formattedContent = `<div style="padding:20px; background:#071214; color:#F2F2F2;"><h3>✅ Task Created</h3><p>${result.title || 'Untitled'}</p></div>`;
       fileType = 'html';
     } else if (toolName === 'send_gmail_message' && result) {
-      formattedContent = `<div style="padding:20px; color:#fff;"><h3>✅ Email Sent</h3><p>Your email has been sent successfully.</p></div>`;
+      formattedContent = `<div style="padding:20px; background:#071214; color:#F2F2F2;"><h3>✅ Email Sent</h3><p>Your email has been sent successfully.</p></div>`;
       fileType = 'html';
     } else if (toolName.startsWith('belgian_') && result) {
       // ... (BELGIAN TOOLS BLOCK)
@@ -1442,7 +1442,7 @@ export function BeatriceAgent({
       setTimeout(() => setTasks(prev => prev.filter(t => t.id !== id)), 8000);
     } else {
       await saveToolResult(user.uid, 'create_document', 'Generation failed.', 'txt');
-      sendResultToDocAgent('<div style="padding:40px;text-align:center;color:#ef4444"><h2>Generation Failed</h2><p>Please try again.</p></div>', 'Error', 'create_document');
+      sendResultToDocAgent('<div style="padding:40px;text-align:center;color:#C7363A"><h2>Generation Failed</h2><p>Please try again.</p></div>', 'Error', 'create_document');
       setTasks(prev => prev.filter(t => t.id !== id));
     }
   };
@@ -1536,37 +1536,37 @@ export function BeatriceAgent({
       speedX: number;
       speedY: number;
       alpha: number;
-      tint: 'cream' | 'peach' | 'amber';
+      tint: 'glow' | 'soft-glow' | 'bright-glow';
     };
 
     const cloudPuffs: CloudPuff[] = [
-      { cx: 0.30, cy: 0.46, r: 0.22, phaseX: 0.2, phaseY: 1.4, speedX: 0.18, speedY: 0.15, alpha: 0.64, tint: 'peach' },
-      { cx: 0.45, cy: 0.39, r: 0.26, phaseX: 2.1, phaseY: 0.7, speedX: 0.16, speedY: 0.18, alpha: 0.72, tint: 'cream' },
-      { cx: 0.61, cy: 0.44, r: 0.24, phaseX: 3.0, phaseY: 2.5, speedX: 0.19, speedY: 0.14, alpha: 0.66, tint: 'peach' },
-      { cx: 0.39, cy: 0.58, r: 0.25, phaseX: 4.4, phaseY: 1.1, speedX: 0.14, speedY: 0.20, alpha: 0.62, tint: 'amber' },
-      { cx: 0.55, cy: 0.59, r: 0.28, phaseX: 1.7, phaseY: 4.1, speedX: 0.17, speedY: 0.16, alpha: 0.70, tint: 'cream' },
-      { cx: 0.70, cy: 0.55, r: 0.19, phaseX: 5.1, phaseY: 3.6, speedX: 0.23, speedY: 0.17, alpha: 0.48, tint: 'peach' },
-      { cx: 0.23, cy: 0.61, r: 0.17, phaseX: 3.7, phaseY: 5.2, speedX: 0.22, speedY: 0.19, alpha: 0.46, tint: 'amber' },
-      { cx: 0.50, cy: 0.50, r: 0.33, phaseX: 0.9, phaseY: 2.8, speedX: 0.10, speedY: 0.12, alpha: 0.42, tint: 'peach' },
-      { cx: 0.34, cy: 0.31, r: 0.14, phaseX: 5.8, phaseY: 0.4, speedX: 0.25, speedY: 0.16, alpha: 0.36, tint: 'cream' },
-      { cx: 0.66, cy: 0.31, r: 0.15, phaseX: 2.8, phaseY: 4.8, speedX: 0.21, speedY: 0.18, alpha: 0.38, tint: 'cream' },
-      { cx: 0.32, cy: 0.73, r: 0.12, phaseX: 1.2, phaseY: 3.2, speedX: 0.20, speedY: 0.24, alpha: 0.32, tint: 'amber' },
-      { cx: 0.65, cy: 0.72, r: 0.13, phaseX: 4.7, phaseY: 2.2, speedX: 0.24, speedY: 0.22, alpha: 0.34, tint: 'peach' },
+      { cx: 0.30, cy: 0.46, r: 0.22, phaseX: 0.2, phaseY: 1.4, speedX: 0.18, speedY: 0.15, alpha: 0.64, tint: 'soft-glow' },
+      { cx: 0.45, cy: 0.39, r: 0.26, phaseX: 2.1, phaseY: 0.7, speedX: 0.16, speedY: 0.18, alpha: 0.72, tint: 'bright-glow' },
+      { cx: 0.61, cy: 0.44, r: 0.24, phaseX: 3.0, phaseY: 2.5, speedX: 0.19, speedY: 0.14, alpha: 0.66, tint: 'soft-glow' },
+      { cx: 0.39, cy: 0.58, r: 0.25, phaseX: 4.4, phaseY: 1.1, speedX: 0.14, speedY: 0.20, alpha: 0.62, tint: 'glow' },
+      { cx: 0.55, cy: 0.59, r: 0.28, phaseX: 1.7, phaseY: 4.1, speedX: 0.17, speedY: 0.16, alpha: 0.70, tint: 'bright-glow' },
+      { cx: 0.70, cy: 0.55, r: 0.19, phaseX: 5.1, phaseY: 3.6, speedX: 0.23, speedY: 0.17, alpha: 0.48, tint: 'soft-glow' },
+      { cx: 0.23, cy: 0.61, r: 0.17, phaseX: 3.7, phaseY: 5.2, speedX: 0.22, speedY: 0.19, alpha: 0.46, tint: 'glow' },
+      { cx: 0.50, cy: 0.50, r: 0.33, phaseX: 0.9, phaseY: 2.8, speedX: 0.10, speedY: 0.12, alpha: 0.42, tint: 'soft-glow' },
+      { cx: 0.34, cy: 0.31, r: 0.14, phaseX: 5.8, phaseY: 0.4, speedX: 0.25, speedY: 0.16, alpha: 0.36, tint: 'bright-glow' },
+      { cx: 0.66, cy: 0.31, r: 0.15, phaseX: 2.8, phaseY: 4.8, speedX: 0.21, speedY: 0.18, alpha: 0.38, tint: 'bright-glow' },
+      { cx: 0.32, cy: 0.73, r: 0.12, phaseX: 1.2, phaseY: 3.2, speedX: 0.20, speedY: 0.24, alpha: 0.32, tint: 'glow' },
+      { cx: 0.65, cy: 0.72, r: 0.13, phaseX: 4.7, phaseY: 2.2, speedX: 0.24, speedY: 0.22, alpha: 0.34, tint: 'soft-glow' },
     ];
 
     const stopCloudPuffs: CloudPuff[] = [
-      { cx: 0.28, cy: 0.49, r: 0.22, phaseX: 0.3, phaseY: 1.8, speedX: 0.20, speedY: 0.16, alpha: 0.62, tint: 'peach' },
-      { cx: 0.45, cy: 0.42, r: 0.25, phaseX: 2.0, phaseY: 0.9, speedX: 0.17, speedY: 0.18, alpha: 0.72, tint: 'cream' },
-      { cx: 0.62, cy: 0.50, r: 0.23, phaseX: 3.5, phaseY: 2.8, speedX: 0.18, speedY: 0.14, alpha: 0.64, tint: 'peach' },
-      { cx: 0.39, cy: 0.61, r: 0.20, phaseX: 4.7, phaseY: 1.4, speedX: 0.15, speedY: 0.21, alpha: 0.54, tint: 'amber' },
-      { cx: 0.58, cy: 0.62, r: 0.21, phaseX: 1.5, phaseY: 4.0, speedX: 0.19, speedY: 0.16, alpha: 0.56, tint: 'cream' },
-      { cx: 0.50, cy: 0.52, r: 0.31, phaseX: 0.8, phaseY: 3.1, speedX: 0.11, speedY: 0.12, alpha: 0.36, tint: 'peach' },
+      { cx: 0.28, cy: 0.49, r: 0.22, phaseX: 0.3, phaseY: 1.8, speedX: 0.20, speedY: 0.16, alpha: 0.62, tint: 'soft-glow' },
+      { cx: 0.45, cy: 0.42, r: 0.25, phaseX: 2.0, phaseY: 0.9, speedX: 0.17, speedY: 0.18, alpha: 0.72, tint: 'bright-glow' },
+      { cx: 0.62, cy: 0.50, r: 0.23, phaseX: 3.5, phaseY: 2.8, speedX: 0.18, speedY: 0.14, alpha: 0.64, tint: 'soft-glow' },
+      { cx: 0.39, cy: 0.61, r: 0.20, phaseX: 4.7, phaseY: 1.4, speedX: 0.15, speedY: 0.21, alpha: 0.54, tint: 'glow' },
+      { cx: 0.58, cy: 0.62, r: 0.21, phaseX: 1.5, phaseY: 4.0, speedX: 0.19, speedY: 0.16, alpha: 0.56, tint: 'bright-glow' },
+      { cx: 0.50, cy: 0.52, r: 0.31, phaseX: 0.8, phaseY: 3.1, speedX: 0.11, speedY: 0.12, alpha: 0.36, tint: 'soft-glow' },
     ];
 
     const getCloudColor = (tint: CloudPuff['tint']) => {
-      if (tint === 'cream') return { core: '255, 241, 232', mid: '235, 208, 188', edge: '208, 167, 139' };
-      if (tint === 'amber') return { core: '236, 189, 154', mid: '208, 167, 139', edge: '151, 104, 78' };
-      return { core: '248, 220, 202', mid: '208, 167, 139', edge: '171, 123, 96' };
+      if (tint === 'bright-glow') return { core: '242, 242, 242', mid: '214, 175, 147', edge: '214, 175, 147' };
+      if (tint === 'soft-glow') return { core: '214, 175, 147', mid: '214, 175, 147', edge: '214, 175, 147' };
+      return { core: '214, 175, 147', mid: '214, 175, 147', edge: '214, 175, 147' };
     };
 
     const drawClouds = (canvas: HTMLCanvasElement | null, avg: number, peak: number, size: number, puffs: CloudPuff[]) => {
@@ -1934,14 +1934,14 @@ export function BeatriceAgent({
           <button
             onClick={onToggle}
             aria-pressed={enabled}
-            className={`w-10 h-6 rounded-full transition-all duration-300 flex items-center shrink-0 cursor-pointer ${enabled ? 'bg-[#D6AF93]' : 'bg-white/[0.1]'}`}
+            className={`w-10 h-6 rounded-full transition-all duration-300 flex items-center shrink-0 cursor-pointer ${enabled ? 'bg-beatrice-live' : 'bg-white/[0.1]'}`}
           >
             <span className={`block w-4.5 h-4.5 rounded-full bg-white transition-all duration-300 shadow-md ${enabled ? 'ml-[18px]' : 'ml-[3px]'}`} />
           </button>
         ) : (
-          <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full ${enabled ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-white/[0.03] border border-white/[0.05]'}`}>
-            <div className={`w-1.5 h-1.5 rounded-full ${enabled ? 'bg-emerald-400' : 'bg-zinc-600'}`} />
-            <span className={`text-[10px] font-bold uppercase tracking-wider ${enabled ? 'text-emerald-400' : 'text-zinc-500'}`}>
+          <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full ${enabled ? 'bg-beatrice-live/10 border border-beatrice-live/20' : 'bg-white/[0.03] border border-white/[0.05]'}`}>
+            <div className={`w-1.5 h-1.5 rounded-full ${enabled ? 'bg-beatrice-live' : 'bg-beatrice-muted/55'}`} />
+            <span className={`text-[10px] font-bold uppercase tracking-wider ${enabled ? 'text-beatrice-live' : 'text-beatrice-muted'}`}>
               {enabled ? 'On' : 'Off'}
             </span>
           </div>
@@ -3882,20 +3882,20 @@ ${historyContext}
               animate={{
                 scale: isActive ? 1 + breathLevel * 0.15 : 1,
                 boxShadow: isActive
-                  ? `0 0 ${20 + breathLevel * 100}px rgba(208,167,139,${0.2 + breathLevel * 0.4})`
+              ? `0 0 ${20 + breathLevel * 100}px rgba(214,175,147,${0.2 + breathLevel * 0.4})`
                   : '0 0 0px rgba(0,0,0,0)',
               }}
               transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-              className="relative w-48 h-48 sm:w-64 sm:h-64 rounded-full bg-white/[0.02] border border-[#D6AF93]/10 overflow-hidden flex items-center justify-center transition-all duration-500 hover:border-[#D6AF93]/30 hover:shadow-[0_0_60px_rgba(208,167,139,0.2)] active:scale-[0.96]"
+              className="relative w-48 h-48 sm:w-64 sm:h-64 rounded-full bg-white/[0.02] border border-beatrice-glow/10 overflow-hidden flex items-center justify-center transition-all duration-500 hover:border-beatrice-glow/30 hover:shadow-[0_0_60px_rgba(214,175,147,0.2)] active:scale-[0.96]"
               aria-label="Toggle Voice Assistant"
             >
               <div className="absolute inset-0 bg-black/5 backdrop-blur-[16px] z-10 rounded-full pointer-events-none" />
 
               <div className="absolute inset-0 w-full h-full flex items-center justify-center transition-transform duration-100 ease-out z-0">
-                <div className="blob-1 absolute w-40 h-40 sm:w-56 sm:h-56 rounded-full bg-[radial-gradient(circle,rgba(208,167,139,0.65)_0%,transparent_70%)] blur-md" />
-                <div className="blob-2 absolute w-36 h-36 sm:w-52 sm:h-52 rounded-full bg-[radial-gradient(circle,rgba(171,123,96,0.45)_0%,transparent_70%)] blur-md" />
-                <div className="blob-3 absolute w-32 h-32 sm:w-48 sm:h-48 rounded-full bg-[radial-gradient(circle,rgba(235,208,188,0.55)_0%,transparent_70%)] blur-md" />
-                <div className="absolute w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-[#D6AF93]/15 blur-xl" />
+                <div className="blob-1 absolute w-40 h-40 sm:w-56 sm:h-56 rounded-full bg-[radial-gradient(circle,rgba(214,175,147,0.65)_0%,transparent_70%)] blur-md" />
+                <div className="blob-2 absolute w-36 h-36 sm:w-52 sm:h-52 rounded-full bg-[radial-gradient(circle,rgba(214,175,147,0.34)_0%,transparent_70%)] blur-md" />
+                <div className="blob-3 absolute w-32 h-32 sm:w-48 sm:h-48 rounded-full bg-[radial-gradient(circle,rgba(242,242,242,0.28)_0%,transparent_70%)] blur-md" />
+                <div className="absolute w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-beatrice-glow/15 blur-xl" />
               </div>
 
               <div className="absolute inset-0 z-20 rounded-full flex items-center justify-center overflow-hidden">
@@ -3906,7 +3906,7 @@ ${historyContext}
                   height={256}
                 />
                 {connecting ? (
-                  <Loader2 className="w-7 h-7 sm:w-9 sm:h-9 animate-spin text-[#D6AF93] z-10" />
+                  <Loader2 className="w-7 h-7 sm:w-9 sm:h-9 animate-spin text-beatrice-glow z-10" />
                 ) : isActive ? null : null}
               </div>
             </motion.button>
@@ -3921,8 +3921,8 @@ ${historyContext}
                   className="absolute z-[100] pointer-events-none"
                 >
                   <div className="task-loader-box animate-clear">
-                    <h2 className="text-2xl font-bold mb-4 text-[#2c3e50]">Task Generation</h2>
-                    <p className="text-[#555] font-medium leading-relaxed">
+                    <h2 className="text-2xl font-bold mb-4 text-beatrice-text">Task Generation</h2>
+                    <p className="text-beatrice-secondary font-medium leading-relaxed">
                       {tasks.find(t => t.status === 'processing')?.action.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || 'Processing...'}
                     </p>
                   </div>
@@ -4085,8 +4085,8 @@ ${historyContext}
                 opacity: 1,
                 y: 0,
                 scale: 1,
-                backgroundColor: task.status === 'processing' ? 'rgba(208, 167, 139, 0.1)' : 'rgba(16, 185, 129, 0.15)',
-                borderColor: task.status === 'processing' ? 'rgba(208, 167, 139, 0.2)' : 'rgba(16, 185, 129, 0.3)',
+                backgroundColor: task.status === 'processing' ? 'rgba(214, 175, 147, 0.1)' : 'rgba(8, 185, 148, 0.15)',
+                borderColor: task.status === 'processing' ? 'rgba(214, 175, 147, 0.2)' : 'rgba(8, 185, 148, 0.3)',
               }}
               exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
@@ -4097,17 +4097,17 @@ ${historyContext}
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: [1, 2], opacity: [0.3, 0] }}
                   transition={{ duration: 0.8, ease: "easeOut" }}
-                  className="absolute inset-0 bg-emerald-500/30 rounded-2xl pointer-events-none"
+                  className="absolute inset-0 bg-beatrice-live/30 rounded-2xl pointer-events-none"
                 />
               )}
 
               {task.status === 'processing' ? (
                 <div className="relative flex-shrink-0">
-                  <Loader2 className="w-4 h-4 text-[#D6AF93] animate-spin" />
+                  <Loader2 className="w-4 h-4 text-beatrice-glow animate-spin" />
                   <motion.div
                     animate={{ scale: [1, 1.8], opacity: [0.5, 0] }}
                     transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut" }}
-                    className="absolute inset-0 bg-[#D6AF93]/50 rounded-full blur-[2px]"
+                    className="absolute inset-0 bg-beatrice-glow/50 rounded-full blur-[2px]"
                   />
                 </div>
               ) : (
@@ -4115,25 +4115,25 @@ ${historyContext}
                   initial={{ scale: 0, rotate: -45 }}
                   animate={{ scale: 1, rotate: 0 }}
                   transition={{ type: "spring", stiffness: 500, damping: 15 }}
-                  className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0 shadow-[0_0_15px_rgba(16,185,129,0.4)] z-10"
+                  className="w-5 h-5 rounded-full bg-beatrice-live flex items-center justify-center flex-shrink-0 shadow-[0_0_15px_rgba(8,185,148,0.4)] z-10"
                 >
-                  <Check className="w-3.5 h-3.5 text-black" strokeWidth={4} />
+                  <Check className="w-3.5 h-3.5 text-beatrice-deep" strokeWidth={4} />
                 </motion.div>
               )}
 
               <div className="flex-1 truncate text-xs relative z-10">
                 <div className="flex items-center gap-1.5 overflow-hidden">
                   <motion.span
-                    animate={{ color: task.status === 'processing' ? '#D6AF93' : '#10b981' }}
+                    animate={{ color: task.status === 'processing' ? '#D6AF93' : '#08B994' }}
                     className="font-mono uppercase font-bold"
                   >
                     {task.serviceName}
                   </motion.span>
-                  <span className="text-gray-400 truncate">: {task.action}</span>
+                  <span className="text-beatrice-secondary truncate">: {task.action}</span>
                 </div>
                 <motion.span
                   animate={{ opacity: task.status === 'processing' ? 0.7 : 1 }}
-                  className="text-[10px] text-gray-500 block font-medium"
+                  className="text-[10px] text-beatrice-muted block font-medium"
                 >
                   {task.status === 'processing' ? 'Processing in background...' : 'Successfully completed'}
                 </motion.span>
@@ -4150,14 +4150,14 @@ ${historyContext}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-50 bg-black flex flex-col h-full w-full"
+            className="fixed inset-0 z-50 bg-beatrice-bg flex flex-col h-full w-full"
           >
-            <header className="sticky top-0 w-full bg-black/80 backdrop-blur-2xl border-b border-white/[0.04] px-4 py-3 flex items-center justify-between z-10 shrink-0">
+            <header className="sticky top-0 w-full bg-beatrice-surface/85 backdrop-blur-2xl border-b border-white/[0.04] px-4 py-3 flex items-center justify-between z-10 shrink-0">
               <div className="w-16" />
-              <h3 className="text-base font-['SF_Pro_Display',system-ui,sans-serif] font-semibold tracking-tight text-white">Agent Settings</h3>
+              <h3 className="text-base font-['SF_Pro_Display',system-ui,sans-serif] font-semibold tracking-tight text-beatrice-text">Agent Settings</h3>
               <button
                 onClick={() => setShowSettings(false)}
-                className="w-16 text-right text-sm font-['SF_Pro_Text',system-ui,sans-serif] font-semibold text-[#D6AF93] hover:text-white transition-colors active:scale-95"
+                className="w-16 text-right text-sm font-['SF_Pro_Text',system-ui,sans-serif] font-semibold text-beatrice-teal hover:text-beatrice-text transition-colors active:scale-95"
                 aria-label="Done"
               >
                 Done
@@ -4171,15 +4171,15 @@ ${historyContext}
                 <h2 className="text-[10px] font-semibold tracking-[0.15em] uppercase text-white/40 mb-3 px-1">Google Integration</h2>
                 <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl overflow-hidden p-5 flex flex-col gap-4">
                   <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-2 bg-black/35 px-3 py-1.5 rounded-full border border-white/[0.02]">
-                      <div className={`w-1.5 h-1.5 rounded-full ${isGoogleLinked(user) ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)] animate-pulse' : 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]'}`} />
-                      <span className={`text-[10px] font-bold uppercase tracking-wider ${isGoogleLinked(user) ? 'text-emerald-400' : 'text-amber-500'}`}>
+                    <div className="flex items-center gap-2 bg-beatrice-deep/45 px-3 py-1.5 rounded-full border border-white/[0.02]">
+                      <div className={`w-1.5 h-1.5 rounded-full ${isGoogleLinked(user) ? 'bg-beatrice-live shadow-[0_0_8px_rgba(8,185,148,0.6)] animate-pulse' : 'bg-beatrice-muted/70'}`} />
+                      <span className={`text-[10px] font-bold uppercase tracking-wider ${isGoogleLinked(user) ? 'text-beatrice-live' : 'text-beatrice-muted'}`}>
                         {isGoogleLinked(user) ? 'Authenticated' : 'Connection Required'}
                       </span>
                     </div>
                     <button
                       onClick={onLogin}
-                      className="px-4 py-2 bg-[#D6AF93] hover:brightness-110 active:scale-95 rounded-xl text-xs font-bold text-black transition-all duration-200 cursor-pointer"
+                      className="px-4 py-2 bg-beatrice-live hover:bg-beatrice-teal active:scale-95 rounded-xl text-xs font-bold text-beatrice-deep transition-all duration-200 cursor-pointer"
                     >
                       {googleToken ? 'Connected' : 'Connect Now'}
                     </button>
@@ -4206,7 +4206,7 @@ ${historyContext}
                       aria-pressed={ambientEnabled}
                       aria-label="Toggle Ambient Sound"
                       title="Toggle Ambient Sound"
-                      className={`w-10 h-6 rounded-full transition-all duration-300 flex items-center shrink-0 cursor-pointer ${ambientEnabled ? 'bg-[#D6AF93]' : 'bg-white/[0.1]'}`}
+                      className={`w-10 h-6 rounded-full transition-all duration-300 flex items-center shrink-0 cursor-pointer ${ambientEnabled ? 'bg-beatrice-live' : 'bg-white/[0.1]'}`}
                     >
                       <span className={`block w-4.5 h-4.5 rounded-full bg-white transition-all duration-300 shadow-md ${ambientEnabled ? 'ml-[18px]' : 'ml-[3px]'}`} />
                     </button>
@@ -4222,7 +4222,7 @@ ${historyContext}
                       value={ambientVolume}
                       onChange={(e) => setAmbientVolume(parseInt(e.target.value, 10))}
                       disabled={!ambientEnabled}
-                      className="w-full h-1.5 bg-white/[0.05] accent-[#D6AF93] rounded-lg appearance-none cursor-pointer disabled:opacity-30 transition-all duration-300"
+                      className="w-full h-1.5 bg-white/[0.05] accent-beatrice-live rounded-lg appearance-none cursor-pointer disabled:opacity-30 transition-all duration-300"
                       aria-label="Ambient Volume"
                       title="Ambient Volume"
                     />
@@ -4243,7 +4243,7 @@ ${historyContext}
                 <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl overflow-hidden">
                   {/* Google Services */}
                   <div className="p-4 border-b border-white/[0.03]">
-                    <span className="text-[10px] font-bold tracking-[0.15em] uppercase text-zinc-500">Google Services</span>
+                    <span className="text-[10px] font-bold tracking-[0.15em] uppercase text-beatrice-muted">Google Services</span>
                   </div>
                   {[
                     { key: 'gmail', label: 'Gmail', desc: 'Read and send emails', icon: Mail },
@@ -4257,7 +4257,7 @@ ${historyContext}
 
                   {/* WhatsApp Skills */}
                   <div className="p-4 border-b border-white/[0.03] border-t border-white/[0.06]">
-                    <span className="text-[10px] font-bold tracking-[0.15em] uppercase text-zinc-500">WhatsApp Skills</span>
+                    <span className="text-[10px] font-bold tracking-[0.15em] uppercase text-beatrice-muted">WhatsApp Skills</span>
                   </div>
                   {[
                     { key: 'send_messages', label: 'Send Messages', desc: 'Send texts on your behalf', icon: MessageCircle },
@@ -4279,10 +4279,10 @@ ${historyContext}
                 <button
                   onClick={() => saveSettings()}
                   disabled={isSaving}
-                  className="w-full p-4 bg-[#D6AF93] hover:brightness-110 active:scale-[0.98] disabled:opacity-50 rounded-2xl text-center transition-all duration-200 cursor-pointer shadow-[0_6px_24px_rgba(208,167,139,0.25)] hover:shadow-[0_8px_30px_rgba(208,167,139,0.4)] flex items-center justify-center gap-2"
+                  className="w-full p-4 bg-beatrice-live hover:bg-beatrice-teal active:scale-[0.98] disabled:opacity-50 rounded-2xl text-center transition-all duration-200 cursor-pointer shadow-[0_6px_24px_rgba(8,185,148,0.22)] hover:shadow-[0_8px_30px_rgba(8,185,148,0.32)] flex items-center justify-center gap-2"
                 >
-                  {isSaving ? <Loader2 className="w-5 h-5 animate-spin text-black" /> : <Save className="w-5 h-5 text-black" />}
-                  <span className="text-[15px] font-['SF_Pro_Text',system-ui,sans-serif] font-bold tracking-tight text-black">Save Settings</span>
+                  {isSaving ? <Loader2 className="w-5 h-5 animate-spin text-beatrice-deep" /> : <Save className="w-5 h-5 text-beatrice-deep" />}
+                  <span className="text-[15px] font-['SF_Pro_Text',system-ui,sans-serif] font-bold tracking-tight text-beatrice-deep">Save Settings</span>
                 </button>
               </section>
 

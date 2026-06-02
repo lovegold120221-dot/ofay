@@ -73,7 +73,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
            <div className="w-10 h-10 rounded-full bg-wa-bg-sidebar border border-white/10 flex items-center justify-center text-wa-text-primary overflow-hidden">
               {chat.name ? (
                  <img 
-                   src={`https://ui-avatars.com/api/?name=${encodeURIComponent(chat.name)}&background=111b21&color=e9edef`} 
+                   src={`https://ui-avatars.com/api/?name=${encodeURIComponent(chat.name)}&background=5630B6&color=F2F2F2`}
                    alt={chat.name}
                    className="w-full h-full object-cover"
                  />
@@ -132,7 +132,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
         className="flex-1 overflow-y-auto px-4 py-4 sm:px-[5%] lg:px-[10%] z-0 custom-scrollbar flex flex-col"
       >
         {/* E2EE Info Card */}
-        <div className="mx-auto mb-6 max-w-sm text-center p-3 bg-[#1d282f] rounded-lg border border-white/5 shadow-sm">
+        <div className="mx-auto mb-6 max-w-sm text-center p-3 bg-wa-bg-header rounded-lg border border-white/5 shadow-sm">
            <div className="flex items-center justify-center gap-2 text-wa-green/60 mb-1">
               <Lock size={10} />
               <span className="text-[10px] font-black uppercase tracking-[0.1em]">Encrypted</span>
@@ -175,7 +175,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
                   onClick={() => fileInputRef.current?.click()}
                   className="flex items-center gap-3 text-wa-text-primary hover:text-wa-green transition-colors"
                 >
-                  <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white">
+                  <div className="w-10 h-10 rounded-full bg-beatrice-avatar flex items-center justify-center text-beatrice-text">
                     <File size={20} />
                   </div>
                   <span className="text-sm font-medium">Document</span>
@@ -184,7 +184,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
                   onClick={() => fileInputRef.current?.click()}
                   className="flex items-center gap-3 text-wa-text-primary hover:text-wa-green transition-colors"
                 >
-                  <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white">
+                  <div className="w-10 h-10 rounded-full bg-wa-green flex items-center justify-center text-wa-bg-main">
                     <ImageIcon size={20} />
                   </div>
                   <span className="text-sm font-medium">Photos & Videos</span>
@@ -216,10 +216,10 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
             {isRecording ? (
               <div className="w-full bg-wa-bg-sidebar text-wa-green flex items-center justify-between px-4 py-2 rounded-lg">
                 <div className="flex items-center gap-3">
-                   <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                   <div className="w-2 h-2 rounded-full bg-beatrice-danger animate-pulse" />
                    <span className="text-sm font-bold uppercase tracking-widest">Recording...</span>
                 </div>
-                <button onClick={() => setIsRecording(false)} className="text-wa-text-secondary hover:text-red-400">
+                <button onClick={() => setIsRecording(false)} className="text-wa-text-secondary hover:text-beatrice-danger">
                    <X size={18} />
                 </button>
               </div>

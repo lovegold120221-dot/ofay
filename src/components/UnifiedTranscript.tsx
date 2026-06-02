@@ -15,7 +15,7 @@ function ThinkingDots() {
       {[0, 1, 2].map(i => (
         <motion.div
           key={i}
-          className="w-[5px] h-[5px] rounded-full bg-[#d0a78b]"
+          className="w-[5px] h-[5px] rounded-full bg-beatrice-live"
           animate={{
             opacity: [0.2, 0.9, 0.2],
             scale: [0.7, 1.2, 0.7],

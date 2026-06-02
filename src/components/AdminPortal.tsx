@@ -252,7 +252,7 @@ export function AdminPortal({ user, onBack, onLogout }: AdminPortalProps) {
               <ArrowLeft className="w-4 h-4" />
               Assistant
             </button>
-            <button onClick={onLogout} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-sm font-bold text-red-400 transition-all">
+            <button onClick={onLogout} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-beatrice-danger/10 hover:bg-beatrice-danger/20 border border-beatrice-danger/20 text-sm font-bold text-beatrice-danger transition-all">
               <LogOut className="w-4 h-4" />
               Sign out
             </button>
@@ -278,7 +278,7 @@ export function AdminPortal({ user, onBack, onLogout }: AdminPortalProps) {
           </header>
 
           {(error || notice) && (
-            <div className={`flex items-start gap-3 rounded-2xl border px-4 py-3 text-sm ${error ? 'border-red-500/30 bg-red-500/10 text-red-100' : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-100'}`}>
+            <div className={`flex items-start gap-3 rounded-2xl border px-4 py-3 text-sm ${error ? 'border-beatrice-danger/30 bg-beatrice-danger/10 text-beatrice-danger' : 'border-wa-green/30 bg-wa-green/10 text-wa-green'}`}>
               {error ? <X className="w-4 h-4 mt-0.5 shrink-0" /> : <Check className="w-4 h-4 mt-0.5 shrink-0" />}
               <span>{error || notice}</span>
             </div>
@@ -357,7 +357,7 @@ export function AdminPortal({ user, onBack, onLogout }: AdminPortalProps) {
                     </label>
                     <div className="md:col-span-2 rounded-xl bg-wa-bg-main border border-white/5 p-3">
                       <p className="text-[10px] uppercase tracking-widest text-wa-text-secondary mb-1 font-black">Webhook URL</p>
-                      <p className="text-xs text-zinc-400 break-all select-all">{webhookUrl}</p>
+                      <p className="text-xs text-wa-text-secondary break-all select-all">{webhookUrl}</p>
                     </div>
                   </div>
                 )}
@@ -370,7 +370,7 @@ export function AdminPortal({ user, onBack, onLogout }: AdminPortalProps) {
                   <h3 className="text-xl font-bold text-wa-text-primary">Session Pairing</h3>
                   <p className="text-xs text-wa-text-secondary">Connect Beatrice to your personal WhatsApp.</p>
                 </div>
-                <span className={`rounded-full px-3 py-1 text-[9px] font-black uppercase tracking-widest ${waStatus === 'paired' ? 'bg-wa-green/20 text-wa-green border border-wa-green/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'}`}>
+                <span className={`rounded-full px-3 py-1 text-[9px] font-black uppercase tracking-widest ${waStatus === 'paired' ? 'bg-wa-green/20 text-wa-green border border-wa-green/30' : 'bg-beatrice-muted/15 text-beatrice-muted border border-beatrice-muted/25'}`}>
                   {waStatus}
                 </span>
               </div>
@@ -378,7 +378,7 @@ export function AdminPortal({ user, onBack, onLogout }: AdminPortalProps) {
               {qrCode ? (
                 <div className="grid place-items-center rounded-2xl border border-white/5 bg-white p-4 shadow-2xl">
                   <img src={qrCode} alt="WhatsApp pairing QR" className="w-56 h-56 rounded-lg" />
-                  <p className="mt-4 text-[11px] text-zinc-500 text-center font-bold">Open WhatsApp &gt; Linked Devices &gt; Link a Device</p>
+                  <p className="mt-4 text-[11px] text-beatrice-muted text-center font-bold">Open WhatsApp &gt; Linked Devices &gt; Link a Device</p>
                 </div>
               ) : (
                 <div className="rounded-2xl border border-white/5 bg-wa-bg-main p-6 shadow-inner">
@@ -395,7 +395,7 @@ export function AdminPortal({ user, onBack, onLogout }: AdminPortalProps) {
                   {pairing ? <Loader2 className="w-4 h-4 animate-spin" /> : <QrCode className="w-4 h-4" />}
                   Pair Device
                 </button>
-                <button onClick={disconnect} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/5 border border-white/10 px-4 py-3.5 text-wa-text-secondary font-black uppercase tracking-widest text-xs hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-400 transition-all active:scale-95">
+                <button onClick={disconnect} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/5 border border-white/10 px-4 py-3.5 text-wa-text-secondary font-black uppercase tracking-widest text-xs hover:bg-beatrice-danger/10 hover:border-beatrice-danger/30 hover:text-beatrice-danger transition-all active:scale-95">
                   <Power className="w-4 h-4" />
                   Disconnect
                 </button>
@@ -432,7 +432,7 @@ export function AdminPortal({ user, onBack, onLogout }: AdminPortalProps) {
                 >
                   <div className="flex items-center justify-between gap-3">
                     <span className={`font-bold text-[14px] ${permissions[item.key] ? 'text-wa-green' : 'text-wa-text-primary group-hover:text-white'}`}>{item.label}</span>
-                    <div className={`h-5 w-9 rounded-full p-0.5 transition-colors ${permissions[item.key] ? 'bg-wa-green' : 'bg-zinc-700'}`}>
+                    <div className={`h-5 w-9 rounded-full p-0.5 transition-colors ${permissions[item.key] ? 'bg-wa-green' : 'bg-beatrice-muted/35'}`}>
                       <div className={`h-4 w-4 rounded-full bg-white transition-transform shadow-md ${permissions[item.key] ? 'translate-x-4' : ''}`} />
                     </div>
                   </div>
@@ -472,7 +472,7 @@ export function AdminPortal({ user, onBack, onLogout }: AdminPortalProps) {
                   <div key={`${message.chatId}:${message.id}`} className="rounded-2xl border border-white/5 bg-wa-bg-main/50 p-4 transition-all hover:bg-wa-bg-main">
                     <div className="flex items-center justify-between gap-3 mb-1.5">
                       <p className="text-[10px] font-black uppercase text-wa-text-secondary tracking-widest">{message.chatId}</p>
-                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-tighter ${message.fromMe ? 'bg-wa-green/10 text-wa-green' : 'bg-white/5 text-zinc-500'}`}>
+                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-tighter ${message.fromMe ? 'bg-wa-green/10 text-wa-green' : 'bg-white/5 text-beatrice-muted'}`}>
                         {message.fromMe ? 'sent' : 'received'}
                       </span>
                     </div>

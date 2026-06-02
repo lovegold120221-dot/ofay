@@ -64,20 +64,20 @@ export function InstallBanner() {
           exit={{ y: 100, opacity: 0 }}
           className="fixed bottom-6 left-6 right-6 z-[200] md:left-auto md:w-96"
         >
-          <div className="relative overflow-hidden rounded-2xl bg-[#121212]/90 backdrop-blur-xl border border-amber-500/20 shadow-2xl shadow-amber-900/20 p-5">
+          <div className="relative overflow-hidden rounded-2xl bg-beatrice-surface/90 backdrop-blur-xl border border-beatrice-glow/15 shadow-2xl shadow-beatrice-deep/60 p-5">
             {/* Background Glow */}
-            <div className="absolute -top-24 -left-24 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -top-24 -left-24 w-48 h-48 bg-beatrice-glow/10 rounded-full blur-3xl pointer-events-none" />
             
             <div className="relative flex items-center gap-4">
-              <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 p-0.5 shadow-lg shadow-amber-900/40">
-                <div className="w-full h-full rounded-[10px] bg-[#121212] flex items-center justify-center overflow-hidden">
+              <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-beatrice-glow/80 to-beatrice-glow/20 p-0.5 shadow-lg shadow-beatrice-glow/10">
+                <div className="w-full h-full rounded-[10px] bg-beatrice-deep flex items-center justify-center overflow-hidden">
                   <img src="/icon-eburon.svg" alt="Beatrice" className="w-8 h-8 object-contain" />
                 </div>
               </div>
               
               <div className="flex-grow">
-                <h3 className="text-white font-semibold text-sm">Install Beatrice</h3>
-                <p className="text-amber-500/60 text-xs mt-0.5 leading-relaxed">
+                <h3 className="text-beatrice-text font-semibold text-sm">Install Beatrice</h3>
+                <p className="text-beatrice-secondary text-xs mt-0.5 leading-relaxed">
                   Eburon AI Voice Intelligence
                 </p>
               </div>
@@ -93,14 +93,14 @@ export function InstallBanner() {
             <div className="mt-4 flex gap-3">
               <button
                 onClick={handleInstallClick}
-                className="flex-grow flex items-center justify-center gap-2 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs rounded-xl transition-all active:scale-95 shadow-lg shadow-amber-900/20"
+                className="flex-grow flex items-center justify-center gap-2 py-2.5 bg-beatrice-live hover:bg-beatrice-teal text-beatrice-deep font-bold text-xs rounded-xl transition-all active:scale-95 shadow-lg shadow-beatrice-live/20"
               >
                 <Download size={14} />
                 Install App
               </button>
               <button
                 onClick={() => setIsVisible(false)}
-                className="px-4 py-2.5 bg-white/5 hover:bg-white/10 text-white/60 text-xs font-medium rounded-xl transition-colors"
+                className="px-4 py-2.5 bg-white/5 hover:bg-white/10 text-beatrice-secondary text-xs font-medium rounded-xl transition-colors"
               >
                 Later
               </button>

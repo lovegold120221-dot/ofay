@@ -247,7 +247,7 @@ export function VideoPage({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-black flex flex-col h-[100dvh]"
+      className="fixed inset-0 z-50 bg-beatrice-deep flex flex-col h-[100dvh]"
       onClick={handleTap}
     >
       <canvas ref={canvasRef} className="hidden" />
@@ -270,12 +270,12 @@ export function VideoPage({
         <div className="flex items-center gap-2">
           {isRecording && (
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 backdrop-blur-2xl border border-white/10">
-              <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
-              <span className="text-[11px] text-white font-['SF_Pro_Text',system-ui,sans-serif] font-semibold tabular-nums tracking-wider">
+              <div className="w-2 h-2 rounded-full bg-beatrice-danger animate-pulse shadow-[0_0_8px_rgba(199,54,58,0.55)]" />
+              <span className="text-[11px] text-beatrice-text font-['SF_Pro_Text',system-ui,sans-serif] font-semibold tabular-nums tracking-wider">
                 {formatTime(elapsed)}
               </span>
               {isSharingScreen && (
-                <span className="text-[9px] text-orange-300 font-semibold uppercase tracking-wider ml-1">
+                <span className="text-[9px] text-beatrice-live font-semibold uppercase tracking-wider ml-1">
                   Share
                 </span>
               )}
@@ -286,7 +286,7 @@ export function VideoPage({
         <div className="w-9" />
       </header>
 
-      <div className="flex-1 flex items-center justify-center relative bg-black">
+      <div className="flex-1 flex items-center justify-center relative bg-beatrice-deep">
         {hasStream ? (
           <video
             ref={localVideoRef}
@@ -298,17 +298,17 @@ export function VideoPage({
         ) : (
           <div className="flex flex-col items-center gap-6 text-center px-8">
             <div className="w-20 h-20 rounded-full bg-white/5 backdrop-blur-2xl border border-white/10 flex items-center justify-center">
-              <Camera className="w-9 h-9 text-white/30" />
+              <Camera className="w-9 h-9 text-beatrice-muted/60" />
             </div>
             <div>
-              <p className="text-white/50 text-base font-['SF_Pro_Text',system-ui,sans-serif] font-medium mb-1 tracking-tight">Camera Off</p>
-              <p className="text-white/20 text-sm font-['SF_Pro_Text',system-ui,sans-serif]">Enable your camera or share your screen</p>
+              <p className="text-beatrice-secondary text-base font-['SF_Pro_Text',system-ui,sans-serif] font-medium mb-1 tracking-tight">Camera Off</p>
+              <p className="text-beatrice-muted/70 text-sm font-['SF_Pro_Text',system-ui,sans-serif]">Enable your camera or share your screen</p>
             </div>
           </div>
         )}
 
         <div
-          className={`absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/80 to-transparent pointer-events-none transition-opacity duration-300 ${
+          className={`absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-beatrice-deep/85 to-transparent pointer-events-none transition-opacity duration-300 ${
             showControls ? 'opacity-100' : 'opacity-0'
           }`}
         />
@@ -324,8 +324,8 @@ export function VideoPage({
           disabled={!isCameraActive || isSharingScreen}
           className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center transition-all duration-300 active:scale-90 ${
             !isCameraActive || isSharingScreen
-              ? 'bg-white/5 border border-white/5 text-white/20 opacity-50 cursor-not-allowed'
-              : 'bg-white/5 backdrop-blur-2xl border border-white/10 text-white/60 hover:bg-white/10 hover:text-white hover:border-white/20'
+              ? 'bg-white/5 border border-white/5 text-beatrice-muted/40 opacity-50 cursor-not-allowed'
+              : 'bg-beatrice-surface/70 backdrop-blur-2xl border border-white/10 text-beatrice-secondary hover:bg-beatrice-surface hover:text-beatrice-text hover:border-white/20'
           }`}
           title="Switch camera"
         >
@@ -337,10 +337,10 @@ export function VideoPage({
           disabled={isConnecting || isSharingScreen}
           className={`w-14 h-14 sm:w-[68px] sm:h-[68px] rounded-full flex items-center justify-center transition-all duration-300 active:scale-90 shadow-xl ${
             isSharingScreen
-              ? 'bg-white/5 border border-white/5 text-white/20 opacity-50 cursor-not-allowed'
+              ? 'bg-white/5 border border-white/5 text-beatrice-muted/40 opacity-50 cursor-not-allowed'
               : isCameraActive
-                ? 'bg-red-500/20 border-2 border-red-500/40 text-red-500 hover:bg-red-500/30'
-                : 'bg-white/10 backdrop-blur-2xl border border-white/15 text-white/80 hover:bg-white/15 hover:text-white'
+                ? 'bg-beatrice-danger/20 border-2 border-beatrice-danger/40 text-beatrice-danger hover:bg-beatrice-danger/30'
+                : 'bg-beatrice-live/15 backdrop-blur-2xl border border-beatrice-live/25 text-beatrice-text hover:bg-beatrice-live/25'
           }`}
           title={isCameraActive ? 'Stop recording' : 'Start camera'}
         >
@@ -355,8 +355,8 @@ export function VideoPage({
           onClick={toggleScreenShare}
           className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center transition-all duration-300 active:scale-90 ${
             isSharingScreen
-              ? 'bg-[#d0a78b]/20 border-2 border-[#d0a78b]/40 text-[#d0a78b] hover:bg-[#d0a78b]/30'
-              : 'bg-white/5 backdrop-blur-2xl border border-white/10 text-white/60 hover:bg-white/10 hover:text-white hover:border-white/20'
+              ? 'bg-beatrice-live/20 border-2 border-beatrice-live/40 text-beatrice-live hover:bg-beatrice-live/30'
+              : 'bg-beatrice-surface/70 backdrop-blur-2xl border border-white/10 text-beatrice-secondary hover:bg-beatrice-surface hover:text-beatrice-text hover:border-white/20'
           }`}
           title={isSharingScreen ? 'Stop sharing' : canScreenShare ? 'Share screen' : 'Share via camera'}
         >

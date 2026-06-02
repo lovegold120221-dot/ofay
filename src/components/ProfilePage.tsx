@@ -403,15 +403,15 @@ export function ProfilePage({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="fixed inset-0 z-50 bg-[#050505] flex flex-col h-full w-full"
+      className="fixed inset-0 z-50 bg-beatrice-bg flex flex-col h-full w-full"
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(208,167,139,0.04),transparent_70%)] pointer-events-none" />
-      <header className="sticky top-0 w-full bg-[#050505]/95 backdrop-blur-md border-b border-zinc-800/60 px-4 py-3 flex items-center justify-between z-10 shrink-0">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(214,175,147,0.04),transparent_70%)] pointer-events-none" />
+      <header className="sticky top-0 w-full bg-beatrice-surface/90 backdrop-blur-md border-b border-white/[0.06] px-4 py-3 flex items-center justify-between z-10 shrink-0">
         <div className="w-16" />
-        <h1 className="text-base font-semibold tracking-wide text-white">Profile</h1>
+        <h1 className="text-base font-semibold tracking-wide text-beatrice-text">Profile</h1>
         <button
           onClick={onClose}
-          className="w-16 text-right text-sm font-semibold text-[#d0a78b] hover:text-white transition-colors"
+          className="w-16 text-right text-sm font-semibold text-beatrice-teal hover:text-beatrice-text transition-colors"
           aria-label="Done"
         >
           Done
@@ -430,7 +430,7 @@ export function ProfilePage({
               className="overflow-hidden"
             >
               <div className={`px-4 py-3 rounded-2xl flex items-center gap-2 text-sm backdrop-blur-2xl ${
-                error ? 'bg-red-500/10 border border-red-500/20 text-red-400' : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
+                error ? 'bg-beatrice-danger/10 border border-beatrice-danger/20 text-beatrice-danger' : 'bg-beatrice-live/10 border border-beatrice-live/20 text-beatrice-live'
               }`}>
                 {error ? <AlertCircle className="w-4 h-4 shrink-0" /> : <Check className="w-4 h-4 shrink-0" />}
                 <span>{error || success}</span>
@@ -441,15 +441,15 @@ export function ProfilePage({
 
         {/* Account Section */}
         <section>
-          <h2 className="text-[13px] uppercase tracking-wide text-zinc-500 font-medium px-4 mb-2">Account</h2>
-            <div className="bg-zinc-900/40 border border-zinc-800/80 rounded-[20px] overflow-hidden">
+          <h2 className="text-[13px] uppercase tracking-wide text-beatrice-muted font-medium px-4 mb-2">Account</h2>
+            <div className="bg-beatrice-surface/35 border border-white/[0.06] rounded-[20px] overflow-hidden">
               <div className="p-4 flex items-center gap-4">
               <div className="relative group shrink-0">
-                <div className="w-[72px] h-[72px] rounded-full bg-zinc-800 overflow-hidden border border-white/10">
+                <div className="w-[72px] h-[72px] rounded-full bg-beatrice-avatar overflow-hidden border border-white/10">
                   {avatarUrl ? (
                     <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-zinc-500">
+                    <div className="w-full h-full flex items-center justify-center text-beatrice-secondary">
                       <User className="w-8 h-8" />
                     </div>
                   )}
@@ -457,12 +457,12 @@ export function ProfilePage({
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploadingAvatar}
-                  className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center transition-opacity"
+                  className="absolute inset-0 rounded-full bg-beatrice-deep/50 flex items-center justify-center transition-opacity"
                 >
                   {uploadingAvatar ? (
-                    <Loader2 className="w-5 h-5 animate-spin text-white" />
+                    <Loader2 className="w-5 h-5 animate-spin text-beatrice-text" />
                   ) : (
-                    <Upload className="w-5 h-5 text-white/80 drop-shadow-md" />
+                    <Upload className="w-5 h-5 text-beatrice-text/85 drop-shadow-md" />
                   )}
                 </button>
                 <input
@@ -481,12 +481,12 @@ export function ProfilePage({
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   placeholder="Your Name"
-                  className="w-full bg-transparent text-[17px] text-white font-medium focus:outline-none truncate"
+                  className="w-full bg-transparent text-[17px] text-beatrice-text font-medium focus:outline-none truncate"
                 />
-                <p className="text-[15px] text-zinc-400 truncate mt-0.5">{user.email}</p>
+                <p className="text-[15px] text-beatrice-secondary truncate mt-0.5">{user.email}</p>
                 <div className="flex items-center gap-1.5 mt-2">
-                  <div className={`w-2 h-2 rounded-full ${isGoogleConnected ? 'bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]' : 'bg-zinc-600'}`} />
-                  <span className={`text-[11px] uppercase tracking-wider font-semibold ${isGoogleConnected ? 'text-emerald-500' : 'text-zinc-500'}`}>
+                  <div className={`w-2 h-2 rounded-full ${isGoogleConnected ? 'bg-beatrice-live shadow-[0_0_6px_rgba(8,185,148,0.5)]' : 'bg-beatrice-muted/60'}`} />
+                  <span className={`text-[11px] uppercase tracking-wider font-semibold ${isGoogleConnected ? 'text-beatrice-live' : 'text-beatrice-muted'}`}>
                     {isGoogleConnected ? 'Google Connected' : 'Google Disconnected'}
                   </span>
                 </div>
@@ -497,21 +497,21 @@ export function ProfilePage({
 
         {/* Appearance Section */}
         <section>
-          <h2 className="text-[13px] uppercase tracking-wide text-zinc-500 font-medium px-4 mb-2">Appearance</h2>
-          <div className="bg-zinc-900/40 border border-zinc-800/80 rounded-[20px] overflow-hidden divide-y divide-zinc-800/40">
+          <h2 className="text-[13px] uppercase tracking-wide text-beatrice-muted font-medium px-4 mb-2">Appearance</h2>
+          <div className="bg-beatrice-surface/35 border border-white/[0.06] rounded-[20px] overflow-hidden divide-y divide-white/[0.06]">
             <div className="p-4 flex items-center justify-between">
-              <label htmlFor="theme-select" className="text-[15px] text-white">Theme</label>
+              <label htmlFor="theme-select" className="text-[15px] text-beatrice-text">Theme</label>
               <select
                 id="theme-select"
                 value={themePreference}
                 onChange={(e) => onSetThemePreference(e.target.value as 'system' | 'light' | 'dark')}
-                className="bg-transparent text-[15px] text-zinc-400 outline-none text-right cursor-pointer"
+                className="bg-transparent text-[15px] text-beatrice-secondary outline-none text-right cursor-pointer"
                 aria-label="Select Theme"
                 title="Select Theme"
               >
-                <option value="system" className="bg-zinc-900 text-white">System (Default)</option>
-                <option value="light" className="bg-zinc-900 text-white">Light</option>
-                <option value="dark" className="bg-zinc-900 text-white">Dark</option>
+                <option value="system" className="bg-beatrice-surface text-beatrice-text">System (Default)</option>
+                <option value="light" className="bg-beatrice-surface text-beatrice-text">Light</option>
+                <option value="dark" className="bg-beatrice-surface text-beatrice-text">Dark</option>
               </select>
             </div>
           </div>
@@ -520,20 +520,20 @@ export function ProfilePage({
         {/* Knowledge Base Section */}
         <section>
           <div className="px-4 mb-2 flex items-baseline justify-between">
-            <h2 className="text-[13px] uppercase tracking-wide text-zinc-500 font-medium">Knowledge Base</h2>
+            <h2 className="text-[13px] uppercase tracking-wide text-beatrice-muted font-medium">Knowledge Base</h2>
           </div>
-          <div className="bg-zinc-900/40 border border-zinc-800/80 rounded-[20px] overflow-hidden">
+          <div className="bg-beatrice-surface/35 border border-white/[0.06] rounded-[20px] overflow-hidden">
             <div 
               onClick={() => !uploadingFile && knowledgeInputRef.current?.click()}
-              className="p-4 border-b border-zinc-800/40 flex items-center justify-between cursor-pointer active:bg-white/5 transition-colors"
+              className="p-4 border-b border-white/[0.06] flex items-center justify-between cursor-pointer active:bg-white/5 transition-colors"
             >
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center shrink-0">
-                  {uploadingFile ? <Loader2 className="w-4 h-4 text-[#d0a78b] animate-spin" /> : <Upload className="w-4 h-4 text-[#d0a78b]" />}
+                  {uploadingFile ? <Loader2 className="w-4 h-4 text-beatrice-live animate-spin" /> : <Upload className="w-4 h-4 text-beatrice-live" />}
                 </div>
                 <div>
-                  <p className="text-[15px] text-white">Upload File</p>
-                  <p className="text-[13px] text-zinc-500">txt, pdf, doc, csv, md (Max 10MB)</p>
+                  <p className="text-[15px] text-beatrice-text">Upload File</p>
+                  <p className="text-[13px] text-beatrice-muted">txt, pdf, doc, csv, md (Max 10MB)</p>
                 </div>
               </div>
             </div>
@@ -548,18 +548,18 @@ export function ProfilePage({
             />
             
             {knowledgeFiles.map((f, i) => (
-              <div key={f.id} className={`p-4 flex items-center justify-between ${i !== knowledgeFiles.length - 1 ? 'border-b border-zinc-800/40' : ''}`}>
+              <div key={f.id} className={`p-4 flex items-center justify-between ${i !== knowledgeFiles.length - 1 ? 'border-b border-white/[0.06]' : ''}`}>
                 <div className="flex items-center gap-3 min-w-0 flex-1 pr-4">
-                  <FileText className="w-5 h-5 text-zinc-400 shrink-0" />
+                  <FileText className="w-5 h-5 text-beatrice-secondary shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-[15px] text-white truncate">{f.name}</p>
-                    <p className="text-[13px] text-zinc-500">{formatSize(f.size)}</p>
+                    <p className="text-[15px] text-beatrice-text truncate">{f.name}</p>
+                    <p className="text-[13px] text-beatrice-muted">{formatSize(f.size)}</p>
                   </div>
                 </div>
                 <button
                   onClick={() => handleDeleteFile(f.id)}
                   disabled={deletingFile === f.id}
-                  className="p-2 rounded-full active:bg-white/5 text-zinc-500 hover:text-red-400 transition-colors"
+                  className="p-2 rounded-full active:bg-white/5 text-beatrice-muted hover:text-beatrice-danger transition-colors"
                 >
                   {deletingFile === f.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                 </button>
@@ -567,7 +567,7 @@ export function ProfilePage({
             ))}
             {knowledgeFiles.length === 0 && (
               <div className="p-4">
-                <p className="text-[15px] text-zinc-500 text-center">No files uploaded yet.</p>
+                <p className="text-[15px] text-beatrice-muted text-center">No files uploaded yet.</p>
               </div>
             )}
           </div>
@@ -576,38 +576,38 @@ export function ProfilePage({
         {/* Domains Section */}
         <section>
           <div className="px-4 mb-2 flex items-baseline justify-between">
-            <h2 className="text-[13px] uppercase tracking-wide text-zinc-500 font-medium">URL Domains</h2>
+            <h2 className="text-[13px] uppercase tracking-wide text-beatrice-muted font-medium">URL Domains</h2>
           </div>
-          <div className="bg-zinc-900/40 border border-zinc-800/80 rounded-[20px] overflow-hidden">
-            <div className="p-4 border-b border-zinc-800/40 flex gap-2 items-center">
+          <div className="bg-beatrice-surface/35 border border-white/[0.06] rounded-[20px] overflow-hidden">
+            <div className="p-4 border-b border-white/[0.06] flex gap-2 items-center">
               <input
                 type="text"
                 value={domainInput}
                 onChange={e => setDomainInput(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addDomain(); } }}
                 placeholder="Add website URL (e.g. docs.stripe.com)"
-                className="flex-1 bg-transparent text-[15px] text-white focus:outline-none placeholder-zinc-500"
+                className="flex-1 bg-transparent text-[15px] text-beatrice-text focus:outline-none placeholder-beatrice-muted"
               />
               <button
                 onClick={addDomain}
                 disabled={!domainInput.trim()}
-                className="px-3 py-1 bg-white/10 rounded-full text-[13px] font-semibold text-white disabled:opacity-30 active:bg-white/20"
+                className="px-3 py-1 bg-beatrice-live/15 rounded-full text-[13px] font-semibold text-beatrice-live disabled:opacity-30 active:bg-beatrice-live/25"
               >
                 Add
               </button>
             </div>
             
             {domains.map((d, i) => (
-              <div key={d} className={`p-4 flex items-center justify-between ${i !== domains.length - 1 ? 'border-b border-zinc-800/40' : ''}`}>
+              <div key={d} className={`p-4 flex items-center justify-between ${i !== domains.length - 1 ? 'border-b border-white/[0.06]' : ''}`}>
                 <div className="flex items-center gap-3 truncate">
-                  <Globe className="w-5 h-5 text-zinc-400 shrink-0" />
-                  <p className="text-[15px] text-white truncate">{d}</p>
+                  <Globe className="w-5 h-5 text-beatrice-secondary shrink-0" />
+                  <p className="text-[15px] text-beatrice-text truncate">{d}</p>
                 </div>
                 <button
                   onClick={() => removeDomain(d)}
                   aria-label={`Remove domain ${d}`}
                   title={`Remove domain ${d}`}
-                  className="p-1 active:bg-white/5 text-zinc-500 hover:text-red-400 transition-colors rounded-full shrink-0 ml-2"
+                  className="p-1 active:bg-white/5 text-beatrice-muted hover:text-beatrice-danger transition-colors rounded-full shrink-0 ml-2"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -615,7 +615,7 @@ export function ProfilePage({
             ))}
             {domains.length === 0 && (
               <div className="p-4">
-                <p className="text-[15px] text-zinc-500 text-center">No domains added yet.</p>
+                <p className="text-[15px] text-beatrice-muted text-center">No domains added yet.</p>
               </div>
             )}
           </div>
@@ -625,42 +625,42 @@ export function ProfilePage({
             disabled={savingDomains}
             className="w-full mt-3 p-4 bg-white/[0.03] backdrop-blur-2xl border border-white/[0.06] rounded-[20px] text-center active:bg-white/[0.06] transition-all flex items-center justify-center gap-2"
           >
-            {savingDomains ? <Loader2 className="w-5 h-5 animate-spin text-[#d0a78b]" /> : <Check className="w-5 h-5 text-[#d0a78b]" />}
-            <span className="text-[15px] font-['SF_Pro_Text',system-ui,sans-serif] font-semibold text-[#d0a78b]">Save Domains to Cloud</span>
+            {savingDomains ? <Loader2 className="w-5 h-5 animate-spin text-beatrice-live" /> : <Check className="w-5 h-5 text-beatrice-live" />}
+            <span className="text-[15px] font-['SF_Pro_Text',system-ui,sans-serif] font-semibold text-beatrice-live">Save Domains to Cloud</span>
           </button>
         </section>
 
         {/* Workspace Section */}
         <section>
           <div className="px-4 mb-2 flex items-baseline justify-between">
-            <h2 className="text-[13px] uppercase tracking-wide text-zinc-500 font-medium">Workspace</h2>
-            <span className="text-[11px] text-zinc-600">auto-saved locally · synced to Drive</span>
+            <h2 className="text-[13px] uppercase tracking-wide text-beatrice-muted font-medium">Workspace</h2>
+            <span className="text-[11px] text-beatrice-muted/70">auto-saved locally · synced to Drive</span>
           </div>
-          <div className="bg-zinc-900/40 border border-zinc-800/80 rounded-[20px] overflow-hidden">
+          <div className="bg-beatrice-surface/35 border border-white/[0.06] rounded-[20px] overflow-hidden">
             {loadingWorkspace ? (
               <div className="p-8 flex items-center justify-center">
-                <Loader2 className="w-5 h-5 animate-spin text-zinc-500" />
+                <Loader2 className="w-5 h-5 animate-spin text-beatrice-muted" />
               </div>
             ) : workspaceOutputs.length === 0 ? (
               <div className="p-6 text-center">
-                <Folder className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
-                <p className="text-[15px] text-zinc-500">No outputs yet.</p>
-                <p className="text-[13px] text-zinc-600 mt-1">Documents, images, and captures from Beatrice will appear here.</p>
+                <Folder className="w-8 h-8 text-beatrice-muted/70 mx-auto mb-2" />
+                <p className="text-[15px] text-beatrice-muted">No outputs yet.</p>
+                <p className="text-[13px] text-beatrice-muted/70 mt-1">Documents, images, and captures from Beatrice will appear here.</p>
               </div>
             ) : (
               workspaceOutputs.map((w, i) => (
-                <div key={w.id} className={`p-4 flex items-center justify-between ${i !== workspaceOutputs.length - 1 ? 'border-b border-zinc-800/40' : ''}`}>
+                <div key={w.id} className={`p-4 flex items-center justify-between ${i !== workspaceOutputs.length - 1 ? 'border-b border-white/[0.06]' : ''}`}>
                   <div className="flex items-center gap-3 min-w-0 flex-1 pr-4">
                     <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
                       {w.type === 'image' || w.type === 'screenshot' || w.type === 'capture' ? (
-                        <Image className="w-4 h-4 text-zinc-400" />
+                        <Image className="w-4 h-4 text-beatrice-secondary" />
                       ) : (
-                        <FileText className="w-4 h-4 text-zinc-400" />
+                        <FileText className="w-4 h-4 text-beatrice-secondary" />
                       )}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[15px] text-white truncate">{w.title}</p>
-                      <p className="text-[11px] text-zinc-500 flex items-center gap-2 mt-0.5">
+                      <p className="text-[15px] text-beatrice-text truncate">{w.title}</p>
+                      <p className="text-[11px] text-beatrice-muted flex items-center gap-2 mt-0.5">
                         <span className="capitalize">{w.type}</span>
                         <span>&middot;</span>
                         <span>{w.fileSize < 1024 ? `${w.fileSize} B` : w.fileSize < 1048576 ? `${(w.fileSize / 1024).toFixed(1)} KB` : `${(w.fileSize / 1048576).toFixed(1)} MB`}</span>
@@ -672,7 +672,7 @@ export function ProfilePage({
                           href={w.driveLink}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-[11px] text-[#d0a78b] hover:underline inline-flex items-center gap-1 mt-0.5"
+                          className="text-[11px] text-beatrice-teal hover:underline inline-flex items-center gap-1 mt-0.5"
                           onClick={e => e.stopPropagation()}
                         >
                           <ExternalLink className="w-3 h-3" />
@@ -690,7 +690,7 @@ export function ProfilePage({
                           window.open(url, '_blank');
                           setTimeout(() => URL.revokeObjectURL(url), 60000);
                         }}
-                        className="p-2 rounded-full active:bg-white/5 text-zinc-500 hover:text-[#d0a78b] transition-colors"
+                        className="p-2 rounded-full active:bg-white/5 text-beatrice-muted hover:text-beatrice-teal transition-colors"
                         aria-label="Preview"
                         title="Preview"
                       >
@@ -700,7 +700,7 @@ export function ProfilePage({
                     <button
                       onClick={() => handleWorkspaceDelete(w.id)}
                       disabled={deletingWorkspaceId === w.id}
-                      className="p-2 rounded-full active:bg-white/5 text-zinc-500 hover:text-red-400 transition-colors"
+                      className="p-2 rounded-full active:bg-white/5 text-beatrice-muted hover:text-beatrice-danger transition-colors"
                       aria-label="Delete"
                       title="Delete"
                     >
@@ -712,7 +712,7 @@ export function ProfilePage({
             )}
           </div>
           {workspaceOutputs.length > 0 && (
-            <p className="text-[11px] text-zinc-600 px-4 mt-2">
+            <p className="text-[11px] text-beatrice-muted/70 px-4 mt-2">
               {workspaceOutputs.filter(w => w.driveLink).length}/{workspaceOutputs.length} synced to Google Drive
             </p>
           )}
@@ -720,39 +720,39 @@ export function ProfilePage({
 
         {/* Persona Settings */}
         <section>
-          <h2 className="text-[13px] uppercase tracking-wide text-zinc-500 font-medium px-4 mb-2">Persona Configuration</h2>
-          <div className="bg-zinc-900/40 border border-zinc-800/80 rounded-[20px] overflow-hidden divide-y divide-zinc-800/40">
+          <h2 className="text-[13px] uppercase tracking-wide text-beatrice-muted font-medium px-4 mb-2">Persona Configuration</h2>
+          <div className="bg-beatrice-surface/35 border border-white/[0.06] rounded-[20px] overflow-hidden divide-y divide-white/[0.06]">
             <div className="p-4 flex flex-col gap-1">
-              <label className="text-[13px] text-zinc-500">Persona Name</label>
+              <label className="text-[13px] text-beatrice-muted">Persona Name</label>
               <input
                 type="text"
                 value={personaName}
                 onChange={(e) => setPersonaName(e.target.value)}
                 placeholder="e.g. Beatrice"
-                className="bg-transparent text-[15px] text-white focus:outline-none"
+                className="bg-transparent text-[15px] text-beatrice-text focus:outline-none"
               />
             </div>
             <div className="p-4 flex flex-col gap-1">
-              <label className="text-[13px] text-zinc-500">System Prompt Context</label>
+              <label className="text-[13px] text-beatrice-muted">System Prompt Context</label>
               <textarea
                 value={customPrompt}
                 onChange={(e) => setCustomPrompt(e.target.value)}
                 placeholder="Enter character traits or specific rules..."
-                className="bg-transparent text-[15px] text-white focus:outline-none h-24 resize-none leading-relaxed"
+                className="bg-transparent text-[15px] text-beatrice-text focus:outline-none h-24 resize-none leading-relaxed"
               />
             </div>
             <div className="p-4 flex flex-col gap-1">
-              <label className="text-[13px] text-zinc-500">What Should Beatrice Call You?</label>
+              <label className="text-[13px] text-beatrice-muted">What Should Beatrice Call You?</label>
               <input
                 type="text"
                 value={userTitle}
                 onChange={(e) => setUserTitle(e.target.value)}
                 placeholder="e.g. Boss"
-                className="bg-transparent text-[15px] text-white focus:outline-none"
+                className="bg-transparent text-[15px] text-beatrice-text focus:outline-none"
               />
             </div>
             <div className="p-4 flex flex-col gap-1">
-              <label htmlFor="context-size-slider" className="text-[13px] text-zinc-500">Conversation Context (Messages)</label>
+              <label htmlFor="context-size-slider" className="text-[13px] text-beatrice-muted">Conversation Context (Messages)</label>
               <div className="flex items-center gap-4 mt-2">
                 <input
                   id="context-size-slider"
@@ -762,11 +762,11 @@ export function ProfilePage({
                   step="1"
                   value={contextSize}
                   onChange={(e) => setContextSize(parseInt(e.target.value))}
-                  className="w-full accent-amber-500 h-1.5 bg-white/5 rounded-lg appearance-none cursor-pointer"
+                  className="w-full accent-beatrice-live h-1.5 bg-white/5 rounded-lg appearance-none cursor-pointer"
                   aria-label="Conversation Context (Messages)"
                   title="Conversation Context (Messages)"
                 />
-                <span className="text-[13px] text-zinc-500 shrink-0 w-6 text-right">{contextSize}</span>
+                <span className="text-[13px] text-beatrice-muted shrink-0 w-6 text-right">{contextSize}</span>
               </div>
             </div>
           </div>
@@ -774,31 +774,31 @@ export function ProfilePage({
 
         {/* Language & Voice */}
         <section>
-          <h2 className="text-[13px] uppercase tracking-wide text-zinc-500 font-medium px-4 mb-2">Speech & Language</h2>
-          <div className="bg-zinc-900/40 border border-zinc-800/80 rounded-[20px] overflow-hidden divide-y divide-zinc-800/40">
+          <h2 className="text-[13px] uppercase tracking-wide text-beatrice-muted font-medium px-4 mb-2">Speech & Language</h2>
+          <div className="bg-beatrice-surface/35 border border-white/[0.06] rounded-[20px] overflow-hidden divide-y divide-white/[0.06]">
             <div className="p-4 flex items-center justify-between">
-              <label htmlFor="language-select" className="text-[15px] text-white">Language</label>
+              <label htmlFor="language-select" className="text-[15px] text-beatrice-text">Language</label>
               <select
                 id="language-select"
                 value={authLanguage}
                 onChange={(e) => { onSetLanguage(e.target.value); try { localStorage.setItem('beatrice_language', e.target.value); } catch {} }}
-                className="bg-transparent text-[15px] text-zinc-400 outline-none text-right cursor-pointer"
+                className="bg-transparent text-[15px] text-beatrice-secondary outline-none text-right cursor-pointer"
                 aria-label="Select Language"
                 title="Select Language"
               >
                 {LANGUAGES.map(l => (
-                  <option key={l.code} value={l.code} className="bg-zinc-900 text-white">{l.label}</option>
+                  <option key={l.code} value={l.code} className="bg-beatrice-surface text-beatrice-text">{l.label}</option>
                 ))}
               </select>
             </div>
             <div className="p-4 flex flex-col gap-3">
-              <span className="text-[15px] text-white mb-1">Agent Voice</span>
+              <span className="text-[15px] text-beatrice-text mb-1">Agent Voice</span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {VOICE_ALIASES.map(v => (
                   <button
                     key={v.id}
                     onClick={() => setSelectedVoice(v.id)}
-                    className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all ${selectedVoice === v.id ? 'bg-amber-500/10 text-amber-500 font-medium' : 'bg-white/5 text-zinc-400'}`}
+                    className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all ${selectedVoice === v.id ? 'bg-beatrice-live/10 text-beatrice-live font-medium border border-beatrice-live/20' : 'bg-white/5 text-beatrice-secondary border border-transparent'}`}
                   >
                     <span>{v.name}</span>
                     {selectedVoice === v.id && <Check className="w-4 h-4" />}
@@ -822,10 +822,10 @@ export function ProfilePage({
               }
             })}
             disabled={isSaving}
-            className="w-full p-4 bg-[#d0a78b] rounded-[20px] text-center active:brightness-90 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-[#d0a78b]/20"
+            className="w-full p-4 bg-beatrice-live rounded-[20px] text-center active:brightness-90 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-beatrice-live/20"
           >
-            {isSaving ? <Loader2 className="w-5 h-5 animate-spin text-black" /> : <Save className="w-5 h-5 text-black" />}
-            <span className="text-[15px] font-['SF_Pro_Text',system-ui,sans-serif] font-bold text-black">Save Settings</span>
+            {isSaving ? <Loader2 className="w-5 h-5 animate-spin text-beatrice-deep" /> : <Save className="w-5 h-5 text-beatrice-deep" />}
+            <span className="text-[15px] font-['SF_Pro_Text',system-ui,sans-serif] font-bold text-beatrice-deep">Save Settings</span>
           </button>
         </section>
 
@@ -835,7 +835,7 @@ export function ProfilePage({
             onClick={() => { signOut(auth); onClose(); }}
             className="w-full p-4 bg-white/[0.03] backdrop-blur-2xl border border-white/[0.06] rounded-[20px] text-center active:bg-white/[0.06] transition-all"
           >
-            <span className="text-[15px] font-['SF_Pro_Text',system-ui,sans-serif] font-semibold text-red-400">Sign Out</span>
+            <span className="text-[15px] font-['SF_Pro_Text',system-ui,sans-serif] font-semibold text-beatrice-danger">Sign Out</span>
           </button>
         </section>
 

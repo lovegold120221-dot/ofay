@@ -52,7 +52,7 @@ export const ChatList: React.FC<ChatListProps> = ({ chats, selectedChatId, onSel
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-wa-bg-header border border-white/10 text-lg font-medium text-wa-text-primary overflow-hidden">
             {chat.name ? (
                <img 
-                 src={`https://ui-avatars.com/api/?name=${encodeURIComponent(chat.name)}&background=202c33&color=e9edef`} 
+                 src={`https://ui-avatars.com/api/?name=${encodeURIComponent(chat.name)}&background=5630B6&color=F2F2F2`}
                  alt={chat.name}
                  className="w-full h-full object-cover"
                />

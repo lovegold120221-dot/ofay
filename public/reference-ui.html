@@ -62,7 +62,7 @@
             animation: cloud-drift-3 10s ease-in-out infinite;
         }
 
-        /* Pulsing ambient glow for the peach orb */
+        /* Pulsing ambient glow for the warm orb */
         @keyframes orb-pulse {
 
             0%,
@@ -84,20 +84,20 @@
 </head>
 
 <body
-    class="bg-[#161312] text-zinc-100 font-sans min-h-screen max-h-screen flex flex-col justify-between relative overflow-hidden select-none">
+    class="bg-[#071214] text-[#F2F2F2] font-sans min-h-screen max-h-screen flex flex-col justify-between relative overflow-hidden select-none">
 
-    <!-- Ambient Background Lighting (Warm Peach/Bronze - Brightened for a lighter feel) -->
+    <!-- Ambient Background Lighting (Warm orb tone, used only as subtle glow) -->
     <div
-        class="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(208,167,139,0.04),transparent_75%)] pointer-events-none z-0">
+        class="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(214,175,147,0.04),transparent_75%)] pointer-events-none z-0">
     </div>
 
     <!-- STICKY TOP HEADER -->
     <header
-        class="sticky top-0 w-full bg-[#161312]/95 backdrop-blur-md border-b border-zinc-800/60 px-6 py-4 flex items-center justify-between z-30">
+        class="sticky top-0 w-full bg-[#1C2A2F]/95 backdrop-blur-md border-b border-white/10 px-6 py-4 flex items-center justify-between z-30">
         <!-- Left Slot: Navigation trigger to Computer View -->
         <div class="flex items-center">
             <button onclick="window.location.href='computer.html'"
-                class="p-1.5 -ml-1.5 rounded-lg text-zinc-400 hover:text-[#d0a78b] hover:bg-zinc-800/50 focus:outline-none transition-all duration-300"
+                class="p-1.5 -ml-1.5 rounded-lg text-[#8E9AA0] hover:text-[#12C7A0] hover:bg-white/5 focus:outline-none transition-all duration-300"
                 aria-label="Navigate to Computer View" title="Computer View">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16">
@@ -108,16 +108,16 @@
 
         <!-- Center Slot: Branding (Beatrice / Eburon AI) -->
         <div class="text-center flex flex-col items-center">
-            <h1 class="text-xl font-semibold tracking-wide text-[#d0a78b]">Beatrice</h1>
-            <p class="text-[9px] text-zinc-500 tracking-[0.22em] lowercase -mt-0.5">eburon ai</p>
+            <h1 class="text-xl font-semibold tracking-wide text-[#F2F2F2]">Beatrice</h1>
+            <p class="text-[9px] text-[#8E9AA0] tracking-[0.22em] lowercase -mt-0.5">eburon ai</p>
         </div>
 
         <!-- Right Slot: Profile Avatar -->
         <div class="flex items-center">
             <button
-                class="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 overflow-hidden flex items-center justify-center hover:border-[#d0a78b]/50 focus:outline-none transition-all duration-300"
+                class="w-8 h-8 rounded-full bg-[#020606] border border-white/10 overflow-hidden flex items-center justify-center hover:border-[#D6AF93]/50 focus:outline-none transition-all duration-300"
                 aria-label="User Profile">
-                <svg class="w-5 h-5 text-zinc-400" fill="currentColor" viewBox="0 0 20 20">
+                <svg class="w-5 h-5 text-[#8E9AA0]" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
                         clip-rule="evenodd"></path>
                 </svg>
@@ -130,7 +130,7 @@
 
         <!-- Status Indicator (Softened colors) -->
         <p id="status-text"
-            class="text-zinc-300 text-sm font-normal tracking-wide mt-2 px-6 text-center transition-all duration-300">
+            class="text-[#A6A6AC] text-sm font-normal tracking-wide mt-2 px-6 text-center transition-all duration-300">
             Beatrice is offline. Tap to Start.</p>
 
         <!-- Centered Responsive 3D Orb & Inside Cloudy Visualizer Area -->
@@ -138,31 +138,31 @@
 
             <!-- Dynamic Background Glow (Softened and widened) -->
             <div id="orb-glow"
-                class="absolute w-72 h-72 bg-[#d0a78b]/10 rounded-full blur-3xl animate-orb-pulse transition-all duration-700">
+                class="absolute w-72 h-72 bg-[#D6AF93]/10 rounded-full blur-3xl animate-orb-pulse transition-all duration-700">
             </div>
 
             <!-- Central Glass-morphic Orb with Internal Cloudy Visualizer -->
             <button id="orb-btn"
-                class="relative w-52 h-52 rounded-full bg-[#1c1614]/60 border border-[#d0a78b]/20 overflow-hidden flex items-center justify-center focus:outline-none transition-all duration-500 hover:border-[#d0a78b] hover:shadow-[0_0_55px_rgba(208,167,139,0.3)] active:scale-[0.98]"
+                class="relative w-52 h-52 rounded-full bg-[#1C2A2F]/60 border border-[#D6AF93]/20 overflow-hidden flex items-center justify-center focus:outline-none transition-all duration-500 hover:border-[#D6AF93] hover:shadow-[0_0_55px_rgba(214,175,147,0.3)] active:scale-[0.98]"
                 aria-label="Toggle Voice Assistant" title="Toggle Voice Assistant">
 
                 <!-- Inner Blur masking layer to blend the interior cloud shapes -->
                 <div class="absolute inset-0 bg-black/5 backdrop-blur-[12px] z-10 rounded-full pointer-events-none">
                 </div>
 
-                <!-- Gradient background drifting clouds (Warm Sand/Beige tones) -->
+                <!-- Gradient background drifting clouds (warm orb tone only) -->
                 <div id="orb-blob-container"
                     class="absolute inset-0 w-full h-full flex items-center justify-center transition-transform duration-100 ease-out z-0">
                     <div
-                        class="blob-1 absolute w-48 h-48 rounded-full bg-[radial-gradient(circle,rgba(208,167,139,0.65)_0%,transparent_70%)] filter blur-md">
+                        class="blob-1 absolute w-48 h-48 rounded-full bg-[radial-gradient(circle,rgba(214,175,147,0.65)_0%,transparent_70%)] filter blur-md">
                     </div>
                     <div
-                        class="blob-2 absolute w-44 h-44 rounded-full bg-[radial-gradient(circle,rgba(171,123,96,0.45)_0%,transparent_70%)] filter blur-md">
+                        class="blob-2 absolute w-44 h-44 rounded-full bg-[radial-gradient(circle,rgba(214,175,147,0.34)_0%,transparent_70%)] filter blur-md">
                     </div>
                     <div
-                        class="blob-3 absolute w-40 h-40 rounded-full bg-[radial-gradient(circle,rgba(235,208,188,0.55)_0%,transparent_70%)] filter blur-md">
+                        class="blob-3 absolute w-40 h-40 rounded-full bg-[radial-gradient(circle,rgba(242,242,242,0.26)_0%,transparent_70%)] filter blur-md">
                     </div>
-                    <div id="orb-core" class="absolute w-16 h-16 rounded-full bg-[#d0a78b]/15 filter blur-xl"></div>
+                    <div id="orb-core" class="absolute w-16 h-16 rounded-full bg-[#D6AF93]/15 filter blur-xl"></div>
                 </div>
 
             </button>
@@ -171,9 +171,9 @@
         <!-- INVISIBLE COMPONENT BOX FOR TRANSCRIPTION (Sitting Spaced cleanly below the orb) -->
         <div id="transcription-box"
             class="w-full max-w-sm px-8 flex flex-col items-center justify-center text-center h-[64px] bg-transparent border-0 opacity-0 transition-opacity duration-700 pointer-events-none select-text">
-            <!-- Line 1: Agent (16px / Warm Peach) -->
+            <!-- Line 1: Agent (16px / soft teal active tone) -->
             <div id="transcription-agent"
-                class="text-base text-[#d0a78b] font-medium tracking-wide leading-7 h-[28px] overflow-hidden"></div>
+                class="text-base text-[#12C7A0] font-medium tracking-wide leading-7 h-[28px] overflow-hidden"></div>
             <!-- Line 2: User (16px / White) -->
             <div id="transcription-user"
                 class="text-base text-white font-medium tracking-wide leading-7 h-[28px] overflow-hidden mt-1"></div>
@@ -182,12 +182,12 @@
 
     <!-- STICKY BOTTOM NAVIGATION BAR -->
     <footer id="bottom-nav"
-        class="sticky bottom-0 w-full h-[92px] bg-[#161312]/95 backdrop-blur-md border-t border-zinc-800/60 z-20 px-6 box-border select-none">
+        class="sticky bottom-0 w-full h-[92px] bg-[#1C2A2F]/95 backdrop-blur-md border-t border-white/10 z-20 px-6 box-border select-none">
         <div class="relative w-full h-full flex items-center justify-between">
 
             <!-- Mic Button (exactly 50px from left) -->
             <button id="mic-btn"
-                class="absolute left-[50px] flex flex-col items-center justify-center text-zinc-400 hover:text-[#d0a78b] transition-colors duration-300">
+                class="absolute left-[50px] flex flex-col items-center justify-center text-[#8E9AA0] hover:text-[#12C7A0] transition-colors duration-300">
                 <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z">
@@ -198,9 +198,9 @@
 
             <!-- Elevated Power/Start Button (Elevated, bigger, and floating on top of the footer) -->
             <button id="start-btn"
-                class="absolute left-1/2 -translate-x-1/2 bottom-[55px] w-20 h-20 rounded-full bg-[#d0a78b] text-black hover:bg-[#ebd0bc] flex flex-col items-center justify-center shadow-xl shadow-[#d0a78b]/20 transition-all duration-300 border-4 border-[#161312] z-30 focus:outline-none">
+                class="absolute left-1/2 -translate-x-1/2 bottom-[55px] w-20 h-20 rounded-full bg-[#08B994] text-[#020606] hover:bg-[#12C7A0] flex flex-col items-center justify-center shadow-xl shadow-[#08B994]/25 transition-all duration-300 border-4 border-[#071214] z-30 focus:outline-none">
                 <!-- Power Icon (Starts as inactive standard playhead, or toggles state) -->
-                <svg id="start-icon" class="w-7 h-7 text-black transition-all duration-300" fill="none"
+                <svg id="start-icon" class="w-7 h-7 text-[#020606] transition-all duration-300" fill="none"
                     stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"
                     stroke-linejoin="round">
                     <path d="M18.36 6.64a9 9 0 1 1-12.72 0"></path>
@@ -211,7 +211,7 @@
 
             <!-- Video Button (exactly 50px from right) -->
             <button id="video-btn" onclick="window.location.href='video.html'"
-                class="absolute right-[50px] flex flex-col items-center justify-center text-zinc-400 hover:text-[#d0a78b] transition-colors duration-300">
+                class="absolute right-[50px] flex flex-col items-center justify-center text-[#8E9AA0] hover:text-[#12C7A0] transition-colors duration-300">
                 <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z">
@@ -350,14 +350,14 @@
                 startVoiceResponsiveness();
 
                 // Toggle active colors and text state
-                startBtn.classList.remove('bg-[#d0a78b]', 'hover:bg-[#ebd0bc]');
-                startBtn.classList.add('bg-zinc-900', 'text-[#d0a78b]', 'border-2', 'border-[#d0a78b]/40', 'hover:bg-zinc-850');
-                startIcon.classList.remove('text-black');
-                startIcon.classList.add('text-[#d0a78b]', 'animate-pulse');
+                startBtn.classList.remove('bg-[#08B994]', 'hover:bg-[#12C7A0]', 'text-[#020606]');
+                startBtn.classList.add('bg-[#020606]', 'text-[#08B994]', 'border-2', 'border-[#08B994]/40', 'hover:bg-[#081416]');
+                startIcon.classList.remove('text-[#020606]');
+                startIcon.classList.add('text-[#08B994]', 'animate-pulse');
 
                 // Enhance glowing effects
-                orbGlow.classList.remove('bg-[#d0a78b]/5');
-                orbGlow.classList.add('bg-[#d0a78b]/25');
+                orbGlow.classList.remove('bg-[#D6AF93]/10');
+                orbGlow.classList.add('bg-[#08B994]/20');
 
                 startText.textContent = "Stop";
                 statusText.textContent = "Beatrice is listening...";
@@ -367,13 +367,13 @@
                 stopVoiceResponsiveness();
 
                 // Toggle back to resting styles
-                startBtn.classList.remove('bg-zinc-900', 'text-[#d0a78b]', 'border-2', 'border-[#d0a78b]/40', 'hover:bg-zinc-850');
-                startBtn.classList.add('bg-[#d0a78b]', 'hover:bg-[#ebd0bc]');
-                startIcon.classList.remove('text-[#d0a78b]', 'animate-pulse');
-                startIcon.classList.add('text-black');
+                startBtn.classList.remove('bg-[#020606]', 'text-[#08B994]', 'border-2', 'border-[#08B994]/40', 'hover:bg-[#081416]');
+                startBtn.classList.add('bg-[#08B994]', 'text-[#020606]', 'hover:bg-[#12C7A0]');
+                startIcon.classList.remove('text-[#08B994]', 'animate-pulse');
+                startIcon.classList.add('text-[#020606]');
 
-                orbGlow.classList.remove('bg-[#d0a78b]/25');
-                orbGlow.classList.add('bg-[#d0a78b]/5');
+                orbGlow.classList.remove('bg-[#08B994]/20');
+                orbGlow.classList.add('bg-[#D6AF93]/10');
 
                 startText.textContent = "Start";
                 statusText.textContent = "Beatrice is offline. Tap to Start.";

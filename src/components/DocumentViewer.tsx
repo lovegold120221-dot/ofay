@@ -81,7 +81,7 @@ export function DocumentViewer({
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
   body { font-family: 'Calibri', 'Arial', sans-serif; font-size: 12pt; line-height: 1.6; color: #000; max-width: 800px; margin: 40px auto; padding: 0 20px; }
-  h1 { font-size: 22pt; color: #1a1a1a; border-bottom: 2px solid #d0a78b; padding-bottom: 8px; }
+  h1 { font-size: 22pt; color: #1a1a1a; border-bottom: 2px solid #D6AF93; padding-bottom: 8px; }
   h2 { font-size: 16pt; color: #333; margin-top: 24px; }
   p { margin: 8px 0; }
   ul, ol { margin: 8px 0; padding-left: 24px; }
@@ -89,7 +89,7 @@ export function DocumentViewer({
   table { width: 100%; border-collapse: collapse; margin: 12px 0; }
   td, th { border: 1px solid #ccc; padding: 8px; text-align: left; }
   th { background: #f5f5f5; }
-  blockquote { border-left: 3px solid #d0a78b; margin: 12px 0; padding: 8px 16px; background: #fafafa; }
+  blockquote { border-left: 3px solid #D6AF93; margin: 12px 0; padding: 8px 16px; background: #fafafa; }
   hr { border: none; border-top: 1px solid #e0e0e0; margin: 24px 0; }
   .footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #e0e0e0; font-size: 9pt; color: #888; text-align: center; }
 </style>
@@ -195,29 +195,29 @@ ${content.replace(/<!DOCTYPE html>[\s\S]*?<body[^>]*>/i, '').replace(/<\/body>[\
 
   // ── Full page preview mode ──
   if (mode === 'full') {
-    if (loading || !doc) return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black"><Loader2 className="w-8 h-8 text-white animate-spin" /></div>;
+    if (loading || !doc) return <div className="fixed inset-0 z-50 flex items-center justify-center bg-beatrice-deep"><Loader2 className="w-8 h-8 text-beatrice-text animate-spin" /></div>;
 
     return (
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 bg-black flex flex-col"
+        className="fixed inset-0 z-50 bg-beatrice-bg flex flex-col"
       >
         {/* Minimal header */}
-        <header className="flex items-center justify-between px-5 py-3 bg-zinc-900/90 border-b border-zinc-800/60 shrink-0">
+        <header className="flex items-center justify-between px-5 py-3 bg-beatrice-surface/90 border-b border-white/[0.06] shrink-0">
           <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() => setMode('card')}
-              className="p-2 rounded-lg text-zinc-500 hover:text-[#d0a78b] hover:bg-zinc-800/60 transition-all shrink-0"
+              className="p-2 rounded-lg text-beatrice-muted hover:text-beatrice-teal hover:bg-white/5 transition-all shrink-0"
               aria-label="Back"
               title="Back"
             >
               <X className="w-4 h-4" />
             </button>
             <div className="min-w-0">
-              <p className="text-sm font-medium text-zinc-200 truncate">Document Preview</p>
-              <p className="text-[9px] text-zinc-500 uppercase tracking-widest">live preview</p>
+              <p className="text-sm font-medium text-beatrice-text truncate">Document Preview</p>
+              <p className="text-[9px] text-beatrice-muted uppercase tracking-widest">live preview</p>
             </div>
           </div>
 
@@ -226,7 +226,7 @@ ${content.replace(/<!DOCTYPE html>[\s\S]*?<body[^>]*>/i, '').replace(/<\/body>[\
             <button
               onClick={() => setDownloadOpen(!downloadOpen)}
               disabled={!!downloading}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#d0a78b] text-black text-sm font-semibold hover:bg-[#ebd0bc] transition-all active:scale-[0.97] disabled:opacity-60"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-beatrice-live text-beatrice-deep text-sm font-semibold hover:bg-beatrice-teal transition-all active:scale-[0.97] disabled:opacity-60"
             >
               {downloading ? (
                 <>
@@ -245,14 +245,14 @@ ${content.replace(/<!DOCTYPE html>[\s\S]*?<body[^>]*>/i, '').replace(/<\/body>[\
             {downloadOpen && !downloading && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setDownloadOpen(false)} />
-                <div className="absolute right-0 top-full mt-1.5 z-50 bg-zinc-900 border border-zinc-700/60 rounded-xl overflow-hidden shadow-2xl shadow-black/40 min-w-[160px]">
+                <div className="absolute right-0 top-full mt-1.5 z-50 bg-beatrice-surface border border-white/[0.08] rounded-xl overflow-hidden shadow-2xl shadow-beatrice-deep/40 min-w-[160px]">
                   {downloadOptions.map((opt) => (
                     <button
                       key={opt.format}
                       onClick={() => downloadAs(opt.format)}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-zinc-300 hover:text-white hover:bg-zinc-800/80 transition-colors text-left"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-beatrice-secondary hover:text-beatrice-text hover:bg-white/[0.06] transition-colors text-left"
                     >
-                      <opt.icon className="w-4 h-4 text-zinc-500" />
+                      <opt.icon className="w-4 h-4 text-beatrice-muted" />
                       {opt.label}
                     </button>
                   ))}
@@ -277,22 +277,22 @@ ${content.replace(/<!DOCTYPE html>[\s\S]*?<body[^>]*>/i, '').replace(/<\/body>[\
   }
 
   // ── Card mode (initial view) ──
-  if (loading || !doc) return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"><Loader2 className="w-8 h-8 text-white animate-spin" /></div>;
+  if (loading || !doc) return <div className="fixed inset-0 z-50 flex items-center justify-center bg-beatrice-deep/90"><Loader2 className="w-8 h-8 text-beatrice-text animate-spin" /></div>;
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-[#050505] flex flex-col h-[100dvh]"
+      className="fixed inset-0 z-50 bg-beatrice-bg flex flex-col h-[100dvh]"
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(208,167,139,0.04),transparent_70%)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(214,175,147,0.04),transparent_70%)] pointer-events-none" />
 
       {/* Header */}
-      <header className="sticky top-0 w-full bg-[#050505]/95 backdrop-blur-md border-b border-zinc-800/60 px-4 py-3 flex items-center justify-between z-10 shrink-0">
+      <header className="sticky top-0 w-full bg-beatrice-surface/90 backdrop-blur-md border-b border-white/[0.06] px-4 py-3 flex items-center justify-between z-10 shrink-0">
         <button
           onClick={onClose}
-          className="p-2 rounded-lg text-zinc-500 hover:text-[#d0a78b] hover:bg-zinc-850/50 transition-all"
+          className="p-2 rounded-lg text-beatrice-muted hover:text-beatrice-teal hover:bg-white/5 transition-all"
           aria-label="Close"
           title="Close"
         >
@@ -300,8 +300,8 @@ ${content.replace(/<!DOCTYPE html>[\s\S]*?<body[^>]*>/i, '').replace(/<\/body>[\
         </button>
 
         <div className="text-center flex flex-col items-center">
-          <h1 className="text-sm font-semibold tracking-wide text-[#d0a78b]">Document Workspace</h1>
-          <p className="text-[9px] text-zinc-500 tracking-[0.2em] lowercase -mt-0.5">preview mode</p>
+          <h1 className="text-sm font-semibold tracking-wide text-beatrice-text">Document Workspace</h1>
+          <p className="text-[9px] text-beatrice-muted tracking-[0.2em] lowercase -mt-0.5">preview mode</p>
         </div>
 
         <div className="w-9" />
@@ -310,14 +310,14 @@ ${content.replace(/<!DOCTYPE html>[\s\S]*?<body[^>]*>/i, '').replace(/<\/body>[\
       {/* Content */}
       <div className="flex-1 overflow-y-auto px-4 py-6 max-w-5xl mx-auto w-full flex flex-col justify-between">
         {/* Document Card */}
-        <div className="bg-zinc-900/40 border border-zinc-800/80 rounded-[24px] overflow-hidden flex flex-col min-h-[400px]">
-          <div className="flex items-center gap-3 px-5 py-4 border-b border-zinc-800/40 bg-zinc-900/60">
-            <div className="w-10 h-10 rounded-xl bg-[#d0a78b]/10 flex items-center justify-center">
-              <FileText className="w-5 h-5 text-[#d0a78b]" />
+        <div className="bg-beatrice-surface/35 border border-white/[0.06] rounded-[24px] overflow-hidden flex flex-col min-h-[400px]">
+          <div className="flex items-center gap-3 px-5 py-4 border-b border-white/[0.06] bg-beatrice-surface/50">
+            <div className="w-10 h-10 rounded-xl bg-beatrice-live/10 flex items-center justify-center">
+              <FileText className="w-5 h-5 text-beatrice-live" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-zinc-200 truncate">Result</p>
-              <p className="text-[10px] text-zinc-500 uppercase tracking-wider">
+              <p className="text-sm font-medium text-beatrice-text truncate">Result</p>
+              <p className="text-[10px] text-beatrice-muted uppercase tracking-wider">
                 {doc.fileType === 'html' ? 'Web Document' : 'Text File'}
               </p>
             </div>
@@ -337,7 +337,7 @@ ${content.replace(/<!DOCTYPE html>[\s\S]*?<body[^>]*>/i, '').replace(/<\/body>[\
         {/* Open Now button */}
         <button
           onClick={openFullPreview}
-          className="mt-5 w-full flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl bg-[#d0a78b] text-black text-sm font-semibold hover:bg-[#ebd0bc] transition-all shadow-lg shadow-[#d0a78b]/10 active:scale-[0.98]"
+          className="mt-5 w-full flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl bg-beatrice-live text-beatrice-deep text-sm font-semibold hover:bg-beatrice-teal transition-all shadow-lg shadow-beatrice-live/20 active:scale-[0.98]"
         >
           <ExternalLink className="w-4 h-4" />
           Open Now

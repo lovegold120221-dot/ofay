@@ -4,13 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Eburon Sandbox</title>
-  <meta name="theme-color" content="#050505" />
+  <meta name="theme-color" content="#071214" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background-color: #000000;
-      color: #f3f4f6;
+      background-color: #020606;
+      color: #F2F2F2;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       display: flex;
       justify-content: center;
@@ -23,7 +23,7 @@
       width: 100%;
       max-width: 480px;
       height: 100vh;
-      background-color: #000000;
+      background-color: #071214;
       display: flex;
       flex-direction: column;
       position: relative;
@@ -32,7 +32,7 @@
 
     @media (min-width: 480px) {
       .device-container {
-        border: 10px solid #16161a;
+        border: 10px solid #1C2A2F;
         border-radius: 44px;
         height: 92vh;
         max-height: 900px;
@@ -41,30 +41,30 @@
     }
 
     .header {
-      background-color: #000000;
+      background-color: #1C2A2F;
       z-index: 1000;
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 20px 24px 16px 24px;
-      border-bottom: 1px solid #1f2025;
+      border-bottom: 1px solid rgba(242, 242, 242, 0.1);
       flex-shrink: 0;
     }
 
     .close-btn {
-      background: none; border: none; color: #ffffff; cursor: pointer;
+      background: none; border: none; color: #F2F2F2; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       opacity: 0.8; transition: color 0.2s ease;
     }
     .close-btn:hover { opacity: 1; }
 
-    .header-title { font-size: 1.15rem; font-weight: 600; letter-spacing: -0.01em; color: #ffffff; }
+    .header-title { font-size: 1.15rem; font-weight: 600; letter-spacing: -0.01em; color: #F2F2F2; }
 
     .dropdown-pill {
-      background-color: #000000; border: 1px solid #27272a; border-radius: 12px;
+      background-color: #020606; border: 1px solid rgba(242, 242, 242, 0.1); border-radius: 12px;
       padding: 6px 10px; display: flex; align-items: center; gap: 8px;
     }
-    .dropdown-pill svg { color: #ffffff; }
+    .dropdown-pill svg { color: #8E9AA0; }
 
     .main-body {
       flex-grow: 1; display: flex; flex-direction: column;
@@ -72,8 +72,8 @@
     }
 
     .workspace-card {
-      background: linear-gradient(180deg, #121316 0%, #16171b 100%);
-      border: 1px solid #1f2025; border-radius: 18px; padding: 20px;
+      background: linear-gradient(180deg, #1C2A2F 0%, #081416 100%);
+      border: 1px solid rgba(242, 242, 242, 0.1); border-radius: 18px; padding: 20px;
       flex-grow: 1; display: flex; flex-direction: column;
       position: relative; overflow: hidden; min-height: 0;
     }
@@ -84,12 +84,12 @@
     }
 
     .monitor-graphic { width: 160px; display: flex; flex-direction: column; align-items: center; }
-    .monitor-screen { width: 100%; aspect-ratio: 16 / 10; background: linear-gradient(135deg, #1e2025 0%, #0d0e12 100%); border: 4px solid #3f3f46; border-radius: 8px; }
+    .monitor-screen { width: 100%; aspect-ratio: 16 / 10; background: linear-gradient(135deg, #1C2A2F 0%, #020606 100%); border: 4px solid #8E9AA0; border-radius: 8px; }
     .monitor-inner { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
     .monitor-inner::after { content: ""; width: 60%; height: 45%; background: rgba(255, 255, 255, 0.02); border-radius: 4px; }
-    .monitor-stand { width: 32px; height: 24px; background-color: #3f3f46; }
-    .monitor-base { width: 60px; height: 4px; background-color: #27272a; border-radius: 2px; }
-    .desktop-ready-text { color: #71717a; font-size: 1rem; font-weight: 500; }
+    .monitor-stand { width: 32px; height: 24px; background-color: #8E9AA0; }
+    .monitor-base { width: 60px; height: 4px; background-color: #1C2A2F; border-radius: 2px; }
+    .desktop-ready-text { color: #A6A6AC; font-size: 1rem; font-weight: 500; }
 
     .document-workspace {
       position: absolute; inset: 0; padding: 16px;
@@ -111,11 +111,11 @@
     }
 
     .processing-header {
-      font-size: 0.9rem; font-weight: 500; color: #94a3b8;
+      font-size: 0.9rem; font-weight: 500; color: #A6A6AC;
       display: flex; align-items: center; gap: 6px;
     }
 
-    .grounding-icon { color: #3b82f6; animation: spin 3s linear infinite; }
+    .grounding-icon { color: #08B994; animation: spin 3s linear infinite; }
     @keyframes spin { 100% { transform: rotate(360deg); } }
 
     .dots span { animation: dot-flash 1.4s infinite both; opacity: 0.2; }
@@ -124,10 +124,10 @@
     @keyframes dot-flash { 0%,100% { opacity: 0.2; } 50% { opacity: 1; } }
 
     .doc-actions { display: none; gap: 8px; }
-    .doc-actions .action-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; background-color: rgba(255, 255, 255, 0.1); color: #f3f4f6; border: 1px solid rgba(255, 255, 255, 0.15); padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
-    .doc-actions .action-btn:hover { background-color: rgba(255, 255, 255, 0.2); }
-    .doc-actions .action-btn.primary { background-color: #3b82f6; border-color: #3b82f6; }
-    .doc-actions .action-btn.primary:hover { background-color: #2563eb; }
+    .doc-actions .action-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; background-color: rgba(28, 42, 47, 0.9); color: #F2F2F2; border: 1px solid rgba(242, 242, 242, 0.12); padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: background 0.2s, border-color 0.2s; }
+    .doc-actions .action-btn:hover { background-color: rgba(8, 20, 22, 0.9); border-color: rgba(18, 199, 160, 0.45); }
+    .doc-actions .action-btn.primary { background-color: #08B994; color: #020606; border-color: #08B994; }
+    .doc-actions .action-btn.primary:hover { background-color: #12C7A0; border-color: #12C7A0; }
 
     .workspace-card.gen-mode .processing-header { display: flex; }
     .workspace-card.doc-ready .processing-header { display: none; }
@@ -158,20 +158,20 @@
     .workspace-card.doc-ready .document-skeleton {
       animation: none; filter: blur(0); opacity: 1; transform: scale(1);
       width: 100%; height: 100%; max-width: 100%; aspect-ratio: auto;
-      overflow-y: auto; padding: 24px 32px; background: #f8fafc; scrollbar-width: thin;
+      overflow-y: auto; padding: 24px 32px; background: #ffffff; scrollbar-width: thin;
     }
     .workspace-card.doc-ready .document-skeleton::-webkit-scrollbar { width: 6px; }
     .workspace-card.doc-ready .document-skeleton::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 
     .doc-sk-header { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
-    .doc-sk-icon { width: 14px; height: 14px; border-radius: 3px; background: #3b82f6; }
-    .doc-sk-title { height: 6px; width: 60%; background: #64748b; border-radius: 2px; }
+    .doc-sk-icon { width: 14px; height: 14px; border-radius: 3px; background: #08B994; }
+    .doc-sk-title { height: 6px; width: 60%; background: rgba(166, 166, 172, 0.55); border-radius: 2px; }
     .doc-sk-divider { height: 1px; background: rgba(0, 0, 0, 0.1); width: 100%; margin: 4px 0; }
-    .doc-sk-line { height: 4px; background: #e2e8f0; border-radius: 2px; margin-bottom: 6px; }
+    .doc-sk-line { height: 4px; background: rgba(166, 166, 172, 0.28); border-radius: 2px; margin-bottom: 6px; }
     .doc-sk-line.short { width: 45%; }
     .doc-sk-line.medium { width: 75%; }
     .doc-sk-line.long { width: 100%; }
-    .doc-sk-visual { height: 40px; background: rgba(59, 130, 246, 0.05); border: 1px dashed rgba(59, 130, 246, 0.25); border-radius: 4px; margin: 6px 0; }
+    .doc-sk-visual { height: 40px; background: rgba(8, 185, 148, 0.05); border: 1px dashed rgba(18, 199, 160, 0.25); border-radius: 4px; margin: 6px 0; }
 
     .workspace-card.gen-mode .document-skeleton .rendered-document { font-size: 5px; line-height: 1.3; color: #1f2933; font-family: "Helvetica Neue", Arial, sans-serif; }
     .workspace-card.gen-mode .document-skeleton .rendered-document h1 { font-size: 8px; margin-bottom: 4px; color: #0f2742; border-bottom: 1px solid #0f2742; }
@@ -192,16 +192,16 @@
     .workspace-card.doc-ready .document-skeleton .rendered-document .meta-grid { display: grid; grid-template-columns: 1fr 1fr; font-size: 0.8rem; gap: 8px; margin-bottom: 14px; }
     .workspace-card.doc-ready .document-skeleton .rendered-document .signature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; }
     .workspace-card.doc-ready .document-skeleton .rendered-document .signature-box { border-top: 1px solid #000000; padding-top: 6px; font-size: 0.75rem; }
-    .workspace-card.doc-ready .document-skeleton .rendered-document footer { font-size: 0.7rem; color: #64748b; text-align: center; margin-top: 24px; border-top: 1px solid #cbd5e1; padding-top: 10px; }
+    .workspace-card.doc-ready .document-skeleton .rendered-document footer { font-size: 0.7rem; color: #8E9AA0; text-align: center; margin-top: 24px; border-top: 1px solid rgba(142, 154, 160, 0.35); padding-top: 10px; }
 
     .command-bar {
-      background-color: #0d0e11; border: 1px solid #1a1b1f; border-radius: 14px;
+      background-color: #1C2A2F; border: 1px solid rgba(242, 242, 242, 0.1); border-radius: 14px;
       padding: 16px 20px; display: flex; align-items: center; gap: 12px; flex-shrink: 0;
     }
-    .cmd-icon { color: #38bdf8; display: flex; align-items: center; justify-content: center; }
-    .cmd-input-field { background: transparent; border: none; color: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 0.95rem; outline: none; flex-grow: 1; }
-    .cmd-input-field::placeholder { color: #52525b; }
-    .cmd-input-field:disabled { color: #52525b; cursor: not-allowed; }
+    .cmd-icon { color: #08B994; display: flex; align-items: center; justify-content: center; }
+    .cmd-input-field { background: transparent; border: none; color: #F2F2F2; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 0.95rem; outline: none; flex-grow: 1; }
+    .cmd-input-field::placeholder { color: #8E9AA0; }
+    .cmd-input-field:disabled { color: #8E9AA0; cursor: not-allowed; }
 
     @media print {
       body, .header, .command-bar, .desktop-ready-state, .view-header { display: none !important; }
@@ -319,8 +319,10 @@
   <script>
     // ── Config ──
     const MODEL_ID = "gemini-flash-lite-latest";
-    const GEMINI_API_KEY = localStorage.getItem('gemini_api_key') || "AIzaSyCKlazUBd4Cj6JmRVCx6fHxuS2w6P_PGyg";
-    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_ID}:streamGenerateContent?key=${GEMINI_API_KEY}`;
+    const GEMINI_API_KEY = localStorage.getItem('gemini_api_key') || "";
+    const API_URL = GEMINI_API_KEY
+      ? `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_ID}:streamGenerateContent?key=${GEMINI_API_KEY}`
+      : "";
 
     // ── DOM refs ──
     const workspaceCard = document.getElementById('workspace-container');
@@ -401,6 +403,10 @@
     // ── Stream generation from Gemini (for direct typing) ──
     async function startGeneration(query) {
       if (isGeneratingLocally) return;
+      if (!API_URL) {
+        alert('Missing Gemini API key. Set localStorage.gemini_api_key before using the document sandbox.');
+        return;
+      }
       isGeneratingLocally = true;
 
       workspaceCard.classList.remove('doc-ready');

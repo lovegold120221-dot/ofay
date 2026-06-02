@@ -16,7 +16,7 @@ export function SplashPage({ onComplete }: SplashPageProps) {
   }, [onComplete]);
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center p-4 relative overflow-hidden select-none">
+    <div className="min-h-screen bg-beatrice-bg text-beatrice-text flex flex-col items-center justify-center p-4 relative overflow-hidden select-none">
       {/* Ambient glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
@@ -26,7 +26,7 @@ export function SplashPage({ onComplete }: SplashPageProps) {
             scale: phase === 'enter' ? 0.5 : phase === 'hold' ? 1 : 0.7,
           }}
           transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-          style={{ background: 'radial-gradient(circle at center, #d0a78b 0%, transparent 70%)' }}
+          style={{ background: 'radial-gradient(circle at center, #D6AF93 0%, transparent 70%)' }}
         />
       </div>
 
@@ -41,24 +41,24 @@ export function SplashPage({ onComplete }: SplashPageProps) {
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       >
         <motion.div
-          className="w-28 h-28 rounded-full bg-gradient-to-br from-[#d0a78b]/15 to-amber-900/30 p-[1.5px] relative"
+          className="w-28 h-28 rounded-full bg-gradient-to-br from-beatrice-glow/20 to-beatrice-deep p-[1.5px] relative"
           animate={phase === 'hold' ? {
             boxShadow: [
-              '0 0 0px rgba(208,167,139,0)',
-              '0 0 30px rgba(208,167,139,0.2)',
-              '0 0 0px rgba(208,167,139,0)',
+              '0 0 0px rgba(214,175,147,0)',
+              '0 0 30px rgba(214,175,147,0.2)',
+              '0 0 0px rgba(214,175,147,0)',
             ],
           } : {}}
           transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
         >
-          <div className="w-full h-full rounded-full bg-[#080808] flex items-center justify-center border border-[#d0a78b]/10 overflow-hidden p-3.5">
+          <div className="w-full h-full rounded-full bg-beatrice-deep flex items-center justify-center border border-beatrice-glow/10 overflow-hidden p-3.5">
             <img src="https://eburon.ai/icon-eburon.svg" alt="Eburon" className="w-full h-full object-contain" draggable={false} />
           </div>
         </motion.div>
 
         <div className="flex flex-col items-center gap-2">
           <motion.h1
-            className="text-[28px] font-light tracking-wide text-white/90 font-['SF_Pro_Display',system-ui,sans-serif] uppercase"
+            className="text-[28px] font-light tracking-wide text-beatrice-text/90 font-['SF_Pro_Display',system-ui,sans-serif] uppercase"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
@@ -66,13 +66,13 @@ export function SplashPage({ onComplete }: SplashPageProps) {
             Beatrice
           </motion.h1>
           <motion.div
-            className="h-px w-12 bg-[#d0a78b]/30"
+            className="h-px w-12 bg-beatrice-glow/30"
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
             transition={{ delay: 0.8, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           />
           <motion.p
-            className="text-[#d0a78b]/35 text-[11px] font-medium tracking-[0.35em] uppercase font-['SF_Pro_Text',system-ui,sans-serif]"
+            className="text-beatrice-glow/45 text-[11px] font-medium tracking-[0.35em] uppercase font-['SF_Pro_Text',system-ui,sans-serif]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1, duration: 0.5 }}
