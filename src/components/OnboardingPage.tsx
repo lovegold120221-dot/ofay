@@ -43,6 +43,20 @@ const slides = [
     title: 'Voice Control',
     subtitle: 'Hands-free operation, real-time AI responses, and complete digital freedom.',
   },
+  {
+    glyph: (
+      <svg viewBox="0 0 56 56" fill="none" className="w-full h-full">
+        <rect x="13" y="8" width="30" height="40" rx="5" stroke="#d0a78b" strokeWidth="1.2" strokeOpacity={0.3} fill="rgba(208,167,139,0.04)" />
+        <rect x="17" y="14" width="22" height="20" rx="3" stroke="#d0a78b" strokeWidth="1" strokeOpacity={0.15} fill="rgba(208,167,139,0.06)" />
+        <path d="M28 20v8M24 24l4-4 4 4" stroke="#d0a78b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity={0.8} />
+        <path d="M21 38l14 5" stroke="#d0a78b" strokeWidth="1.5" strokeLinecap="round" opacity={0.4} />
+        <path d="M21 40l14 5" stroke="#d0a78b" strokeWidth="1.5" strokeLinecap="round" opacity={0.25} />
+        <circle cx="28" cy="39" r="2" fill="#d0a78b" opacity={0.3} />
+      </svg>
+    ),
+    title: 'Install App',
+    subtitle: 'Add Beatrice to your home screen for quick access. Tap Share → Add to Home Screen on iOS, or Install from the browser menu on Android.',
+  },
 ];
 
 export function OnboardingPage({ onComplete }: OnboardingPageProps) {
