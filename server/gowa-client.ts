@@ -1,3 +1,6 @@
+import * as fs from 'fs';
+import * as path from 'path';
+
 /**
  * Go WhatsApp (gowa) API Client
  * 
@@ -36,14 +39,59 @@ interface GowaSession {
   createdAt: number;
 }
 
+interface QrCacheEntry {
+  qrCode: string;
+  expiresAt: number; // ms epoch
+}
+
 export class GowaClient {
   private apiUrl: string;
   private auth: string;
   private sessions = new Map<string, GowaSession>(); // userId → session
+  private sessionsPath: string;
+  private qrCache = new Map<string, QrCacheEntry>(); // deviceId → cached QR
 
-  constructor(apiUrl: string, username: string, password: string) {
+  constructor(apiUrl: string, username: string, password: string, sessionsDir?: string) {
     this.apiUrl = apiUrl.replace(/\/+$/, '');
     this.auth = btoa(`${username}:${password}`);
+    this.sessionsPath = path.join(sessionsDir || process.env.WA_AUTH_ROOT || '.', 'gowa-sessions.json');
+    this.loadSessions();
+  }
+
+  // ── Persistence: userId → deviceId mapping survives server restarts ──
+
+  private loadSessions(): void {
+    try {
+      if (fs.existsSync(this.sessionsPath)) {
+        const data = JSON.parse(fs.readFileSync(this.sessionsPath, 'utf-8'));
+        if (Array.isArray(data)) {
+          for (const s of data) {
+            if (s.userId && s.deviceId) {
+              this.sessions.set(s.userId, { deviceId: s.deviceId, userId: s.userId, createdAt: s.createdAt || Date.now() });
+            }
+          }
+        }
+        console.log(`[Gowa] Loaded ${this.sessions.size} session(s) from ${this.sessionsPath}`);
+      }
+    } catch (e) {
+      console.error('[Gowa] Failed to load sessions:', e);
+    }
+  }
+
+  private saveSessions(): void {
+    try {
+      const dir = path.dirname(this.sessionsPath);
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      const data = Array.from(this.sessions.values());
+      fs.writeFileSync(this.sessionsPath, JSON.stringify(data, null, 2));
+    } catch (e) {
+      console.error('[Gowa] Failed to save sessions:', e);
+    }
+  }
+
+  private trackSession(userId: string, deviceId: string): void {
+    this.sessions.set(userId, { deviceId, userId, createdAt: Date.now() });
+    this.saveSessions();
   }
 
   private get headers(): Record<string, string> {
@@ -79,12 +127,12 @@ export class GowaClient {
     return res.results || [];
   }
 
-  async createDevice(id: string, displayName?: string): Promise<GowaDevice> {
+  async createDevice(displayName?: string): Promise<GowaDevice> {
     const res = await this.request<GowaDevice>('POST', '/devices', {
-      id,
-      display_name: displayName || id,
+      display_name: displayName || '',
     });
     if (!res.results) throw new Error(`Failed to create device: ${res.message}`);
+    console.log(`[Gowa] Created device ${res.results.id} (display_name: ${displayName || ''})`);
     return res.results;
   }
 
@@ -93,18 +141,18 @@ export class GowaClient {
     const existing = this.sessions.get(userId);
     if (existing) return existing.deviceId;
 
-    // Check if device already exists on gowa
+    // Check if device already exists on gowa (by matching on our stored UUID mapping)
     const devices = await this.listDevices();
+    // Try matching by display_name — gowa often ignores it, so this may not find anything
     const match = devices.find(d => d.display_name === userId || d.id === userId);
     if (match) {
-      this.sessions.set(userId, { deviceId: match.id, userId, createdAt: Date.now() });
+      this.trackSession(userId, match.id);
       return match.id;
     }
 
-    // Create a new device
-    const deviceId = `voxx-${userId}-${Date.now()}`;
-    const device = await this.createDevice(deviceId, userId);
-    this.sessions.set(userId, { deviceId: device.id, userId, createdAt: Date.now() });
+    // Create a new device — gowa will assign its own UUID as id
+    const device = await this.createDevice(userId);
+    this.trackSession(userId, device.id);
     return device.id;
   }
 
@@ -166,7 +214,7 @@ export class GowaClient {
     const devices = await this.listDevices();
     const match = devices.find(d => d.display_name === userId);
     if (match) {
-      this.sessions.set(userId, { deviceId: match.id, userId, createdAt: Date.now() });
+      this.trackSession(userId, match.id);
       return match.id;
     }
     return null;
@@ -174,6 +222,22 @@ export class GowaClient {
 
   removeSession(userId: string): void {
     this.sessions.delete(userId);
+    this.saveSessions();
+  }
+
+  // ── QR Cache Helpers ──
+
+  /** Evict stale cache entries periodically */
+  pruneQrCache(): void {
+    const now = Date.now();
+    for (const [deviceId, entry] of this.qrCache) {
+      if (now >= entry.expiresAt) this.qrCache.delete(deviceId);
+    }
+  }
+
+  /** Clear QR cache when a user logs out */
+  clearQrCache(deviceId: string): void {
+    this.qrCache.delete(deviceId);
   }
 
   // ── Send Message ──
@@ -218,20 +282,38 @@ export class GowaClient {
         };
       }
 
-      if (device.state === 'connecting' || device.state === 'disconnected') {
-        // Try to generate QR
+      if (device.state === 'connecting' || device.state === 'disconnected' || device.state === 'connected') {
+        // Check if we have a valid cached QR that hasn't expired
+        const cached = this.qrCache.get(deviceId);
+        if (cached && Date.now() < cached.expiresAt) {
+          return {
+            status: 'qr_ready',
+            qrCode: cached.qrCode,
+            device_id: deviceId,
+          };
+        }
+
+        // Need to generate a fresh QR
         try {
           const qr = await this.getLoginQR(deviceId);
-          // The qr_link is a URL to the QR PNG on the gowa server
-          // Fetch it and convert to base64 data URL
-          const qrImageRes = await fetch(`${this.apiUrl}${qr.qr_link}`, {
-            headers: this.headers,
-            signal: AbortSignal.timeout(10000),
-          });
-          if (qrImageRes.ok) {
+          // qr_link is already a full URL (e.g. http://host:port/statics/qrcode/...)
+          // Retry a few times because the image file may not be written instantly
+          let qrImageRes: Response | null = null;
+          for (let attempt = 0; attempt < 5; attempt++) {
+            qrImageRes = await fetch(qr.qr_link, {
+              headers: this.headers,
+              signal: AbortSignal.timeout(5000),
+            });
+            if (qrImageRes.ok) break;
+            await new Promise(r => setTimeout(r, 600));
+          }
+          if (qrImageRes?.ok) {
             const blob = await qrImageRes.arrayBuffer();
             const base64 = Buffer.from(blob).toString('base64');
             const qrCode = `data:image/png;base64,${base64}`;
+            // Cache the QR for its duration (with 5s safety margin)
+            const ttl = Math.max((qr.qr_duration || 30) * 1000 - 5000, 5000);
+            this.qrCache.set(deviceId, { qrCode, expiresAt: Date.now() + ttl });
             return {
               status: 'qr_ready',
               qrCode,

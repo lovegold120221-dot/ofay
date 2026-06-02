@@ -240,7 +240,10 @@ if (gowaClient) {
       const { userId } = req.body;
       if (!userId) { res.status(400).json({ error: 'userId required' }); return; }
       const deviceId = await gowaClient!.getDeviceIdForUser(userId);
-      if (deviceId) await gowaClient!.logout(deviceId);
+      if (deviceId) {
+        try { await gowaClient!.logout(deviceId); } catch { /* ignore gowa logout errors */ }
+        gowaClient!.clearQrCache(deviceId);
+      }
       gowaClient!.removeSession(userId);
       res.json({ ok: true });
     } catch (err: any) {
@@ -300,6 +303,9 @@ if (gowaClient) {
   app.post('/api/whatsapp/webhook/:userId', (_req, res) => res.json({ ok: true }));
 
   console.log('[Gowa] All WhatsApp routes mounted for gowa provider');
+
+  // Periodic QR cache cleanup (every 60s)
+  setInterval(() => gowaClient!.pruneQrCache(), 60_000);
 
 } else if (waManager) {
 
@@ -555,7 +561,65 @@ app.get('/site-build/:userId/:timestamp', async (req, res) => {
   }
 });
 
-// ── Shutdown hook ──
+// ── Document Generation Route ──
+
+app.post('/api/docs/generate', async (req, res) => {
+  try {
+    const { userId, title, prompt, templateKey, historyContext, language } = req.body;
+    if (!userId || !title || !prompt || !templateKey) {
+      res.status(400).json({ error: 'userId, title, prompt, and templateKey are required' });
+      return;
+    }
+
+    // 1. Identify the template (placeholder logic, assuming templates exist somewhere)
+    // In a real implementation, you'd fetch the template file content here.
+    
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+
+    // 2. Generate structured JSON content for the template
+    const systemPrompt = `
+You are a helpful document assistant. Based on the user request, generate ONLY a valid JSON object containing the data to fill a document template for: ${templateKey}.
+Ensure all fields required by the template are populated with appropriate values derived from the user request and conversation.
+`;
+
+    const userPrompt = `
+Title: ${title}
+Request: ${prompt}
+Context: ${historyContext || ''}
+Language: ${language || 'en'}
+`;
+
+    const genResult = await model.generateContent([systemPrompt, userPrompt]);
+    const jsonContent = JSON.parse(genResult.response.text().trim().replace(/^```json/, '').replace(/```$/, ''));
+
+    // 3. Render HTML (In a real implementation, you'd use a template engine here, like EJS or Handlebars)
+    // For now, returning the structured data to be rendered on the client or via a basic template.
+    
+    // Placeholder rendering logic
+    const htmlContent = `<h1>${jsonContent.title || title}</h1><p>${JSON.stringify(jsonContent)}</p>`;
+
+    // Save to Supabase (assuming a 'documents' table exists)
+    const { error } = await supabase.from('tool_outputs').insert({
+      user_id: userId,
+      type: 'document',
+      content: { htmlContent, data: jsonContent },
+      metadata: { title, templateKey }
+    });
+
+    if (error) {
+      console.error('Supabase save error:', error);
+      res.status(500).json({ error: 'Failed to save generated document' });
+      return;
+    }
+
+    res.json({ ok: true, data: jsonContent });
+
+  } catch (err: any) {
+    console.error('Document generation error:', err);
+    res.status(500).json({ error: err.message || 'Generation failed' });
+  }
+});
 
 process.on('SIGTERM', async () => {
   console.log('Shutting down...');

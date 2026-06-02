@@ -736,22 +736,31 @@ ${request.historyContext || ''}
 Produce one finished standalone file now.
 `;
 
-  const ai = new GoogleGenAI({ apiKey });
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
-    contents: systemPrompt + '\n\n' + userPrompt,
-    config: {
-      temperature: 0.25,
-    }
+  const response = await fetch('http://localhost:4200/api/docs/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      userId: user.uid,
+      title: request.title,
+      prompt: request.prompt,
+      templateKey: preferredTemplateKey,
+      historyContext: request.historyContext,
+      language: request.language || 'en'
+    })
   });
 
-  const content = response.text || '';
-
-  if (!content || typeof content !== 'string') {
-    throw new Error('Gemini returned no document content.');
+  if (!response.ok) {
+    throw new Error(`Backend Document Generation failed with status ${response.status}`);
   }
 
-  return extractHtmlArtifact(content);
+  const result = await response.json();
+  
+  if (!result.ok) {
+    throw new Error(result.error || 'Backend generation failed');
+  }
+
+  // Handle the structured data from the backend
+  return result.data;
 };
 
 function VisualizerBars({ volumes, side }: { volumes: number[], side: 'left' | 'right' }) {

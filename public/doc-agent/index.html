@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eburon PC - Maximized Document Viewport</title>
+    <style>
+        /* Global Reset & Base Styling */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #000000;
+            color: #f3f4f6;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Rigid Device Viewport Wrapper */
+        .device-container {
+            width: 100%;
+            max-width: 480px;
+            /* Slightly wider for better document reading */
+            height: 100vh;
+            background-color: #000000;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @media (min-width: 480px) {
+            .device-container {
+                border: 10px solid #16161a;
+                border-radius: 44px;
+                height: 92vh;
+                max-height: 900px;
+                box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+            }
+        }
+
+        /* --- Fixed Header Area --- */
+        .header {
+            background-color: #000000;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px 16px 24px;
+            border-bottom: 1px solid #1f2025;
+            flex-shrink: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #ffffff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.8;
+            transition: color 0.2s ease;
+        }
+
+        .close-btn:hover {
+            opacity: 1;
+        }
+
+        .header-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            color: #ffffff;
+        }
+
+        .dropdown-pill {
+            background-color: #000000;
+            border: 1px solid #27272a;
+            border-radius: 12px;
+            padding: 6px 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dropdown-pill svg {
+            color: #ffffff;
+        }
+
+        /* --- Main Body Wrapper --- */
+        .main-body {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            gap: 16px;
+            overflow: hidden;
+            /* Prevents whole container from scrolling */
+        }
+
+        /* ==================================================
+       DOMINANT WORKSPACE CARD (Takes up remaining space)
+       ================================================== */
+        .workspace-card {
+            background: linear-gradient(180deg, #121316 0%, #16171b 100%);
+            border: 1px solid #1f2025;
+            border-radius: 18px;
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            /* Only inner document scrolls */
+            min-height: 0;
+            /* Fix flexbox child overflow */
+        }
+
+        /* Subview 1: Initial Ready State */
+        .desktop-ready-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            width: 100%;
+            height: 100%;
+            transition: opacity 0.3s ease;
+        }
+
+        .monitor-graphic {
+            width: 160px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .monitor-screen {
+            width: 100%;
+            aspect-ratio: 16 / 10;
+            background: linear-gradient(135deg, #1e2025 0%, #0d0e12 100%);
+            border: 4px solid #3f3f46;
+            border-radius: 8px;
+        }
+
+        .monitor-inner {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .monitor-inner::after {
+            content: "";
+            width: 60%;
+            height: 45%;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 4px;
+        }
+
+        .monitor-stand {
+            width: 32px;
+            height: 24px;
+            background-color: #3f3f46;
+        }
+
+        .monitor-base {
+            width: 60px;
+            height: 4px;
+            background-color: #27272a;
+            border-radius: 2px;
+        }
+
+        .desktop-ready-text {
+            color: #71717a;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        /* Subview 2: Document Workspace Viewport (Gen Mode & Ready Mode) */
+        .document-workspace {
+            position: absolute;
+            inset: 0;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        /* State Switchers */
+        .workspace-card.gen-mode .desktop-ready-state,
+        .workspace-card.doc-ready .desktop-ready-state {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .workspace-card.gen-mode .document-workspace,
+        .workspace-card.doc-ready .document-workspace {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        /* Toolbar Header (Inside Workspace) */
+        .view-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            min-height: 32px;
+            flex-shrink: 0;
+        }
+
+        .processing-header {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .dots span {
+            animation: dot-flash 1.4s infinite both;
+            opacity: 0.2;
+        }
+
+        .dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes dot-flash {
+
+            0%,
+            100% {
+                opacity: 0.2;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        /* Document Action Buttons */
+        .doc-actions {
+            display: none;
+            gap: 8px;
+        }
+
+        .doc-actions .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #f3f4f6;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .doc-actions .action-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .doc-actions .action-btn.primary {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+        }
+
+        .doc-actions .action-btn.primary:hover {
+            background-color: #2563eb;
+        }
+
+        .workspace-card.gen-mode .processing-header {
+            display: flex;
+        }
+
+        .workspace-card.doc-ready .processing-header {
+            display: none;
+        }
+
+        .workspace-card.doc-ready .doc-actions {
+            display: flex;
+            margin-left: auto;
+        }
+
+        /* Push buttons to right */
+
+        /* Document Preview Container (The Embedding Box) */
+        .document-preview-wrapper {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            /* Contains inner skeleton overflow */
+        }
+
+        .document-skeleton {
+            background: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* -> GENERATION MODE: Small, constrained, blurry loop */
+        .workspace-card.gen-mode .document-skeleton {
+            width: 100%;
+            max-width: 200px;
+            padding: 16px;
+            aspect-ratio: 3 / 4;
+            overflow: hidden;
+            animation: blur-loop-generation 10s ease-in-out infinite alternate;
+        }
+
+        @keyframes blur-loop-generation {
+            0% {
+                filter: blur(22px);
+                opacity: 0.95;
+                transform: scale(0.96);
+            }
+
+            100% {
+                filter: blur(4px);
+                opacity: 0.55;
+                transform: scale(1);
+            }
+        }
+
+        /* -> READY MODE: Expanded, sharp, internally scrollable */
+        .workspace-card.doc-ready .document-skeleton {
+            animation: none;
+            filter: blur(0);
+            opacity: 1;
+            transform: scale(1);
+            width: 100%;
+            height: 100%;
+            max-width: 100%;
+            aspect-ratio: auto;
+            overflow-y: auto;
+            padding: 24px 32px;
+            background: #f8fafc;
+            scrollbar-width: thin;
+        }
+
+        /* Scrollbar styling for the inner document reader */
+        .workspace-card.doc-ready .document-skeleton::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .workspace-card.doc-ready .document-skeleton::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        /* Skeleton Loading Placeholders */
+        .doc-sk-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .doc-sk-icon {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            background: #3b82f6;
+        }
+
+        .doc-sk-title {
+            height: 6px;
+            width: 60%;
+            background: #64748b;
+            border-radius: 2px;
+        }
+
+        .doc-sk-divider {
+            height: 1px;
+            background: rgba(0, 0, 0, 0.1);
+            width: 100%;
+            margin: 4px 0;
+        }
+
+        .doc-sk-line {
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+            margin-bottom: 6px;
+        }
+
+        .doc-sk-line.short {
+            width: 45%;
+        }
+
+        .doc-sk-line.medium {
+            width: 75%;
+        }
+
+        .doc-sk-line.long {
+            width: 100%;
+        }
+
+        .doc-sk-visual {
+            height: 40px;
+            background: rgba(59, 130, 246, 0.05);
+            border: 1px dashed rgba(59, 130, 246, 0.25);
+            border-radius: 4px;
+            margin: 6px 0;
+        }
+
+        /* --- HTML Render Styling: Micro scale for blur (Gen Mode) --- */
+        .workspace-card.gen-mode .document-skeleton .rendered-document {
+            font-size: 5px;
+            line-height: 1.3;
+            color: #1f2933;
+            font-family: "Helvetica Neue", Arial, sans-serif;
+        }
+
+        .workspace-card.gen-mode .document-skeleton .rendered-document h1 {
+            font-size: 8px;
+            margin-bottom: 4px;
+            color: #0f2742;
+            border-bottom: 1px solid #0f2742;
+        }
+
+        .workspace-card.gen-mode .document-skeleton .rendered-document h2 {
+            font-size: 6px;
+            margin-top: 6px;
+            margin-bottom: 3px;
+            color: #0f2742;
+            border-bottom: 1px solid #d9dee7;
+        }
+
+        .workspace-card.gen-mode .document-skeleton .rendered-document p {
+            font-size: 5px;
+            margin-bottom: 4px;
+        }
+
+        .workspace-card.gen-mode .document-skeleton .rendered-document .meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            font-size: 4px;
+            gap: 2px;
+            margin-bottom: 6px;
+        }
+
+        .workspace-card.gen-mode .document-skeleton .rendered-document .signature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            margin-top: 8px;
+            gap: 8px;
+        }
+
+        .workspace-card.gen-mode .document-skeleton .rendered-document .signature-box {
+            font-size: 4px;
+            padding-top: 2px;
+            border-top: 1px solid #000;
+        }
+
+        .workspace-card.gen-mode .document-skeleton .rendered-document footer {
+            font-size: 4px;
+            margin-top: 8px;
+            padding-top: 4px;
+            text-align: center;
+            border-top: 1px solid #d9dee7;
+        }
+
+        /* --- HTML Render Styling: Readable clear scale (Ready Mode) --- */
+        .workspace-card.doc-ready .document-skeleton .rendered-document {
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: #1f2933;
+            font-family: "Helvetica Neue", Arial, sans-serif;
+            text-align: left;
+        }
+
+        .workspace-card.doc-ready .document-skeleton .rendered-document h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #0f2742;
+            border-bottom: 2px solid #0f2742;
+            padding-bottom: 6px;
+            margin-bottom: 14px;
+            text-transform: uppercase;
+        }
+
+        .workspace-card.doc-ready .document-skeleton .rendered-document h2 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #0f2742;
+            border-bottom: 1px solid #cbd5e1;
+            padding-bottom: 4px;
+            margin-top: 18px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .workspace-card.doc-ready .document-skeleton .rendered-document p {
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+        }
+
+        .workspace-card.doc-ready .document-skeleton .rendered-document strong {
+            font-weight: 700;
+        }
+
+        .workspace-card.doc-ready .document-skeleton .rendered-document .meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            font-size: 0.8rem;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .workspace-card.doc-ready .document-skeleton .rendered-document .signature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .workspace-card.doc-ready .document-skeleton .rendered-document .signature-box {
+            border-top: 1px solid #000000;
+            padding-top: 6px;
+            font-size: 0.75rem;
+        }
+
+        .workspace-card.doc-ready .document-skeleton .rendered-document footer {
+            font-size: 0.7rem;
+            color: #64748b;
+            text-align: center;
+            margin-top: 24px;
+            border-top: 1px solid #cbd5e1;
+            padding-top: 10px;
+        }
+
+        /* ==================================================
+       STICKY COMMAND INPUT BAR (Replaces Terminal)
+       ================================================== */
+        .command-bar {
+            background-color: #0d0e11;
+            border: 1px solid #1a1b1f;
+            border-radius: 14px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+            /* Prevents squishing */
+        }
+
+        .cmd-icon {
+            color: #38bdf8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cmd-input-field {
+            background: transparent;
+            border: none;
+            color: #f3f4f6;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 0.95rem;
+            outline: none;
+            flex-grow: 1;
+        }
+
+        .cmd-input-field::placeholder {
+            color: #52525b;
+        }
+
+        .cmd-input-field:disabled {
+            color: #52525b;
+            cursor: not-allowed;
+        }
+
+        /* --- Printing Overrides --- */
+        @media print {
+
+            body,
+            .header,
+            .command-bar,
+            .desktop-ready-state,
+            .view-header {
+                display: none !important;
+            }
+
+            html,
+            body {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+                width: 100% !important;
+                height: auto !important;
+                overflow: visible !important;
+            }
+
+            .device-container {
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                height: auto !important;
+                overflow: visible !important;
+            }
+
+            .main-body {
+                padding: 0 !important;
+                overflow: visible !important;
+            }
+
+            .workspace-card {
+                padding: 0 !important;
+                border: none !important;
+                background: transparent !important;
+            }
+
+            .document-workspace {
+                position: static !important;
+                padding: 0 !important;
+            }
+
+            .document-skeleton {
+                height: auto !important;
+                overflow: visible !important;
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+            }
+
+            @page {
+                size: A4;
+                margin: 20mm;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="device-container" id="device-viewport">
+
+        <!-- Fixed Header -->
+        <header class="header">
+            <button class="close-btn" aria-label="Close" onclick="resetPage()">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            <h1 class="header-title">Eburon PC</h1>
+
+            <div class="dropdown-pill">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                </svg>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </div>
+        </header>
+
+        <!-- Main Body Section -->
+        <div class="main-body">
+
+            <!-- DOMINANT WORKSPACE CARD (Replaces Desktop + Logs) -->
+            <div class="workspace-card" id="workspace-container">
+
+                <!-- Default State: Desktop Monitor UI -->
+                <div class="desktop-ready-state">
+                    <div class="monitor-graphic">
+                        <div class="monitor-screen">
+                            <div class="monitor-inner"></div>
+                        </div>
+                        <div class="monitor-stand"></div>
+                        <div class="monitor-base"></div>
+                    </div>
+                    <p class="desktop-ready-text">Eburon Engine Ready</p>
+                </div>
+
+                <!-- Embedded Document Viewport -->
+                <div class="document-workspace">
+                    <!-- Top Action Bar inside the viewport -->
+                    <div class="view-header">
+                        <div class="processing-header">
+                            Generating<span class="dots"><span>.</span><span>.</span><span>.</span></span>
+                        </div>
+                        <div class="doc-actions">
+                            <button onclick="triggerPrint()" class="action-btn">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                                    <path
+                                        d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2">
+                                    </path>
+                                    <rect x="6" y="14" width="12" height="8"></rect>
+                                </svg>
+                                Print
+                            </button>
+                            <button onclick="triggerPrint()" class="action-btn primary">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                                PDF
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Document Rendering Container -->
+                    <div class="document-preview-wrapper">
+                        <div class="document-skeleton" id="doc-skeleton">
+                            <!-- Outline Skeletons -->
+                            <div class="doc-sk-header" id="skeleton-placeholders-header">
+                                <div class="doc-sk-icon"></div>
+                                <div class="doc-sk-title"></div>
+                            </div>
+                            <div class="doc-sk-divider" id="skeleton-placeholders-div"></div>
+                            <div id="skeleton-placeholders-lines">
+                                <div class="doc-sk-line long"></div>
+                                <div class="doc-sk-line medium"></div>
+                                <div class="doc-sk-visual"></div>
+                                <div class="doc-sk-line long"></div>
+                                <div class="doc-sk-line short"></div>
+                            </div>
+
+                            <!-- Target for API Generated HTML -->
+                            <div id="live-render-target"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STICKY COMMAND INPUT BAR -->
+            <div class="command-bar">
+                <div class="cmd-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="4 17 10 11 4 5"></polyline>
+                        <line x1="12" y1="19" x2="20" y2="19"></line>
+                    </svg>
+                </div>
+                <input type="text" id="cmd-input" class="cmd-input-field"
+                    placeholder="Ask Eburon to generate a document..." autocomplete="off" autofocus>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const API_KEY = "AIzaSyCKlazUBd4Cj6JmRVCx6fHxuS2w6P_PGyg";
+        const MODEL_ID = "gemini-flash-lite-latest";
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_ID}:streamGenerateContent?key=${API_KEY}`;
+
+        const workspaceCard = document.getElementById('workspace-container');
+        const cmdInput = document.getElementById('cmd-input');
+        const liveTarget = document.getElementById('live-render-target');
+        const docSkeleton = document.getElementById('doc-skeleton');
+
+        const skHeader = document.getElementById('skeleton-placeholders-header');
+        const skDiv = document.getElementById('skeleton-placeholders-div');
+        const skLines = document.getElementById('skeleton-placeholders-lines');
+
+        // Resets the page state back to Idle
+        function resetPage() {
+            workspaceCard.classList.remove('gen-mode');
+            workspaceCard.classList.remove('doc-ready');
+            liveTarget.innerHTML = "";
+
+            skHeader.style.display = 'flex';
+            skDiv.style.display = 'block';
+            skLines.style.display = 'block';
+
+            cmdInput.value = "";
+            cmdInput.disabled = false;
+            cmdInput.placeholder = "Ask Eburon to generate a document...";
+            cmdInput.focus();
+        }
+
+        function triggerPrint() { window.print(); }
+
+        // Input command listener
+        cmdInput.addEventListener('keydown', async (e) => {
+            if (e.key === 'Enter') {
+                const query = cmdInput.value.trim();
+                if (!query) return;
+
+                // Clean slate
+                workspaceCard.classList.remove('doc-ready');
+
+                // Disable input to show processing
+                cmdInput.disabled = true;
+                cmdInput.value = "";
+                cmdInput.placeholder = "Processing your request...";
+
+                // Activate Generation Blur Mode
+                workspaceCard.classList.add('gen-mode');
+
+                const requestPayload = {
+                    contents: [{
+                        role: "user",
+                        parts: [{
+                            text: `${query}\n\nStrictly provide your output as clean, semantic HTML inside a wrapper div with class 'rendered-document'. Match an executive, print-ready document structure. You can use headers (h1, h2), paragraphs (p), meta grids (<div class="meta-grid">), and signature sections (<div class="signature-grid"><div class="signature-box">...</div></div>). Do not wrap the response in markdown code blocks like \`\`\`html or write any leading/trailing explanations.`
+                        }]
+                    }],
+                    generationConfig: { temperature: 0.7 }
+                };
+
+                try {
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(requestPayload)
+                    });
+
+                    if (!response.ok) throw new Error(`HTTP Error Status: ${response.status}`);
+
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder("utf-8");
+                    let accumulatedJSON = "";
+
+                    // Hide skeleton placeholders once streaming starts
+                    skHeader.style.display = 'none';
+                    skDiv.style.display = 'none';
+                    skLines.style.display = 'none';
+
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
+
+                        accumulatedJSON += decoder.decode(value, { stream: true });
+
+                        const textPattern = /"text":\s*"((?:[^"\\]|\\.)*)"/g;
+                        let regexMatch;
+                        let combinedTextOutput = "";
+
+                        while ((regexMatch = textPattern.exec(accumulatedJSON)) !== null) {
+                            const rawStringToken = regexMatch[1];
+                            try { combinedTextOutput += JSON.parse(`"${rawStringToken}"`); }
+                            catch (parseErr) { combinedTextOutput += rawStringToken.replace(/\\n/g, '\n').replace(/\\"/g, '"'); }
+                        }
+
+                        liveTarget.innerHTML = combinedTextOutput.replace(/^```html\s*/i, '').replace(/```\s*$/, '').trim();
+                    }
+
+                    // FINISHED: Switch from Blurry Gen Mode to Clear Ready Mode
+                    workspaceCard.classList.remove('gen-mode');
+                    workspaceCard.classList.add('doc-ready');
+
+                    // Re-enable text input
+                    cmdInput.disabled = false;
+                    cmdInput.placeholder = "Ask Eburon to generate a document...";
+                    cmdInput.focus();
+
+                    // Reset the inner scrollbar of the embedded document wrapper
+                    docSkeleton.scrollTop = 0;
+
+                } catch (err) {
+                    console.error(err);
+                    alert(`Engine communication error: ${err.message}`);
+                    resetPage();
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
