@@ -204,7 +204,7 @@ export class AmbientConversationBed {
 export class AudioRecorder {
   private audioContext: AudioContext | null = null;
   private stream: MediaStream | null = null;
-  private processor: ScriptProcessorNode | null = null;
+  private workletNode: AudioWorkletNode | null = null;
   private silentSink: GainNode | null = null;
   private analyser: AnalyserNode | null = null;
   private dataArray: Uint8Array | null = null;
@@ -216,6 +216,15 @@ export class AudioRecorder {
 
   async start() {
     this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    
+    // Load the audio worklet processor
+    try {
+      await this.audioContext.audioWorklet.addModule('/audio-processor.js');
+    } catch (e) {
+      console.error('Failed to load audio worklet:', e);
+      return;
+    }
+
     this.stream = await navigator.mediaDevices.getUserMedia({ 
       audio: {
         echoCancellation: true,
@@ -234,9 +243,9 @@ export class AudioRecorder {
     this.dataArray = new Uint8Array(bufferLength);
     source.connect(this.analyser);
 
-    this.processor = this.audioContext.createScriptProcessor(1024, 1, 1);
-    this.processor.onaudioprocess = (e) => {
-      const input = e.inputBuffer.getChannelData(0);
+    this.workletNode = new AudioWorkletNode(this.audioContext, 'audio-processor');
+    this.workletNode.port.onmessage = (e) => {
+      const input = e.data;
       const resampled = this.downsampleBuffer(input, this.audioContext!.sampleRate, 16000);
       const output = new Int16Array(resampled.length);
       for (let i = 0; i < resampled.length; i++) {
@@ -256,10 +265,10 @@ export class AudioRecorder {
       this.onData(btoa(binary));
     };
     
-    this.analyser.connect(this.processor);
+    this.analyser.connect(this.workletNode);
     this.silentSink = this.audioContext.createGain();
     this.silentSink.gain.value = 0;
-    this.processor.connect(this.silentSink);
+    this.workletNode.connect(this.silentSink);
     this.silentSink.connect(this.audioContext.destination);
   }
 
@@ -304,9 +313,9 @@ export class AudioRecorder {
   }
 
   stop() {
-    if (this.processor && this.audioContext) {
+    if (this.workletNode && this.audioContext) {
       try {
-        this.processor.disconnect();
+        this.workletNode.disconnect();
       } catch (e) {}
     }
     if (this.silentSink) {
@@ -335,7 +344,7 @@ export class AudioRecorder {
     }
     this.audioContext = null;
     this.stream = null;
-    this.processor = null;
+    this.workletNode = null;
     this.silentSink = null;
     this.analyser = null;
     this.dataArray = null;
