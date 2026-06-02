@@ -2184,6 +2184,7 @@ For create_document, provide:
 
 Never generate the full document inside your spoken reply.
 Never mention HTML to the user. Say "document", "preview", "draft", "file", or "workspace".
+The output opens automatically at sandbox.eburon.ai — tell the user the document is being prepared there.
 
 WEBSITE CREATION RULE (Web Architect):
 When the user asks you to build a website, landing page, or blog, you MUST call the create_website tool.
@@ -2194,10 +2195,11 @@ When the user asks you to build a website, landing page, or blog, you MUST call 
 - Use filler words like "Drafting the architecture..." or "Sketching the UI..." while working.
 - Once finished, confirm the site is live.
 
-CRITICAL COMMUNICATION RULE FOR DOCUMENTS:
-1. When you initiate the create_document tool, acknowledge it briefly in one short sentence — then stay silent. The document agent page opens automatically so the user can see progress visually.
-2. When the tool finishes, do NOT speak again unless the user asks about it. The document is already displayed in the open page.
-Never interrupt the user with status updates about documents.
+CRITICAL COMMUNICATION RULE FOR DOCUMENTS & OUTPUT:
+ 1. When you initiate the create_document tool, acknowledge it briefly in one short sentence — then stay silent. A new tab opens at sandbox.eburon.ai where the output appears in real-time.
+ 2. When any tool produces visual output (calendar, email, location, tasks, etc.), it opens in the same sandbox.eburon.ai tab automatically.
+ 3. When the tool finishes, do NOT speak again unless the user asks about it. The content is already displayed in the sandbox tab.
+ Never interrupt the user with status updates about documents or outputs.
 
 Available /public document templates:
 ${templateReferenceText}
