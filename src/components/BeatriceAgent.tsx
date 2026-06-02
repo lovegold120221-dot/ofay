@@ -1322,7 +1322,7 @@ export function BeatriceAgent({
         }
         return `
         <div style="margin-bottom:12px;">
-          <div style="font-size:11px; color:#d0a78b; text-transform:uppercase; font-weight:bold; letter-spacing:0.5px;">${key.replace(/_/g, ' ')}</div>
+          <div style="font-size:11px; color:#D6AF93; text-transform:uppercase; font-weight:bold; letter-spacing:0.5px;">${key.replace(/_/g, ' ')}</div>
           <div style="font-size:14px; color:#fff; margin-top:2px;">${displayVal}</div>
         </div>`;
       }).join('');
@@ -1345,40 +1345,40 @@ export function BeatriceAgent({
       fileType = 'html';
     } else if (toolName === 'get_user_location' && result) {
       const mapsUrl = `https://www.google.com/maps?q=${result.lat},${result.lng}`;
-      formattedContent = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your Location</title><style>body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0d0a08;color:#f0e6df;display:flex;flex-direction:column;height:100vh}.map-wrap{flex:1;min-height:0}iframe{width:100%;height:100%;border:0}.info{padding:16px 20px;background:#1a1512;border-top:1px solid #2a1f18;text-align:center}p{margin:4px 0;font-size:14px;color:#d0a78b}span{color:#988c84}</style></head><body><div class="map-wrap"><iframe src="${mapsUrl}&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div><div class="info"><p>📍 Your location</p><span>Accuracy: ±${Math.round(result.accuracy)}m</span></div></body></html>`;
+      formattedContent = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your Location</title><style>body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0d0a08;color:#f0e6df;display:flex;flex-direction:column;height:100vh}.map-wrap{flex:1;min-height:0}iframe{width:100%;height:100%;border:0}.info{padding:16px 20px;background:#1a1512;border-top:1px solid #2a1f18;text-align:center}p{margin:4px 0;font-size:14px;color:#D6AF93}span{color:#988c84}</style></head><body><div class="map-wrap"><iframe src="${mapsUrl}&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div><div class="info"><p>📍 Your location</p><span>Accuracy: ±${Math.round(result.accuracy)}m</span></div></body></html>`;
       fileType = 'html';
     } else if (toolName === 'list_calendar_events' && result?.items) {
       const events = result.items.map((e: any) => {
         const start = e.start?.dateTime || e.start?.date || 'TBD';
         const t = start.includes('T') ? new Date(start).toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : start;
-        return `<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #2a1f18"><div style="width:4px;height:4px;border-radius:50%;background:#d0a78b;flex-shrink:0"></div><div style="flex:1"><p style="margin:0;font-size:14px;color:#f0e6df">${e.summary || 'Untitled'}</p><p style="margin:2px 0 0;font-size:11px;color:#988c84">${t}</p></div></div>`;
+        return `<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #2a1f18"><div style="width:4px;height:4px;border-radius:50%;background:#D6AF93;flex-shrink:0"></div><div style="flex:1"><p style="margin:0;font-size:14px;color:#f0e6df">${e.summary || 'Untitled'}</p><p style="margin:2px 0 0;font-size:11px;color:#988c84">${t}</p></div></div>`;
       }).join('');
       const count = result.items.length;
-      formattedContent = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Calendar Events</title><style>body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0d0a08;color:#f0e6df;padding:20px}h2{margin:0 0 4px;font-size:18px;color:#d0a78b}.count{font-size:12px;color:#6b5d53;margin-bottom:16px}.empty{text-align:center;padding:40px 20px;color:#6b5d53}</style></head><body><h2>📅 Upcoming Events</h2><p class="count">${count} event${count !== 1 ? 's' : ''}</p>${events || '<p class="empty">No upcoming events</p>'}</body></html>`;
+      formattedContent = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Calendar Events</title><style>body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0d0a08;color:#f0e6df;padding:20px}h2{margin:0 0 4px;font-size:18px;color:#D6AF93}.count{font-size:12px;color:#6b5d53;margin-bottom:16px}.empty{text-align:center;padding:40px 20px;color:#6b5d53}</style></head><body><h2>📅 Upcoming Events</h2><p class="count">${count} event${count !== 1 ? 's' : ''}</p>${events || '<p class="empty">No upcoming events</p>'}</body></html>`;
       fileType = 'html';
     } else if (toolName === 'list_gmail_messages' && result?.messages) {
       const msgs = result.messages.map((m: any) =>
-        `<div style="display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-bottom:1px solid #2a1f18"><div style="width:32px;height:32px;border-radius:50%;background:#2a1f18;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;color:#d0a78b">${(m.from?.[0] || '?').toUpperCase()}</div><div style="flex:1;min-width:0"><p style="margin:0;font-size:13px;color:#f0e6df;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.subject || '(no subject)'}</p><p style="margin:2px 0 0;font-size:11px;color:#988c84">${m.from || ''}</p><p style="margin:2px 0 0;font-size:11px;color:#6b5d53;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.snippet || ''}</p></div></div>`
+        `<div style="display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-bottom:1px solid #2a1f18"><div style="width:32px;height:32px;border-radius:50%;background:#2a1f18;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;color:#D6AF93">${(m.from?.[0] || '?').toUpperCase()}</div><div style="flex:1;min-width:0"><p style="margin:0;font-size:13px;color:#f0e6df;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.subject || '(no subject)'}</p><p style="margin:2px 0 0;font-size:11px;color:#988c84">${m.from || ''}</p><p style="margin:2px 0 0;font-size:11px;color:#6b5d53;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.snippet || ''}</p></div></div>`
       ).join('');
-      formattedContent = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Recent Emails</title><style>body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0d0a08;color:#f0e6df;padding:20px}h2{margin:0 0 4px;font-size:18px;color:#d0a78b}.count{font-size:12px;color:#6b5d53;margin-bottom:16px}</style></head><body><h2>📬 Recent Emails</h2><p class="count">${result.messages.length} message${result.messages.length !== 1 ? 's' : ''}</p>${msgs}</body></html>`;
+      formattedContent = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Recent Emails</title><style>body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0d0a08;color:#f0e6df;padding:20px}h2{margin:0 0 4px;font-size:18px;color:#D6AF93}.count{font-size:12px;color:#6b5d53;margin-bottom:16px}</style></head><body><h2>📬 Recent Emails</h2><p class="count">${result.messages.length} message${result.messages.length !== 1 ? 's' : ''}</p>${msgs}</body></html>`;
       fileType = 'html';
     } else if (toolName === 'list_google_tasks' && result?.items) {
       const tasks = result.items.map((t: any) =>
         `<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid #2a1f18"><div style="width:16px;height:16px;border-radius:50%;border:2px solid #5a4a40;flex-shrink:0"></div><p style="margin:0;font-size:13px;color:#f0e6df">${t.title || 'Untitled'}</p></div>`
       ).join('');
-      formattedContent = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tasks</title><style>body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0d0a08;color:#f0e6df;padding:20px}h2{margin:0 0 4px;font-size:18px;color:#d0a78b}.count{font-size:12px;color:#6b5d53;margin-bottom:16px}</style></head><body><h2>📋 Tasks</h2><p class="count">${result.items.length} task${result.items.length !== 1 ? 's' : ''}</p>${tasks}</body></html>`;
+      formattedContent = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tasks</title><style>body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0d0a08;color:#f0e6df;padding:20px}h2{margin:0 0 4px;font-size:18px;color:#D6AF93}.count{font-size:12px;color:#6b5d53;margin-bottom:16px}</style></head><body><h2>📋 Tasks</h2><p class="count">${result.items.length} task${result.items.length !== 1 ? 's' : ''}</p>${tasks}</body></html>`;
       fileType = 'html';
     } else if (toolName === 'list_drive_files' && result?.files) {
       const files = result.files.map((f: any) =>
         `<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid #2a1f18"><div style="font-size:16px;flex-shrink:0">📄</div><div style="flex:1;min-width:0"><p style="margin:0;font-size:13px;color:#f0e6df;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${f.name}</p><p style="margin:1px 0 0;font-size:10px;color:#6b5d53">${(f.mimeType || '').split('/').pop()}</p></div></div>`
       ).join('');
-      formattedContent = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Drive Files</title><style>body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0d0a08;color:#f0e6df;padding:20px}h2{margin:0 0 4px;font-size:18px;color:#d0a78b}.count{font-size:12px;color:#6b5d53;margin-bottom:16px}</style></head><body><h2>📁 Drive Files</h2><p class="count">${result.files.length} file${result.files.length !== 1 ? 's' : ''}</p>${files}</body></html>`;
+      formattedContent = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Drive Files</title><style>body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0d0a08;color:#f0e6df;padding:20px}h2{margin:0 0 4px;font-size:18px;color:#D6AF93}.count{font-size:12px;color:#6b5d53;margin-bottom:16px}</style></head><body><h2>📁 Drive Files</h2><p class="count">${result.files.length} file${result.files.length !== 1 ? 's' : ''}</p>${files}</body></html>`;
       fileType = 'html';
     } else if (toolName === 'search_youtube' && result?.items) {
       const vids = result.items.map((v: any) =>
         `<div style="display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-bottom:1px solid #2a1f18"><div style="width:80px;height:45px;border-radius:6px;background-color:#2a1f18;flex-shrink:0;overflow:hidden"><img src="${v.snippet?.thumbnails?.default?.url || ''}" style="width:100%;height:100%;object-fit:cover" alt=""></div><div style="flex:1;min-width:0"><p style="margin:0;font-size:13px;color:#f0e6df">${v.snippet?.title || ''}</p><p style="margin:2px 0 0;font-size:11px;color:#988c84">${v.snippet?.channelTitle || ''}</p></div></div>`
       ).join('');
-      formattedContent = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>YouTube Results</title><style>body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0d0a08;color:#f0e6df;padding:20px}h2{margin:0 0 4px;font-size:18px;color:#d0a78b}.count{font-size:12px;color:#6b5d53;margin-bottom:16px}</style></head><body><h2>▶ YouTube Results</h2><p class="count">${result.items.length} result${result.items.length !== 1 ? 's' : ''}</p>${vids}</body></html>`;
+      formattedContent = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>YouTube Results</title><style>body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0d0a08;color:#f0e6df;padding:20px}h2{margin:0 0 4px;font-size:18px;color:#D6AF93}.count{font-size:12px;color:#6b5d53;margin-bottom:16px}</style></head><body><h2>▶ YouTube Results</h2><p class="count">${result.items.length} result${result.items.length !== 1 ? 's' : ''}</p>${vids}</body></html>`;
       fileType = 'html';
     } else if (toolName === 'create_google_task' && result) {
       formattedContent = `<div style="padding:20px; color:#fff;"><h3>✅ Task Created</h3><p>${result.title || 'Untitled'}</p></div>`;
@@ -1397,33 +1397,38 @@ export function BeatriceAgent({
 
     const resultId = await saveToolResult(user.uid, toolName, isError ? (error || result?.error || 'Unknown error') : formattedContent, fileType);
 
-    // Route ALL visual output to the doc-agent sandbox page
+    // Route ALL visual output to the sandbox page via postMessage (cross-origin safe)
     try {
-      window.open('/doc-agent/', 'docgen-output');
-      // Brief delay so the target page can register its BroadcastChannel listener
-      setTimeout(() => {
-        try {
-          const bc = new BroadcastChannel('docgen_channel');
-          bc.postMessage({
-            type: 'show_result',
-            content: formattedContent,
-            title: isError ? `Error: ${title}` : title,
-            toolName,
-            isError,
-          });
-          bc.close();
-        } catch (_) {}
-      }, 300);
+      const sb = window.open('https://sandbox.eburon.ai', 'docgen-output');
+      // Wait for the sandbox page to load, then send content via postMessage
+      const sendToSandbox = () => {
+        if (sb) {
+          try {
+            sb.postMessage({
+              type: 'show_result',
+              content: formattedContent,
+              title: isError ? `Error: ${title}` : title,
+              toolName,
+              isError,
+            }, 'https://sandbox.eburon.ai');
+          } catch (_) {}
+        }
+      };
+      // Try immediately and then retry a few times to account for page load time
+      setTimeout(sendToSandbox, 500);
+      setTimeout(sendToSandbox, 1500);
+      setTimeout(sendToSandbox, 3000);
     } catch (_) {
-      // Fallback: if window.open fails, silently skip (caller still has the result)
+      // Fallback: if window.open fails, silently skip
     }
   };
 
   const sendResultToDocAgent = (content: string, title: string, toolName: string) => {
     try {
-      const bc = new BroadcastChannel('docgen_channel');
-      bc.postMessage({ type: 'show_result', content, title, toolName });
-      bc.close();
+      const sb = window.open('https://sandbox.eburon.ai', 'docgen-output');
+      if (sb) {
+        sb.postMessage({ type: 'show_result', content, title, toolName }, 'https://sandbox.eburon.ai');
+      }
     } catch (_) {}
   };
 
@@ -1929,7 +1934,7 @@ export function BeatriceAgent({
           <button
             onClick={onToggle}
             aria-pressed={enabled}
-            className={`w-10 h-6 rounded-full transition-all duration-300 flex items-center shrink-0 cursor-pointer ${enabled ? 'bg-[#d0a78b]' : 'bg-white/[0.1]'}`}
+            className={`w-10 h-6 rounded-full transition-all duration-300 flex items-center shrink-0 cursor-pointer ${enabled ? 'bg-[#D6AF93]' : 'bg-white/[0.1]'}`}
           >
             <span className={`block w-4.5 h-4.5 rounded-full bg-white transition-all duration-300 shadow-md ${enabled ? 'ml-[18px]' : 'ml-[3px]'}`} />
           </button>
@@ -2083,8 +2088,8 @@ GOOGLE SERVICES PERMISSION RULE:
 You can access the user's Google Calendar, Gmail, Tasks, Drive, and YouTube. The user asking you about their data IS their permission — execute immediately. Do NOT pre-ask for permission. Do not say "shall I check your calendar?" — if they asked about their schedule, just check. Only pause for confirmation on destructive actions like deleting emails, deleting events, or sending emails (show the recipient/subject first for send). For reading — just do it.
 
 CURRENT AUTHENTICATION STATUS:
-- Google Services (Gmail, Calendar, Drive, Tasks, YouTube, Contacts): ${googleToken ? 'AUTHENTICATED - You have the technical permission token.' : 'NOT AUTHENTICATED - You lack the required permission token.'}
-- WhatsApp Integration: ${waStatus === 'paired' ? 'CONNECTED - You have the technical permission token.' : 'NOT CONNECTED - You lack the required permission token.'}
+- Google Services: ${googleTokenRef.current ? 'GOOGLE CONNECTED' : 'GOOGLE DISCONNECTED — You cannot use Google services.'}
+- WhatsApp Integration: ${waStatus === 'paired' ? 'WHATSAPP CONNECTED' : 'WHATSAPP DISCONNECTED — Pair in Settings → WhatsApp.'}
 
 CRITICAL PERMISSION PRE-CHECK RULE:
 Before you attempt to call ANY tool for Google Services or WhatsApp, you MUST check your "CURRENT AUTHENTICATION STATUS" above.
@@ -3355,20 +3360,19 @@ ${historyContext}
                       const prompt = String(args.prompt || 'Create a professional document.');
                       const generationTaskId = taskId;
 
-                      // ── IMMEDIATELY open doc-agent page (shows "Generating..." blur) ──
-                      try {
-                        const apiKey = getGeminiApiKey();
-                        localStorage.setItem('docgen_prompt', prompt);
-                        localStorage.setItem('docgen_title', title);
-                        if (apiKey) localStorage.setItem('gemini_api_key', apiKey);
-                        window.open('/doc-agent/', 'docgen-output');
-                      } catch (_) { /* localStorage or window.open may fail in some contexts */ }
+                      // ── IMMEDIATELY open sandbox page ──
+                      const sb = window.open('https://sandbox.eburon.ai', 'docgen-output');
+                      // Tell the sandbox page to show "Generating..." state
+                      setTimeout(() => {
+                        if (sb) {
+                          try {
+                            sb.postMessage({ type: 'generating', title, prompt }, 'https://sandbox.eburon.ai');
+                          } catch (_) {}
+                        }
+                      }, 300);
 
                       // ── Set UI state ──
                       setGeneratedDocumentTask(generationTaskId, title, '', 'working');
-
-                      // Create cross-tab channel — result will be sent to the doc-agent page
-                      const docChannel = new BroadcastChannel('docgen_channel');
 
                       // Background generation
                       (async () => {
@@ -3385,11 +3389,16 @@ ${historyContext}
 
                           await setGeneratedDocumentTask(generationTaskId, title, content, 'done');
 
-                          // Send result to the already-open doc-agent page
-                          try {
-                            docChannel.postMessage({ type: 'docgen_result', content, title, prompt });
-                          } catch (_) {}
-                          docChannel.close();
+                          // Send result to the sandbox page via postMessage (cross-origin safe)
+                          const sendDoc = () => {
+                            if (sb) {
+                              try {
+                                sb.postMessage({ type: 'docgen_result', content, title, prompt }, 'https://sandbox.eburon.ai');
+                              } catch (_) {}
+                            }
+                          };
+                          setTimeout(sendDoc, 500);
+                          setTimeout(sendDoc, 1500);
 
                           const wsOutput = {
                             id: `doc_${generationTaskId}`,
@@ -3410,7 +3419,6 @@ ${historyContext}
                             }).catch(() => {});
                           }
                         } catch (e: any) {
-                          docChannel.close();
                           await setGeneratedDocumentTask(generationTaskId, title, '', 'error');
                         }
                       })();
@@ -3815,7 +3823,7 @@ ${historyContext}
   };
 
   return (
-    <div className="min-h-screen bg-wa-bg-main text-wa-text-primary flex flex-col h-[100dvh] overflow-hidden select-none relative">
+    <div className="min-h-screen bg-wa-bg-main text-wa-text-primary flex flex-col h-[100dvh] overflow-hidden select-none relative shadow-[inset_0_0_0_1px_rgba(214,175,147,0.08)]">
       <audio ref={bgAudioRef} src="/office.mp3" loop crossOrigin="anonymous" className="hidden" />
       <div
         className="wa-chat-bg opacity-[0.04]"
@@ -3873,7 +3881,7 @@ ${historyContext}
                   : '0 0 0px rgba(0,0,0,0)',
               }}
               transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-              className="relative w-48 h-48 sm:w-64 sm:h-64 rounded-full bg-white/[0.02] border border-[#d0a78b]/10 overflow-hidden flex items-center justify-center transition-all duration-500 hover:border-[#d0a78b]/30 hover:shadow-[0_0_60px_rgba(208,167,139,0.2)] active:scale-[0.96]"
+              className="relative w-48 h-48 sm:w-64 sm:h-64 rounded-full bg-white/[0.02] border border-[#D6AF93]/10 overflow-hidden flex items-center justify-center transition-all duration-500 hover:border-[#D6AF93]/30 hover:shadow-[0_0_60px_rgba(208,167,139,0.2)] active:scale-[0.96]"
               aria-label="Toggle Voice Assistant"
             >
               <div className="absolute inset-0 bg-black/5 backdrop-blur-[16px] z-10 rounded-full pointer-events-none" />
@@ -3882,7 +3890,7 @@ ${historyContext}
                 <div className="blob-1 absolute w-40 h-40 sm:w-56 sm:h-56 rounded-full bg-[radial-gradient(circle,rgba(208,167,139,0.65)_0%,transparent_70%)] blur-md" />
                 <div className="blob-2 absolute w-36 h-36 sm:w-52 sm:h-52 rounded-full bg-[radial-gradient(circle,rgba(171,123,96,0.45)_0%,transparent_70%)] blur-md" />
                 <div className="blob-3 absolute w-32 h-32 sm:w-48 sm:h-48 rounded-full bg-[radial-gradient(circle,rgba(235,208,188,0.55)_0%,transparent_70%)] blur-md" />
-                <div className="absolute w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-[#d0a78b]/15 blur-xl" />
+                <div className="absolute w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-[#D6AF93]/15 blur-xl" />
               </div>
 
               <div className="absolute inset-0 z-20 rounded-full flex items-center justify-center overflow-hidden">
@@ -3893,7 +3901,7 @@ ${historyContext}
                   height={256}
                 />
                 {connecting ? (
-                  <Loader2 className="w-7 h-7 sm:w-9 sm:h-9 animate-spin text-[#d0a78b] z-10" />
+                  <Loader2 className="w-7 h-7 sm:w-9 sm:h-9 animate-spin text-[#D6AF93] z-10" />
                 ) : isActive ? null : null}
               </div>
             </motion.button>
@@ -3931,7 +3939,7 @@ ${historyContext}
         </div>
       </main>
 
-      <footer className="sticky bottom-0 w-full h-[72px] sm:h-[84px] bg-wa-bg-header border-t border-white/5 z-20 px-4 sm:px-6 box-border select-none shrink-0 shadow-lg">
+      <footer className="sticky bottom-0 w-full h-[72px] sm:h-[84px] bg-wa-bg-header border-t border-[rgba(214,175,147,0.10)] z-20 px-4 sm:px-6 box-border select-none shrink-0 shadow-lg">
         <div className="relative w-full h-full flex items-center justify-between">
 
           <button
@@ -4090,11 +4098,11 @@ ${historyContext}
 
               {task.status === 'processing' ? (
                 <div className="relative flex-shrink-0">
-                  <Loader2 className="w-4 h-4 text-[#d0a78b] animate-spin" />
+                  <Loader2 className="w-4 h-4 text-[#D6AF93] animate-spin" />
                   <motion.div
                     animate={{ scale: [1, 1.8], opacity: [0.5, 0] }}
                     transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut" }}
-                    className="absolute inset-0 bg-[#d0a78b]/50 rounded-full blur-[2px]"
+                    className="absolute inset-0 bg-[#D6AF93]/50 rounded-full blur-[2px]"
                   />
                 </div>
               ) : (
@@ -4111,7 +4119,7 @@ ${historyContext}
               <div className="flex-1 truncate text-xs relative z-10">
                 <div className="flex items-center gap-1.5 overflow-hidden">
                   <motion.span
-                    animate={{ color: task.status === 'processing' ? '#d0a78b' : '#10b981' }}
+                    animate={{ color: task.status === 'processing' ? '#D6AF93' : '#10b981' }}
                     className="font-mono uppercase font-bold"
                   >
                     {task.serviceName}
@@ -4144,7 +4152,7 @@ ${historyContext}
               <h3 className="text-base font-['SF_Pro_Display',system-ui,sans-serif] font-semibold tracking-tight text-white">Agent Settings</h3>
               <button
                 onClick={() => setShowSettings(false)}
-                className="w-16 text-right text-sm font-['SF_Pro_Text',system-ui,sans-serif] font-semibold text-[#d0a78b] hover:text-white transition-colors active:scale-95"
+                className="w-16 text-right text-sm font-['SF_Pro_Text',system-ui,sans-serif] font-semibold text-[#D6AF93] hover:text-white transition-colors active:scale-95"
                 aria-label="Done"
               >
                 Done
@@ -4166,7 +4174,7 @@ ${historyContext}
                     </div>
                     <button
                       onClick={onLogin}
-                      className="px-4 py-2 bg-[#d0a78b] hover:brightness-110 active:scale-95 rounded-xl text-xs font-bold text-black transition-all duration-200 cursor-pointer"
+                      className="px-4 py-2 bg-[#D6AF93] hover:brightness-110 active:scale-95 rounded-xl text-xs font-bold text-black transition-all duration-200 cursor-pointer"
                     >
                       {googleToken ? 'Connected' : 'Connect Now'}
                     </button>
@@ -4193,7 +4201,7 @@ ${historyContext}
                       aria-pressed={ambientEnabled}
                       aria-label="Toggle Ambient Sound"
                       title="Toggle Ambient Sound"
-                      className={`w-10 h-6 rounded-full transition-all duration-300 flex items-center shrink-0 cursor-pointer ${ambientEnabled ? 'bg-[#d0a78b]' : 'bg-white/[0.1]'}`}
+                      className={`w-10 h-6 rounded-full transition-all duration-300 flex items-center shrink-0 cursor-pointer ${ambientEnabled ? 'bg-[#D6AF93]' : 'bg-white/[0.1]'}`}
                     >
                       <span className={`block w-4.5 h-4.5 rounded-full bg-white transition-all duration-300 shadow-md ${ambientEnabled ? 'ml-[18px]' : 'ml-[3px]'}`} />
                     </button>
@@ -4209,7 +4217,7 @@ ${historyContext}
                       value={ambientVolume}
                       onChange={(e) => setAmbientVolume(parseInt(e.target.value, 10))}
                       disabled={!ambientEnabled}
-                      className="w-full h-1.5 bg-white/[0.05] accent-[#d0a78b] rounded-lg appearance-none cursor-pointer disabled:opacity-30 transition-all duration-300"
+                      className="w-full h-1.5 bg-white/[0.05] accent-[#D6AF93] rounded-lg appearance-none cursor-pointer disabled:opacity-30 transition-all duration-300"
                       aria-label="Ambient Volume"
                       title="Ambient Volume"
                     />
@@ -4266,7 +4274,7 @@ ${historyContext}
                 <button
                   onClick={() => saveSettings()}
                   disabled={isSaving}
-                  className="w-full p-4 bg-[#d0a78b] hover:brightness-110 active:scale-[0.98] disabled:opacity-50 rounded-2xl text-center transition-all duration-200 cursor-pointer shadow-[0_6px_24px_rgba(208,167,139,0.25)] hover:shadow-[0_8px_30px_rgba(208,167,139,0.4)] flex items-center justify-center gap-2"
+                  className="w-full p-4 bg-[#D6AF93] hover:brightness-110 active:scale-[0.98] disabled:opacity-50 rounded-2xl text-center transition-all duration-200 cursor-pointer shadow-[0_6px_24px_rgba(208,167,139,0.25)] hover:shadow-[0_8px_30px_rgba(208,167,139,0.4)] flex items-center justify-center gap-2"
                 >
                   {isSaving ? <Loader2 className="w-5 h-5 animate-spin text-black" /> : <Save className="w-5 h-5 text-black" />}
                   <span className="text-[15px] font-['SF_Pro_Text',system-ui,sans-serif] font-bold tracking-tight text-black">Save Settings</span>

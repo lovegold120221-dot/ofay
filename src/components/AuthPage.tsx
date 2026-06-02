@@ -173,7 +173,7 @@ export function AuthPage({ onGoogleToken, onLogin }: AuthPageProps) {
             >
               <div className="backdrop-blur-2xl bg-white/[0.03] border border-white/[0.06] rounded-3xl p-7 flex flex-col shadow-2xl">
                 <h2 className="text-xl font-light tracking-wide text-white/90 mb-1 font-['SF_Pro_Display',system-ui,sans-serif]">Sign In</h2>
-                <p className="text-white/30 text-xs mb-7 font-['SF_Pro_Text',system-ui,sans-serif]">Welcome back. Enter your credentials.</p>
+                <p className="text-white/30 text-xs mb-7 font-['SF_Pro_Text',system-ui,sans-serif]">Welcome back. Access your Beatrice workspace.</p>
 
                 <form onSubmit={handleEmailAuth} className="space-y-3 mb-5">
                   <div className="group rounded-2xl bg-white/[0.04] border border-white/[0.06] focus-within:border-[#d0a78b]/30 focus-within:bg-white/[0.06] transition-all duration-300 has-[:focus]:shadow-[0_0_0_1px_rgba(208,167,139,0.15)]">
@@ -262,7 +262,7 @@ export function AuthPage({ onGoogleToken, onLogin }: AuthPageProps) {
             >
               <div className="backdrop-blur-2xl bg-white/[0.03] border border-white/[0.06] rounded-3xl p-7 flex flex-col shadow-2xl">
                 <h2 className="text-xl font-light tracking-wide text-white/90 mb-1 font-['SF_Pro_Display',system-ui,sans-serif]">Create Account</h2>
-                <p className="text-white/30 text-xs mb-7 font-['SF_Pro_Text',system-ui,sans-serif]">Sign up to unlock Beatrice's voice intelligence.</p>
+                <p className="text-white/30 text-xs mb-7 font-['SF_Pro_Text',system-ui,sans-serif]">Create your account to start using Beatrice.</p>
 
                 <form onSubmit={handleEmailAuth} className="space-y-3 mb-4">
                   <div className="group rounded-2xl bg-white/[0.04] border border-white/[0.06] focus-within:border-[#d0a78b]/30 focus-within:bg-white/[0.06] transition-all duration-300 has-[:focus]:shadow-[0_0_0_1px_rgba(208,167,139,0.15)]">
