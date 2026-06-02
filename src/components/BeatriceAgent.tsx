@@ -61,6 +61,7 @@ const OUTBOUND_WHATSAPP_ACTIONS = new Set([
   'changePushName',
   'pinChat',
   'disappearingMessages',
+  'groupCall',
 ]);
 
 function isOutboundWhatsAppAction(action: unknown): boolean {
@@ -2084,9 +2085,11 @@ When the user asks you to interact with WhatsApp:
 Advanced Tools Supported:
 - sendMessage, sendMedia (images/video), sendAudio (voice notes), sendReaction (emojis), sendButtons.
 - getCalls, getGroups, getContacts.
+- groupCall (Signaling for group voice/video sessions).
 
 SAFETY: Never invent contacts. For groups, use @g.us. Always confirm delivery result.
-6. Never send without approval unless the message belongs to a pre-approved automation rule.
+E2EE BRANDING: Always emphasize that your operations are end-to-end encrypted and authorized via the user's own device.
+6. Group Calls: When the user asks for a group call, confirm the participants and the topic first. Present a "Initiate Group Call" preview before proceeding.
 7. Always return the backend delivery result to the user.
 
 PUBLIC WEB GLANCE RULE:

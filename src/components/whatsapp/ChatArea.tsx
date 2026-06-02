@@ -11,7 +11,9 @@ import {
   Phone,
   X,
   File,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Lock,
+  PhoneCall
 } from 'lucide-react';
 import { type WaChatSummary, type WaMessageRecord } from '../../lib/whatsappClient';
 import { MessageBubble } from './MessageBubble';
@@ -87,20 +89,32 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
         </div>
 
         <div className="flex items-center gap-1 sm:gap-4 text-wa-text-secondary">
-           <button 
-             onClick={() => onCall('video')}
-             className="p-2 hover:bg-white/5 rounded-full transition-colors hidden sm:block"
-             title="Video Call"
-           >
-              <Video className="w-5 h-5" />
-           </button>
-           <button 
-             onClick={() => onCall('audio')}
-             className="p-2 hover:bg-white/5 rounded-full transition-colors hidden sm:block"
-             title="Voice Call"
-           >
-              <Phone className="w-5 h-5" />
-           </button>
+           {chat.isGroup ? (
+              <button 
+                onClick={() => onCall('group')}
+                className="p-2 hover:bg-white/5 rounded-full transition-colors hidden sm:block"
+                title="Group Call"
+              >
+                 <PhoneCall className="w-5 h-5" />
+              </button>
+           ) : (
+             <>
+              <button 
+                onClick={() => onCall('video')}
+                className="p-2 hover:bg-white/5 rounded-full transition-colors hidden sm:block"
+                title="Video Call"
+              >
+                  <Video className="w-5 h-5" />
+              </button>
+              <button 
+                onClick={() => onCall('audio')}
+                className="p-2 hover:bg-white/5 rounded-full transition-colors hidden sm:block"
+                title="Voice Call"
+              >
+                  <Phone className="w-5 h-5" />
+              </button>
+             </>
+           )}
            <div className="w-[1px] h-6 bg-white/5 hidden sm:block mx-1" />
            <button className="p-2 hover:bg-white/5 rounded-full transition-colors">
               <Search className="w-5 h-5" />
@@ -116,16 +130,25 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
         ref={scrollRef}
         className="flex-1 overflow-y-auto px-4 py-4 sm:px-[5%] lg:px-[10%] z-0 custom-scrollbar flex flex-col"
       >
+        {/* E2EE Info Card */}
+        <div className="mx-auto mb-6 max-w-sm text-center p-3 bg-[#1d282f] rounded-lg border border-white/5 shadow-sm">
+           <div className="flex items-center justify-center gap-2 text-wa-green/60 mb-1">
+              <Lock size={10} />
+              <span className="text-[10px] font-black uppercase tracking-[0.1em]">Encrypted</span>
+           </div>
+           <p className="text-[12px] text-wa-text-secondary leading-relaxed font-medium">
+              Messages are end-to-end encrypted. No one outside of this chat, not even WhatsApp, can read or listen to them.
+           </p>
+        </div>
+
         {loadingMessages && messages.length === 0 ? (
           <div className="my-auto flex flex-col items-center gap-4 text-wa-text-secondary">
              <Loader2 className="w-8 h-8 animate-spin text-wa-green" />
              <p className="text-sm font-medium uppercase tracking-widest">Decrypting messages</p>
           </div>
         ) : messages.length === 0 ? (
-          <div className="my-auto mx-auto max-w-xs text-center p-6 bg-wa-bg-header/40 rounded-lg backdrop-blur-sm border border-white/5">
-             <p className="text-[13px] text-wa-text-secondary leading-relaxed">
-                Messages are end-to-end encrypted. No one outside of this chat, not even WhatsApp, can read or listen to them.
-             </p>
+          <div className="my-auto mx-auto max-w-xs text-center p-6 bg-wa-bg-header/40 rounded-lg backdrop-blur-sm border border-white/5 invisible">
+             {/* Previous text removed and moved to top card */}
           </div>
         ) : (
           <div className="flex flex-col gap-0.5">
