@@ -1,3 +1,44 @@
+## TASK-20260602-160000: Deploy Baileys Backend to VPS under whatsapp.eburon.ai
+
+### START RECORD
+- STATUS: COMPLETED
+- Start time: 2026-06-02T16:00:00Z
+- User request: Drop gowa, run Baileys backend on VPS port 4200, deploy under whatsapp.eburon.ai
+- Preservation constraints: Keep Baileys WhatsAppManager unchanged; gowa-client.ts kept as file but not used
+- Success criteria:
+  - Baileys backend running on VPS at port 4200
+  - whatsapp.eburon.ai serves both API + frontend (HTTPS via Traefik + Let's Encrypt)
+  - Gowa stopped and removed
+  - PM2 managed with auto-restart on boot
+
+### FINAL REPORT
+- STATUS: COMPLETED
+- End time: 2026-06-02T16:15:00Z
+- What was done:
+  1. Removed `GOWA_API_URL` from `.env` — backend now uses Baileys
+  2. Synced server code to VPS at `/opt/voxx-zero/` via rsync
+  3. Installed npm dependencies on VPS (Node 22)
+  4. Created Traefik dynamic config at `/docker/traefik/dynamic/whatsapp-backend.yml` routing `whatsapp.eburon.ai` → `http://127.0.0.1:4200`
+  5. Started backend via PM2 (`voxx-backend`) with auto-restart on boot (`pm2 startup` + `pm2 save`)
+  6. Built frontend locally and synced `dist/` to VPS
+  7. Updated backend to serve static files from `dist/` (with `__dirname` ESM fix via `fileURLToPath`)
+  8. Stopped and removed gowa Docker container + compose stack
+- Verified:
+  - `https://whatsapp.eburon.ai/api/health` → 200 ✅
+  - `https://whatsapp.eburon.ai/` → 200 (serves React app) ✅
+  - `POST /api/whatsapp/pair` → Baileys responding correctly ✅
+- Files changed:
+  - `server/index.ts` — added `path`/`fileURLToPath` imports, static file serving for `dist/`, SPA fallback
+  - `.env` — removed gowa vars, set `VITE_BACKEND_URL`/`VITE_SANDBOX_URL` to `https://whatsapp.eburon.ai`
+- CSS/UI preservation: N/A
+- Real data/API credential check: Using real VPS, real domain, real Let's Encrypt cert
+- Known issues:
+  - The `gowa-client.ts` file still exists on the VPS but isn't imported/used (harmless)
+  - Frontend built with `VITE_BACKEND_URL=https://whatsapp.eburon.ai` — local dev still uses localhost:4200 via auto-detection
+- Next step: Test WhatsApp QR pairing from the deployed app at `https://whatsapp.eburon.ai`
+
+---
+
 ## TASK-20260602-150000: Integrate Go WhatsApp (gowa) as Primary Provider
 
 ### START RECORD

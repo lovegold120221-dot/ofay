@@ -1,7 +1,12 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 import { supabase } from './supabase';
 import { WhatsAppManager } from './whatsapp';
 import * as waTools from './whatsapp-tools';
@@ -625,6 +630,18 @@ process.on('SIGTERM', async () => {
   console.log('Shutting down...');
   if (waManager) await waManager!.shutdown();
   process.exit(0);
+});
+
+// ── Serve built frontend for production (same domain) ──
+const distPath = path.join(__dirname, '..', 'dist');
+app.use(express.static(distPath));
+
+// SPA fallback — serve index.html for any non-API route
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api/') || req.path.startsWith('/site-build/')) return next();
+  res.sendFile(path.join(distPath, 'index.html'), (err) => {
+    if (err) next();
+  });
 });
 
 app.use((_req, res) => {
