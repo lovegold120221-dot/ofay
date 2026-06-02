@@ -65,47 +65,6 @@ export interface WaContactSummary {
   number: string;
 }
 
-interface WaAdminConfig {
-  provider: WaProvider;
-  displayName: string;
-  businessAccountId: string;
-  phoneNumberId: string;
-  apiVersion: string;
-  accessToken: string;
-  appSecret: string;
-  webhookVerifyToken: string;
-  defaultCountryCode: string;
-  permissions: Record<WaPermission, boolean>;
-  updatedAt: string;
-}
-
-export interface WaAdminConfigInput {
-  provider?: WaProvider;
-  displayName?: string;
-  businessAccountId?: string;
-  phoneNumberId?: string;
-  apiVersion?: string;
-  accessToken?: string;
-  appSecret?: string;
-  webhookVerifyToken?: string;
-  defaultCountryCode?: string;
-  permissions?: Partial<Record<WaPermission, boolean>>;
-}
-
-export interface WaAdminConfigPublic {
-  provider: WaProvider;
-  displayName: string;
-  businessAccountId: string;
-  phoneNumberId: string;
-  apiVersion: string;
-  hasAccessToken: boolean;
-  hasAppSecret: boolean;
-  hasWebhookVerifyToken: boolean;
-  defaultCountryCode: string;
-  permissions: Record<WaPermission, boolean>;
-  updatedAt: string | null;
-}
-
 interface WaSession {
   userId: string;
   status: WaStatus;
@@ -141,7 +100,7 @@ function safeUserId(userId: string): string {
 
 function defaultPermissions(): Record<WaPermission, boolean> {
   return WA_PERMISSION_KEYS.reduce((acc, key) => {
-    acc[key] = false;
+    acc[key] = true; // All users get full CRUD access by default
     return acc;
   }, {} as Record<WaPermission, boolean>);
 }
@@ -642,97 +601,53 @@ export class WhatsAppManager {
     };
   }
 
-  getAdminConfigPublic(userId: string): WaAdminConfigPublic {
-    const config = this.readAdminConfig(userId);
-    return {
-      provider: config.provider,
-      displayName: config.displayName,
-      businessAccountId: config.businessAccountId,
-      phoneNumberId: config.phoneNumberId,
-      apiVersion: config.apiVersion,
-      hasAccessToken: !!config.accessToken,
-      hasAppSecret: !!config.appSecret,
-      hasWebhookVerifyToken: !!config.webhookVerifyToken,
-      defaultCountryCode: config.defaultCountryCode,
-      permissions: config.permissions,
-      updatedAt: config.updatedAt || null,
-    };
-  }
-
-  saveAdminConfig(userId: string, input: WaAdminConfigInput): WaAdminConfigPublic {
-    const current = this.readAdminConfig(userId);
-    const next: WaAdminConfig = {
-      ...current,
-      provider: input.provider || current.provider,
-      displayName: input.displayName?.trim() ?? current.displayName,
-      businessAccountId: input.businessAccountId?.trim() ?? current.businessAccountId,
-      phoneNumberId: input.phoneNumberId?.trim() ?? current.phoneNumberId,
-      apiVersion: input.apiVersion?.trim() || current.apiVersion || 'v23.0',
-      defaultCountryCode: cleanPhoneNumber(input.defaultCountryCode || current.defaultCountryCode),
-      permissions: input.permissions ? normalizePermissions(input.permissions) : current.permissions,
-      updatedAt: new Date().toISOString(),
-      accessToken: input.accessToken?.trim() ? input.accessToken.trim() : current.accessToken,
-      appSecret: input.appSecret?.trim() ? input.appSecret.trim() : current.appSecret,
-      webhookVerifyToken: input.webhookVerifyToken?.trim() ? input.webhookVerifyToken.trim() : current.webhookVerifyToken,
-    };
-
-    this.writeAdminConfig(userId, next);
-    return this.getAdminConfigPublic(userId);
-  }
-
   getEffectivePermissions(userId: string, requestPermissions?: Record<string, any>): Record<string, any> {
-    const config = this.readAdminConfig(userId);
+    const defaults = defaultPermissions();
     const requestContext = requestPermissions || {};
     const approvalContext = {
       requireUserApproval: requestContext.requireUserApproval,
       approvedByUser: requestContext.approvedByUser,
       mode: requestContext.mode,
     };
-
-    if (config.updatedAt) {
-      return {
-        ...config.permissions,
-        ...approvalContext,
-      };
-    }
-
-    return {
-      ...config.permissions,
-      ...requestContext,
-    };
+    return { ...defaults, ...requestContext, ...approvalContext };
   }
 
   async sendCloudTextMessage(userId: string, to: string, text: string): Promise<{ chatId: string; messageId?: string } | null> {
-    const config = this.readAdminConfig(userId);
-    if (config.provider !== 'cloud_api' || !config.accessToken || !config.phoneNumberId) return null;
+    const accessToken = process.env.WA_CLOUD_ACCESS_TOKEN;
+    const phoneNumberId = process.env.WA_CLOUD_PHONE_NUMBER_ID;
+    const apiVersion = process.env.WA_CLOUD_API_VERSION || 'v23.0';
+    if (!accessToken || !phoneNumberId) return null;
 
     const resolvedJid = this.resolveContactJid(userId, to);
     const resolvedNumber = jidNumber(resolvedJid);
-    const recipient = cleanPhoneNumber(resolvedNumber || to, config.defaultCountryCode);
+    const recipient = cleanPhoneNumber(resolvedNumber || to, process.env.WA_DEFAULT_COUNTRY_CODE || '');
     if (!recipient) throw new Error('Recipient phone number required');
 
-    const version = config.apiVersion || 'v23.0';
-    const url = `https://graph.facebook.com/${encodeURIComponent(version)}/${encodeURIComponent(config.phoneNumberId)}/messages`;
+    const url = `https://graph.facebook.com/${apiVersion}/${phoneNumberId}/messages`;
+    const body = {
+      messaging_product: 'whatsapp',
+      recipient_type: 'individual',
+      to: recipient,
+      type: 'text',
+      text: { preview_url: false, body: text },
+    };
+
+    console.log(`[WhatsApp Cloud] Sending message to ${recipient} via Cloud API`);
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${config.accessToken}`,
+        'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        messaging_product: 'whatsapp',
-        recipient_type: 'individual',
-        to: recipient,
-        type: 'text',
-        text: { preview_url: false, body: text },
-      }),
+      body: JSON.stringify(body),
     });
-    const data: any = await response.json().catch(() => ({}));
-    if (!response.ok) {
+
+    const data: any = await response.json();
+    if (response.ok && data?.messages?.[0]?.id) {
+      return { chatId: `${recipient}@cloud.whatsapp`, messageId: data.messages[0].id };
+    } else {
       throw new Error(data?.error?.message || `WhatsApp Cloud API returned ${response.status}`);
     }
-
-    return { chatId: `${recipient}@cloud.whatsapp`, messageId: data?.messages?.[0]?.id };
   }
 
   async sendWhatsAppMediaMessage(
@@ -1050,19 +965,6 @@ export class WhatsAppManager {
     return sock.sendMessage(chatId, { react: { text: emoji, key: { remoteJid: chatId, fromMe: true, id: messageId } } });
   }
 
-  async getAdminOverview(userId: string) {
-    const status = await this.getStatusOrStart(userId);
-    const config = this.getAdminConfigPublic(userId);
-    return {
-      config,
-      status: status || { status: 'not_found' },
-      messages: this.getRecentMessages(userId, 20),
-      chats: this.getChats(userId, 20),
-      contactsCount: this.getContacts(userId, 500).length,
-      authRootConfigured: !!this.authRoot,
-    };
-  }
-
   ingestCloudWebhook(userId: string, payload: any): { accepted: number } {
     const safeId = safeUserId(userId);
     const authDir = path.join(this.authRoot, safeId);
@@ -1117,11 +1019,6 @@ export class WhatsAppManager {
     entry.recentMessages = entry.recentMessages.slice(0, MESSAGE_HISTORY_LIMIT);
     writeSessionData(entry);
     return { accepted };
-  }
-
-  verifyWebhookToken(userId: string, token: unknown): boolean {
-    const expected = this.readAdminConfig(userId).webhookVerifyToken;
-    return !!expected && String(token || '') === expected;
   }
 
   getRecentMessages(userId: string, limit = 20): WaRecentMessage[] {
@@ -1300,43 +1197,4 @@ export class WhatsAppManager {
     }
   }
 
-  private adminConfigFile(userId: string): string {
-    const authDir = path.join(this.authRoot, safeUserId(userId));
-    ensureDir(authDir);
-    return path.join(authDir, 'admin-config.json');
-  }
-
-  private readAdminConfig(userId: string): WaAdminConfig {
-    const file = this.adminConfigFile(userId);
-    const fallback: WaAdminConfig = {
-      provider: 'linked_device',
-      displayName: '',
-      businessAccountId: '',
-      phoneNumberId: '',
-      apiVersion: 'v23.0',
-      accessToken: '',
-      appSecret: '',
-      webhookVerifyToken: '',
-      defaultCountryCode: '',
-      permissions: defaultPermissions(),
-      updatedAt: '',
-    };
-
-    try {
-      if (!fs.existsSync(file)) return fallback;
-      const parsed = JSON.parse(fs.readFileSync(file, 'utf8'));
-      return {
-        ...fallback,
-        ...parsed,
-        provider: parsed.provider === 'cloud_api' ? 'cloud_api' : 'linked_device',
-        permissions: normalizePermissions(parsed.permissions),
-      };
-    } catch {
-      return fallback;
-    }
-  }
-
-  private writeAdminConfig(userId: string, config: WaAdminConfig) {
-    fs.writeFileSync(this.adminConfigFile(userId), JSON.stringify(config, null, 2));
-  }
 }

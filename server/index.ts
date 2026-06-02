@@ -391,10 +391,6 @@ if (gowaClient) {
 
   // Gowa doesn't support these — return empty/disconnected
   app.get('/api/whatsapp/messages/:userId', (_req, res) => res.json({ messages: [] }));
-  app.get('/api/whatsapp/admin/overview/:userId', (_req, res) => res.json({ provider: 'gowa' }));
-  app.get('/api/whatsapp/admin/config/:userId', (_req, res) => res.json({ config: null }));
-  app.post('/api/whatsapp/admin/config', (_req, res) => res.json({ ok: true }));
-  app.post('/api/whatsapp/admin/test-message', (_req, res) => res.json({ error: 'Not available on gowa' }));
   app.get('/api/whatsapp/webhook/:userId', (_req, res) => res.sendStatus(403));
   app.post('/api/whatsapp/webhook/:userId', (_req, res) => res.json({ ok: true }));
 
@@ -495,53 +491,12 @@ if (gowaClient) {
     }
   });
 
-  app.get('/api/whatsapp/admin/overview/:userId', async (req, res) => {
-    try {
-      res.json(await waManager!.getAdminOverview(req.params.userId));
-    } catch (err: any) {
-      res.status(500).json({ error: getMsg(err) });
-    }
-  });
-
-  app.get('/api/whatsapp/admin/config/:userId', (req, res) => {
-    try {
-      res.json({ config: waManager!.getAdminConfigPublic(req.params.userId) });
-    } catch (err: any) {
-      res.status(500).json({ error: getMsg(err) });
-    }
-  });
-
-  app.post('/api/whatsapp/admin/config', (req, res) => {
-    try {
-      const { userId, config } = req.body;
-      if (!userId) { res.status(400).json({ error: 'userId required' }); return; }
-      res.json({ config: waManager!.saveAdminConfig(userId, config || {}) });
-    } catch (err: any) {
-      res.status(500).json({ error: getMsg(err) });
-    }
-  });
-
-  app.post('/api/whatsapp/admin/test-message', async (req, res) => {
-    try {
-      const { userId, to, text } = req.body;
-      if (!userId || !to || !text) { res.status(400).json({ error: 'userId, to, text required' }); return; }
-      const permissions = waManager!.getEffectivePermissions(userId, {
-        requireUserApproval: true,
-        approvedByUser: true,
-        mode: 'delegated_send',
-      });
-      const result = await waTools.handleSendMessage(waManager!, userId, permissions, to, text);
-      res.json(result);
-    } catch (err: any) {
-      res.status(500).json({ error: getMsg(err) });
-    }
-  });
-
   app.get('/api/whatsapp/webhook/:userId', (req, res) => {
     const mode = req.query['hub.mode'];
     const token = req.query['hub.verify_token'];
     const challenge = req.query['hub.challenge'];
-    if (mode === 'subscribe' && waManager!.verifyWebhookToken(req.params.userId, token)) {
+    const expectedToken = process.env.WA_WEBHOOK_VERIFY_TOKEN || 'eburon_wa_verify';
+    if (mode === 'subscribe' && token === expectedToken) {
       res.status(200).send(String(challenge || ''));
       return;
     }

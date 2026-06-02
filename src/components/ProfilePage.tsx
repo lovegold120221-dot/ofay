@@ -233,6 +233,7 @@ export function ProfilePage({
   const [savingDomains, setSavingDomains] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [displayName, setDisplayName] = useState<string>(user.displayName || '');
   const [workspaceOutputs, setWorkspaceOutputs] = useState<WorkspaceOutput[]>([]);
   const [loadingWorkspace, setLoadingWorkspace] = useState(false);
   const [deletingWorkspaceId, setDeletingWorkspaceId] = useState<string | null>(null);
@@ -266,15 +267,27 @@ export function ProfilePage({
     }
   };
 
+  // Auto-save display name when it changes (debounced)
+  useEffect(() => {
+    if (!displayName || displayName === user.displayName) return;
+    const timer = setTimeout(async () => {
+      try { await supabase.from('user_settings').upsert({
+        user_id: user.uid, display_name: displayName, updated_at: new Date().toISOString()
+      }); } catch {}
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [displayName]);
+
   const loadProfile = async () => {
     try {
       const { data: settings } = await supabase
         .from('user_settings')
-        .select('avatar_url, knowledge_domains')
+        .select('avatar_url, knowledge_domains, display_name')
         .eq('user_id', user.uid)
         .single();
       if (settings) {
         if (settings.avatar_url) setAvatarUrl(settings.avatar_url);
+        if (settings.display_name) setDisplayName(settings.display_name);
         if (settings.knowledge_domains) {
           setDomains(settings.knowledge_domains);
           saveLocalDomains(settings.knowledge_domains);
@@ -390,9 +403,10 @@ export function ProfilePage({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="fixed inset-0 z-50 bg-black flex flex-col h-full w-full"
+      className="fixed inset-0 z-50 bg-[#050505] flex flex-col h-full w-full"
     >
-      <header className="sticky top-0 w-full bg-black/80 backdrop-blur-2xl border-b border-white/[0.04] px-4 py-3 flex items-center justify-between z-10 shrink-0">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(208,167,139,0.04),transparent_70%)] pointer-events-none" />
+      <header className="sticky top-0 w-full bg-[#050505]/95 backdrop-blur-md border-b border-zinc-800/60 px-4 py-3 flex items-center justify-between z-10 shrink-0">
         <div className="w-16" />
         <h1 className="text-base font-semibold tracking-wide text-white">Profile</h1>
         <button
@@ -428,8 +442,8 @@ export function ProfilePage({
         {/* Account Section */}
         <section>
           <h2 className="text-[13px] uppercase tracking-wide text-zinc-500 font-medium px-4 mb-2">Account</h2>
-          <div className="bg-[#1C1C1E] rounded-[20px] overflow-hidden">
-            <div className="p-4 flex items-center gap-4">
+            <div className="bg-zinc-900/40 border border-zinc-800/80 rounded-[20px] overflow-hidden">
+              <div className="p-4 flex items-center gap-4">
               <div className="relative group shrink-0">
                 <div className="w-[72px] h-[72px] rounded-full bg-zinc-800 overflow-hidden border border-white/10">
                   {avatarUrl ? (
@@ -462,7 +476,13 @@ export function ProfilePage({
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[17px] text-white font-medium truncate">{user.displayName || 'User'}</p>
+                <input
+                  type="text"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  placeholder="Your Name"
+                  className="w-full bg-transparent text-[17px] text-white font-medium focus:outline-none truncate"
+                />
                 <p className="text-[15px] text-zinc-400 truncate mt-0.5">{user.email}</p>
                 <div className="flex items-center gap-1.5 mt-2">
                   <div className={`w-2 h-2 rounded-full ${isGoogleConnected ? 'bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]' : 'bg-zinc-600'}`} />
@@ -478,7 +498,7 @@ export function ProfilePage({
         {/* Appearance Section */}
         <section>
           <h2 className="text-[13px] uppercase tracking-wide text-zinc-500 font-medium px-4 mb-2">Appearance</h2>
-          <div className="bg-[#1C1C1E] rounded-[20px] overflow-hidden divide-y divide-white/5">
+          <div className="bg-zinc-900/40 border border-zinc-800/80 rounded-[20px] overflow-hidden divide-y divide-zinc-800/40">
             <div className="p-4 flex items-center justify-between">
               <label htmlFor="theme-select" className="text-[15px] text-white">Theme</label>
               <select
@@ -489,9 +509,9 @@ export function ProfilePage({
                 aria-label="Select Theme"
                 title="Select Theme"
               >
-                <option value="system" className="bg-[#1C1C1E] text-white">System (Default)</option>
-                <option value="light" className="bg-[#1C1C1E] text-white">Light</option>
-                <option value="dark" className="bg-[#1C1C1E] text-white">Dark</option>
+                <option value="system" className="bg-zinc-900 text-white">System (Default)</option>
+                <option value="light" className="bg-zinc-900 text-white">Light</option>
+                <option value="dark" className="bg-zinc-900 text-white">Dark</option>
               </select>
             </div>
           </div>
@@ -502,10 +522,10 @@ export function ProfilePage({
           <div className="px-4 mb-2 flex items-baseline justify-between">
             <h2 className="text-[13px] uppercase tracking-wide text-zinc-500 font-medium">Knowledge Base</h2>
           </div>
-          <div className="bg-[#1C1C1E] rounded-[20px] overflow-hidden">
+          <div className="bg-zinc-900/40 border border-zinc-800/80 rounded-[20px] overflow-hidden">
             <div 
               onClick={() => !uploadingFile && knowledgeInputRef.current?.click()}
-              className="p-4 border-b border-white/5 flex items-center justify-between cursor-pointer active:bg-white/5 transition-colors"
+              className="p-4 border-b border-zinc-800/40 flex items-center justify-between cursor-pointer active:bg-white/5 transition-colors"
             >
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center shrink-0">
@@ -528,7 +548,7 @@ export function ProfilePage({
             />
             
             {knowledgeFiles.map((f, i) => (
-              <div key={f.id} className={`p-4 flex items-center justify-between ${i !== knowledgeFiles.length - 1 ? 'border-b border-white/5' : ''}`}>
+              <div key={f.id} className={`p-4 flex items-center justify-between ${i !== knowledgeFiles.length - 1 ? 'border-b border-zinc-800/40' : ''}`}>
                 <div className="flex items-center gap-3 min-w-0 flex-1 pr-4">
                   <FileText className="w-5 h-5 text-zinc-400 shrink-0" />
                   <div className="min-w-0">
@@ -558,8 +578,8 @@ export function ProfilePage({
           <div className="px-4 mb-2 flex items-baseline justify-between">
             <h2 className="text-[13px] uppercase tracking-wide text-zinc-500 font-medium">URL Domains</h2>
           </div>
-          <div className="bg-[#1C1C1E] rounded-[20px] overflow-hidden">
-            <div className="p-4 border-b border-white/5 flex gap-2 items-center">
+          <div className="bg-zinc-900/40 border border-zinc-800/80 rounded-[20px] overflow-hidden">
+            <div className="p-4 border-b border-zinc-800/40 flex gap-2 items-center">
               <input
                 type="text"
                 value={domainInput}
@@ -578,7 +598,7 @@ export function ProfilePage({
             </div>
             
             {domains.map((d, i) => (
-              <div key={d} className={`p-4 flex items-center justify-between ${i !== domains.length - 1 ? 'border-b border-white/5' : ''}`}>
+              <div key={d} className={`p-4 flex items-center justify-between ${i !== domains.length - 1 ? 'border-b border-zinc-800/40' : ''}`}>
                 <div className="flex items-center gap-3 truncate">
                   <Globe className="w-5 h-5 text-zinc-400 shrink-0" />
                   <p className="text-[15px] text-white truncate">{d}</p>
@@ -616,7 +636,7 @@ export function ProfilePage({
             <h2 className="text-[13px] uppercase tracking-wide text-zinc-500 font-medium">Workspace</h2>
             <span className="text-[11px] text-zinc-600">auto-saved locally · synced to Drive</span>
           </div>
-          <div className="bg-[#1C1C1E] rounded-[20px] overflow-hidden">
+          <div className="bg-zinc-900/40 border border-zinc-800/80 rounded-[20px] overflow-hidden">
             {loadingWorkspace ? (
               <div className="p-8 flex items-center justify-center">
                 <Loader2 className="w-5 h-5 animate-spin text-zinc-500" />
@@ -629,7 +649,7 @@ export function ProfilePage({
               </div>
             ) : (
               workspaceOutputs.map((w, i) => (
-                <div key={w.id} className={`p-4 flex items-center justify-between ${i !== workspaceOutputs.length - 1 ? 'border-b border-white/5' : ''}`}>
+                <div key={w.id} className={`p-4 flex items-center justify-between ${i !== workspaceOutputs.length - 1 ? 'border-b border-zinc-800/40' : ''}`}>
                   <div className="flex items-center gap-3 min-w-0 flex-1 pr-4">
                     <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
                       {w.type === 'image' || w.type === 'screenshot' || w.type === 'capture' ? (
@@ -701,7 +721,7 @@ export function ProfilePage({
         {/* Persona Settings */}
         <section>
           <h2 className="text-[13px] uppercase tracking-wide text-zinc-500 font-medium px-4 mb-2">Persona Configuration</h2>
-          <div className="bg-[#1C1C1E] rounded-[20px] overflow-hidden divide-y divide-white/5">
+          <div className="bg-zinc-900/40 border border-zinc-800/80 rounded-[20px] overflow-hidden divide-y divide-zinc-800/40">
             <div className="p-4 flex flex-col gap-1">
               <label className="text-[13px] text-zinc-500">Persona Name</label>
               <input
@@ -755,7 +775,7 @@ export function ProfilePage({
         {/* Language & Voice */}
         <section>
           <h2 className="text-[13px] uppercase tracking-wide text-zinc-500 font-medium px-4 mb-2">Speech & Language</h2>
-          <div className="bg-[#1C1C1E] rounded-[20px] overflow-hidden divide-y divide-white/5">
+          <div className="bg-zinc-900/40 border border-zinc-800/80 rounded-[20px] overflow-hidden divide-y divide-zinc-800/40">
             <div className="p-4 flex items-center justify-between">
               <label htmlFor="language-select" className="text-[15px] text-white">Language</label>
               <select
@@ -767,7 +787,7 @@ export function ProfilePage({
                 title="Select Language"
               >
                 {LANGUAGES.map(l => (
-                  <option key={l.code} value={l.code} className="bg-[#1C1C1E] text-white">{l.label}</option>
+                  <option key={l.code} value={l.code} className="bg-zinc-900 text-white">{l.label}</option>
                 ))}
               </select>
             </div>
