@@ -11,7 +11,8 @@ export interface CompanyData {
   ceo: string;
 }
 
-// Local high-fidelity company records for popular Belgian enterprises
+// Local high-fidelity company records for popular Belgian enterprises.
+// Used as a fast in-memory cache so common lookups don't hit the network.
 const BELGIAN_COMPANIES: Record<string, CompanyData> = {
   'proximus': {
     bce: '0202.239.951',
@@ -76,54 +77,149 @@ const BELGIAN_COMPANIES: Record<string, CompanyData> = {
 };
 
 /**
+ * Search the public KBO/CBE register for a Belgian company by name or number.
+ * Uses the official public search form at kbopub.economie.fgov.be
+ */
+async function searchKboPublic(query: string): Promise<CompanyData | null> {
+  try {
+    const url = 'https://kbopub.economie.fgov.be/kbopub/zoeknaamfonetisch.html';
+    const params = new URLSearchParams({
+      page: '1',
+      pageSize: '15',
+      zoekNaam: query,
+      action: 'Zoek'
+    });
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'User-Agent': 'Beatrice/1.0' },
+      body: params,
+      signal: AbortSignal.timeout(8000)
+    });
+
+    if (!response.ok) return null;
+    const html = await response.text();
+
+    // Parse the HTML table of results — find the first result row
+    // The page returns a table with class 'table-striped' containing company data
+    const tableMatch = html.match(/<table[^>]*class="[^"]*table-striped[^"]*"[^>]*>([\s\S]*?)<\/table>/i);
+    if (!tableMatch) return null;
+
+    const rows = tableMatch[1].match(/<tr[^>]*>[\s\S]*?<\/tr>/g);
+    if (!rows || rows.length < 2) return null;
+
+    // First data row (skip header)
+    const firstRow = rows[1];
+    const cells = firstRow.match(/<td[^>]*>([\s\S]*?)<\/td>/g);
+    if (!cells || cells.length < 4) return null;
+
+    const stripHtml = (s: string) => s.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+
+    // Cell 0: Enterprise number (BCE/KBO)
+    const bceRaw = stripHtml(cells[0]);
+    const bceDigits = bceRaw.replace(/[^0-9]/g, '');
+    const formattedBce = bceDigits.length === 10
+      ? `${bceDigits.slice(0, 4)}.${bceDigits.slice(4, 7)}.${bceDigits.slice(7, 10)}`
+      : bceRaw;
+
+    // Cell 1: Company name
+    const name = stripHtml(cells[1]);
+
+    // Cell 2: Address
+    const address = stripHtml(cells[2] || '');
+
+    // Cell 3: Legal form (often abbreviated like NV, BV, etc.)
+    const legalFormRaw = stripHtml(cells[3] || '');
+
+    // Map abbreviated legal forms to full descriptions
+    const legalFormMap: Record<string, string> = {
+      'nv': 'Naamloze Vennootschap / Société Anonyme (NV/SA)',
+      'bv': 'Besloten Vennootschap / Société à Responsabilité Limitée (BV/SRL)',
+      'bv cv': 'Besloten Vennootschap met Coöperatieve Vennootschap',
+      'vzw': 'Vereniging zonder Winstoogmerk / Association sans But Lucratif (VZW/ASBL)',
+      'eenpersoons bv': 'Eenpersoons Besloten Vennootschap (BV/SPRL)',
+      'cv': 'Coöperatieve Vennootschap / Société Coopérative (CV/SC)',
+      'commv': 'Gewone Commanditaire Vennootschap / Société en Commandite Simple (CommV/SCS)',
+      'sb': 'Société Anonyme / Naamloze Vennootschap (SA/NV)',
+    };
+    const normalisedForm = legalFormRaw.toLowerCase().trim();
+    const legalForm = legalFormMap[normalisedForm] || legalFormRaw;
+
+    if (!name || !formattedBce) return null;
+
+    return {
+      bce: formattedBce,
+      name,
+      legalForm,
+      status: 'Active / Registered',
+      address,
+      established: '',
+      nace: '',
+      ceo: '',
+    };
+  } catch (err) {
+    console.warn('[KBO] Public search failed:', err);
+    return null;
+  }
+}
+
+/**
  * 1. KBO/CBE Company Lookup
+ * 
+ * Queries in order:
+ *   1. Local in-memory database (fast cache for common companies)
+ *   2. Public KBO/CBE web search (live official register)
+ *   3. VIES VAT validation (if query looks like a VAT number)
+ * 
+ * NEVER fabricates company data. If no real match is found, returns a
+ * clear "not found" response so Beatrice can ask the user for more info.
  */
 export async function lookupCompany(query: string): Promise<{ ok: boolean; company?: CompanyData; message?: string }> {
   const norm = query.toLowerCase().trim();
+  if (!norm) return { ok: false, message: 'No company name or number provided.' };
 
-  // Try matching local database first
+  // ── 1. Try local database first (fast, exact match on BCE or key name) ──
+  const bceDigitsInput = norm.replace(/[^0-9]/g, '');
   for (const [key, details] of Object.entries(BELGIAN_COMPANIES)) {
-    if (norm.includes(key) || norm.replace(/[^0-9]/g, '').includes(details.bce.replace(/[^0-9]/g, ''))) {
+    const bceDigitsEntry = details.bce.replace(/[^0-9]/g, '');
+    // Match on full BCE number OR exact company name (word-boundary)
+    const nameMatch = bceDigitsInput === bceDigitsEntry;
+    const keyMatch = norm === key || norm.startsWith(key + ' ') || norm.endsWith(' ' + key) || norm.includes(' ' + key + ' ');
+    if (nameMatch || keyMatch) {
       return { ok: true, company: details };
     }
   }
 
-  // Generate plausible lookup if not found to provide smooth voice UX
-  const cleanNum = norm.replace(/[^0-9]/g, '');
-  if (cleanNum.length === 10 && (cleanNum.startsWith('0') || cleanNum.startsWith('1'))) {
-    const formattedBce = `${cleanNum.slice(0, 4)}.${cleanNum.slice(4, 7)}.${cleanNum.slice(7, 10)}`;
-    return {
-      ok: true,
-      company: {
-        bce: formattedBce,
-        name: `MOCK BELGIUM SOLUTIONS SRL (Simulated for BCE ${formattedBce})`,
-        legalForm: 'Société à Responsabilité Limitée (SRL / BV)',
-        status: 'Active / Registered',
-        address: 'Rue de la Loi 16, 1000 Brussels',
-        established: '15-09-2018',
-        nace: '62010 - Computer programming activities',
-        ceo: 'Jean-Pierre Janssens'
-      }
-    };
+  // ── 2. Try KBO public web search (live register) ──
+  const kboResult = await searchKboPublic(query);
+  if (kboResult) {
+    return { ok: true, company: kboResult };
   }
 
-  // Fallback to searching by company name
-  const generatedBce = `0${Math.floor(100000000 + Math.random() * 900000000)}`;
-  const formattedBce = `${generatedBce.slice(0, 4)}.${generatedBce.slice(4, 7)}.${generatedBce.slice(7, 10)}`;
-  const proposedName = query.toUpperCase() + ' NV/SA';
-
-  return {
-    ok: true,
-    company: {
-      bce: formattedBce,
-      name: proposedName,
-      legalForm: 'Naamloze Vennootschap / Société Anonyme (NV/SA)',
-      status: 'Active / Registered',
-      address: 'Louizalaan 240, 1050 Brussels',
-      established: '01-02-2010',
-      nace: '70220 - Business and other management consultancy activities',
-      ceo: 'Marc Dubois'
+  // ── 3. If query looks like a VAT/BTW/BCE number, try VIES validation ──
+  if (bceDigitsInput.length >= 9 && bceDigitsInput.length <= 10) {
+    const viesResult = await validateViesVat(bceDigitsInput.padStart(10, '0')).catch(() => null);
+    if (viesResult?.isValid && viesResult.name) {
+      return {
+        ok: true,
+        company: {
+          bce: `${bceDigitsInput.padStart(10, '0').slice(0, 4)}.${bceDigitsInput.padStart(10, '0').slice(4, 7)}.${bceDigitsInput.padStart(10, '0').slice(7, 10)}`,
+          name: viesResult.name,
+          legalForm: '',
+          status: 'Active / VAT registered',
+          address: viesResult.address || '',
+          established: '',
+          nace: '',
+          ceo: '',
+        }
+      };
     }
+  }
+
+  // ── 4. Not found — clear response, no fabricated data ──
+  return {
+    ok: false,
+    message: `Company "${query}" was not found in the Belgian KBO/CBE register. Please check the spelling or try searching by the enterprise number (BCE/KBO).`
   };
 }
 
@@ -157,28 +253,19 @@ export async function validateViesVat(vatNumber: string): Promise<{ ok: boolean;
     console.warn('VIES REST API timeout or failure, falling back to offline validation:', err);
   }
 
-  // Local fallback validation
+  // VIES unavailable — validate format only, no fabricated identity
   const isValidFormat = /^[0-9]{10}$/.test(numberOnly) || /^[0-9]{9}$/.test(numberOnly);
-  let name = 'Unknown Entity (VIES Offline)';
-  let address = 'Belgium';
-
-  // Match our local corporate directory for premium mock output
-  for (const details of Object.values(BELGIAN_COMPANIES)) {
-    if (details.bce.replace(/[^0-9]/g, '') === numberOnly) {
-      name = details.name;
-      address = details.address;
-      break;
-    }
-  }
 
   return {
     ok: true,
     isValid: isValidFormat,
     countryCode,
     vatNumber: numberOnly,
-    name: isValidFormat ? name : undefined,
-    address: isValidFormat ? address : undefined,
-    error: 'Using fallback local validation engine (VIES network error or timeout).'
+    name: isValidFormat ? undefined : undefined,
+    address: isValidFormat ? undefined : undefined,
+    error: isValidFormat
+      ? 'Format is valid but VIES online validation is temporarily unavailable. The VAT number could not be verified in real-time.'
+      : 'Invalid VAT number format. Expected BE followed by 10 digits.'
   };
 }
 
@@ -196,8 +283,9 @@ export async function generatePeppolInvoice(params: {
   const formattedKbo = `${cleanKbo.slice(0, 4)}.${cleanKbo.slice(4, 7)}.${cleanKbo.slice(7, 10)}`;
 
   const companyLookup = await lookupCompany(formattedKbo);
-  const companyName = companyLookup.company?.name || 'MOCK BELGIUM SOLUTIONS SRL';
-  const companyAddress = companyLookup.company?.address || 'Rue de la Loi 16, 1000 Brussels';
+  // If lookup failed, use the BCE number as display identity (no fabricated name)
+  const companyName = companyLookup.company?.name || `Enterprise ${formattedKbo}`;
+  const companyAddress = companyLookup.company?.address || formattedKbo;
 
   const transactionId = 'PEPPOL-' + Math.random().toString(36).substring(3, 9).toUpperCase();
   const date = new Date().toISOString().split('T')[0];
