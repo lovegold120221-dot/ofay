@@ -20,6 +20,22 @@ app.use(express.json({ limit: '10mb' }));
 const waManager = new WhatsAppManager();
 waManager.resumeExistingSessions();
 
+// Server Housekeeping: Run every 30 minutes
+setInterval(() => {
+  try {
+     console.log('[Housekeeping] Starting periodic cleanup...');
+     // @ts-ignore - access internal if needed or add public method
+     for (const [userId, entry] of waManager['sessions'].entries()) {
+        if ((entry.status === 'error' || entry.status === 'disconnected') && !entry.reconnecting) {
+           console.log(`[Housekeeping] Evicting idle session: ${userId}`);
+           waManager['sessions'].delete(userId);
+        }
+     }
+  } catch (e) {
+     console.error('[Housekeeping] Error:', e);
+  }
+}, 30 * 60 * 1000);
+
 app.get('/', (_req, res) => {
   res.send('Beatrice Backend API Server is running. To open the application, visit http://localhost:3000');
 });
