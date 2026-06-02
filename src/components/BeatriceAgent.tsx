@@ -2037,6 +2037,11 @@ export function BeatriceAgent({
       try { localStorage.setItem('beatrice_language', authLanguage); } catch {}
       callbacks?.onSuccess?.();
       setShowSettings(false);
+      // Restart session so the new name/prompt takes effect immediately
+      if (isActive) {
+        stopSession();
+        setTimeout(() => startSession(), 500);
+      }
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Failed to save settings';
       callbacks?.onError?.(msg);
