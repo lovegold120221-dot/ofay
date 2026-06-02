@@ -6,6 +6,7 @@ import { supabase } from './supabase';
 import { WhatsAppManager } from './whatsapp';
 import * as waTools from './whatsapp-tools';
 import * as belgianTools from './belgian-tools';
+import { GowaClient } from './gowa-client';
 
 const app = express();
 const PORT = process.env.SANDBOX_PORT ? parseInt(process.env.SANDBOX_PORT) : 4200;
@@ -17,24 +18,37 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '10mb' }));
 
-const waManager = new WhatsAppManager();
-waManager.resumeExistingSessions();
+// ── WhatsApp Provider: Gowa (preferred) or Baileys (fallback) ──
+const useGowa = !!process.env.GOWA_API_URL;
+let waManager: WhatsAppManager | null = null;
+let gowaClient: GowaClient | null = null;
 
-// Server Housekeeping: Run every 30 minutes
-setInterval(() => {
-  try {
-     console.log('[Housekeeping] Starting periodic cleanup...');
-     // @ts-ignore - access internal if needed or add public method
-     for (const [userId, entry] of waManager['sessions'].entries()) {
-        if ((entry.status === 'error' || entry.status === 'disconnected') && !entry.reconnecting) {
-           console.log(`[Housekeeping] Evicting idle session: ${userId}`);
-           waManager['sessions'].delete(userId);
-        }
-     }
-  } catch (e) {
-     console.error('[Housekeeping] Error:', e);
-  }
-}, 30 * 60 * 1000);
+if (useGowa) {
+  const gowaUrl = process.env.GOWA_API_URL!;
+  const gowaAuth = (process.env.GOWA_API_AUTH || 'admin:120221').split(':');
+  gowaClient = new GowaClient(gowaUrl, gowaAuth[0], gowaAuth[1]);
+  console.log(`[Gowa] Using Go WhatsApp at ${gowaUrl}`);
+} else {
+  waManager = new WhatsAppManager();
+  waManager.resumeExistingSessions();
+}
+
+// Server Housekeeping: Run every 30 minutes (Baileys only, gowa handles itself)
+if (!useGowa) {
+  setInterval(() => {
+    try {
+       console.log('[Housekeeping] Starting periodic cleanup...');
+       for (const [userId, entry] of (waManager as any)['sessions'].entries()) {
+          if ((entry.status === 'error' || entry.status === 'disconnected') && !entry.reconnecting) {
+             console.log(`[Housekeeping] Evicting idle session: ${userId}`);
+             (waManager as any)['sessions'].delete(userId);
+          }
+       }
+    } catch (e) {
+       console.error('[Housekeeping] Error:', e);
+    }
+  }, 30 * 60 * 1000);
+}
 
 app.get('/', (_req, res) => {
   res.send('Beatrice Backend API Server is running. To open the application, visit http://localhost:3000');
@@ -174,148 +188,273 @@ app.post('/api/belgian/tool', async (req, res) => {
 });
 
 // ── WhatsApp Routes ──
+// Uses Gowa provider when GOWA_API_URL is set, otherwise falls back to Baileys
 
-app.post('/api/whatsapp/pair', async (req, res) => {
-  try {
-    const { userId, phoneNumber } = req.body;
-    if (!userId) { res.status(400).json({ error: 'userId required' }); return; }
-    const result = await waManager.startPairing(userId, phoneNumber);
-    if ('error' in result) { res.status(500).json(result); return; }
-    res.json(result);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message || 'Pairing failed' });
-  }
-});
+const getMsg = (e: any) => e?.message || String(e);
 
-app.get('/api/whatsapp/status/:userId', async (req, res) => {
-  try {
-    const status = await waManager.getStatusOrStart(req.params.userId);
-    if (!status) { res.json({ status: 'not_found' }); return; }
-    res.json(status);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message || 'Failed to read WhatsApp status' });
-  }
-});
+// Helper: route through active provider
+function getApiUserId(userId: string) {
+  return userId;
+}
 
-app.get('/api/whatsapp/qr/:userId', async (req, res) => {
-  try {
-    const status = await waManager.getStatusOrStart(req.params.userId);
-    const qrCode = status?.qrCode;
-    if (!qrCode) {
-      res.status(404).send('QR not available');
+// ── Gowa Provider Routes ──
+if (gowaClient) {
+
+  app.post('/api/whatsapp/pair', async (req, res) => {
+    try {
+      const { userId, phoneNumber } = req.body;
+      if (!userId) { res.status(400).json({ error: 'userId required' }); return; }
+      const result = await gowaClient!.startPairing(userId, phoneNumber);
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ error: getMsg(err) });
+    }
+  });
+
+  app.get('/api/whatsapp/status/:userId', async (req, res) => {
+    try {
+      const status = await gowaClient!.getFullStatus(req.params.userId);
+      res.json(status);
+    } catch (err: any) {
+      res.status(500).json({ error: getMsg(err) });
+    }
+  });
+
+  app.get('/api/whatsapp/qr/:userId', async (req, res) => {
+    try {
+      const status = await gowaClient!.getFullStatus(req.params.userId);
+      if (!status.qrCode) {
+        res.status(404).json({ error: 'QR not available', status: status.status });
+        return;
+      }
+      const base64 = status.qrCode.replace(/^data:image\/png;base64,/, '');
+      res.setHeader('Cache-Control', 'no-store');
+      res.type('png').send(Buffer.from(base64, 'base64'));
+    } catch (err: any) {
+      res.status(500).json({ error: getMsg(err) });
+    }
+  });
+
+  app.post('/api/whatsapp/disconnect', async (req, res) => {
+    try {
+      const { userId } = req.body;
+      if (!userId) { res.status(400).json({ error: 'userId required' }); return; }
+      const deviceId = await gowaClient!.getDeviceIdForUser(userId);
+      if (deviceId) await gowaClient!.logout(deviceId);
+      gowaClient!.removeSession(userId);
+      res.json({ ok: true });
+    } catch (err: any) {
+      res.status(500).json({ error: getMsg(err) });
+    }
+  });
+
+  app.post('/api/whatsapp/send', async (req, res) => {
+    try {
+      const { userId, to, text } = req.body;
+      if (!userId || !to || !text) { res.status(400).json({ error: 'userId, to, text required' }); return; }
+      const deviceId = await gowaClient!.getDeviceIdForUser(userId);
+      if (!deviceId) { res.status(400).json({ error: 'WhatsApp not paired. Please pair first.' }); return; }
+      const result = await gowaClient!.sendTextMessage(deviceId, to, text);
+      res.json({ ok: true, result });
+    } catch (err: any) {
+      res.status(500).json({ error: getMsg(err) });
+    }
+  });
+
+  app.post('/api/whatsapp/tool', async (req, res) => {
+    try {
+      const { userId, tool } = req.body;
+      const params = req.body.params || {};
+      if (!userId || !tool) { res.status(400).json({ error: 'userId and tool required' }); return; }
+      // For gowa, delegate to the existing tool handler with gowa context
+      // Tool execution still requires Baileys for now — or we proxy through gowa
+      if (tool === 'sendMessage' || tool === 'sendGroupMessage') {
+        const deviceId = await gowaClient!.getDeviceIdForUser(userId);
+        if (!deviceId) { res.json({ ok: false, error: 'WhatsApp not paired.' }); return; }
+        const to = params.to || params.jid || '';
+        const text = params.text || '';
+        if (!to || !text) { res.json({ ok: false, error: 'recipient and text required' }); return; }
+        const result = await gowaClient!.sendTextMessage(deviceId, to, text);
+        res.json({ ok: true, result });
+      } else {
+        // For read-only tools, try gowa first, fall back to Baileys if available
+        if (waManager) {
+          const result = await waTools.handleWhatsAppAction(waManager, userId, tool, params, req.body.permissions);
+          res.json(result);
+        } else {
+          res.json({ ok: false, error: `Tool "${tool}" not available on gowa provider yet.` });
+        }
+      }
+    } catch (err: any) {
+      res.status(500).json({ error: getMsg(err) });
+    }
+  });
+
+  // Gowa doesn't support these — return empty/disconnected
+  app.get('/api/whatsapp/messages/:userId', (_req, res) => res.json({ messages: [] }));
+  app.get('/api/whatsapp/admin/overview/:userId', (_req, res) => res.json({ provider: 'gowa' }));
+  app.get('/api/whatsapp/admin/config/:userId', (_req, res) => res.json({ config: null }));
+  app.post('/api/whatsapp/admin/config', (_req, res) => res.json({ ok: true }));
+  app.post('/api/whatsapp/admin/test-message', (_req, res) => res.json({ error: 'Not available on gowa' }));
+  app.get('/api/whatsapp/webhook/:userId', (_req, res) => res.sendStatus(403));
+  app.post('/api/whatsapp/webhook/:userId', (_req, res) => res.json({ ok: true }));
+
+  console.log('[Gowa] All WhatsApp routes mounted for gowa provider');
+
+} else if (waManager) {
+
+  // ── Baileys Provider Routes (fallback) ──
+
+  app.post('/api/whatsapp/pair', async (req, res) => {
+    try {
+      const { userId, phoneNumber } = req.body;
+      if (!userId) { res.status(400).json({ error: 'userId required' }); return; }
+      const result = await waManager!.startPairing(userId, phoneNumber);
+      if ('error' in result) { res.status(500).json(result); return; }
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ error: getMsg(err) });
+    }
+  });
+
+  app.get('/api/whatsapp/status/:userId', async (req, res) => {
+    try {
+      const status = await waManager!.getStatusOrStart(req.params.userId);
+      if (!status) { res.json({ status: 'not_found' }); return; }
+      res.json(status);
+    } catch (err: any) {
+      res.status(500).json({ error: getMsg(err) });
+    }
+  });
+
+  app.get('/api/whatsapp/qr/:userId', async (req, res) => {
+    try {
+      const status = await waManager!.getStatusOrStart(req.params.userId);
+      let qrCode = status?.qrCode;
+      if (!qrCode) {
+        const pollStart = Date.now();
+        const pollTimeout = 30000;
+        while (!qrCode && Date.now() - pollStart < pollTimeout) {
+          await new Promise(resolve => setTimeout(resolve, 400));
+          const refresh = waManager!.getStatus(req.params.userId);
+          qrCode = refresh?.qrCode || undefined;
+        }
+      }
+      if (!qrCode) {
+        res.status(404).json({ error: 'QR not generated within 30s.', status: waManager!.getStatus(req.params.userId)?.status || 'unknown' });
+        return;
+      }
+      const base64 = qrCode.replace(/^data:image\/png;base64,/, '');
+      res.setHeader('Cache-Control', 'no-store');
+      res.type('png').send(Buffer.from(base64, 'base64'));
+    } catch (err: any) {
+      res.status(500).json({ error: getMsg(err) });
+    }
+  });
+
+  app.get('/api/whatsapp/messages/:userId', (req, res) => {
+    const limit = parseInt(req.query.limit as string) || 20;
+    const messages = waManager!.getRecentMessages(req.params.userId, limit);
+    res.json({ messages });
+  });
+
+  app.post('/api/whatsapp/disconnect', async (req, res) => {
+    try {
+      const { userId } = req.body;
+      if (!userId) { res.status(400).json({ error: 'userId required' }); return; }
+      await waManager!.disconnect(userId);
+      res.json({ ok: true });
+    } catch (err: any) {
+      res.status(500).json({ error: getMsg(err) });
+    }
+  });
+
+  app.post('/api/whatsapp/send', async (req, res) => {
+    try {
+      const { userId, to, text, permissions } = req.body;
+      if (!userId || !to || !text) { res.status(400).json({ error: 'userId, to, text required' }); return; }
+      const effectivePermissions = waManager!.getEffectivePermissions(userId, permissions);
+      const result = await waTools.handleSendMessage(waManager!, userId, effectivePermissions, to, text);
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ error: getMsg(err) });
+    }
+  });
+
+  app.post('/api/whatsapp/tool', async (req, res) => {
+    try {
+      const { userId, tool, permissions } = req.body;
+      const params = req.body.params || {};
+      if (!userId || !tool) { res.status(400).json({ error: 'userId and tool required' }); return; }
+      const result = await waTools.handleWhatsAppAction(waManager!, userId, tool, params, permissions);
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ error: getMsg(err) });
+    }
+  });
+
+  app.get('/api/whatsapp/admin/overview/:userId', async (req, res) => {
+    try {
+      res.json(await waManager!.getAdminOverview(req.params.userId));
+    } catch (err: any) {
+      res.status(500).json({ error: getMsg(err) });
+    }
+  });
+
+  app.get('/api/whatsapp/admin/config/:userId', (req, res) => {
+    try {
+      res.json({ config: waManager!.getAdminConfigPublic(req.params.userId) });
+    } catch (err: any) {
+      res.status(500).json({ error: getMsg(err) });
+    }
+  });
+
+  app.post('/api/whatsapp/admin/config', (req, res) => {
+    try {
+      const { userId, config } = req.body;
+      if (!userId) { res.status(400).json({ error: 'userId required' }); return; }
+      res.json({ config: waManager!.saveAdminConfig(userId, config || {}) });
+    } catch (err: any) {
+      res.status(500).json({ error: getMsg(err) });
+    }
+  });
+
+  app.post('/api/whatsapp/admin/test-message', async (req, res) => {
+    try {
+      const { userId, to, text } = req.body;
+      if (!userId || !to || !text) { res.status(400).json({ error: 'userId, to, text required' }); return; }
+      const permissions = waManager!.getEffectivePermissions(userId, {
+        requireUserApproval: true,
+        approvedByUser: true,
+        mode: 'delegated_send',
+      });
+      const result = await waTools.handleSendMessage(waManager!, userId, permissions, to, text);
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ error: getMsg(err) });
+    }
+  });
+
+  app.get('/api/whatsapp/webhook/:userId', (req, res) => {
+    const mode = req.query['hub.mode'];
+    const token = req.query['hub.verify_token'];
+    const challenge = req.query['hub.challenge'];
+    if (mode === 'subscribe' && waManager!.verifyWebhookToken(req.params.userId, token)) {
+      res.status(200).send(String(challenge || ''));
       return;
     }
+    res.sendStatus(403);
+  });
 
-    const base64 = qrCode.replace(/^data:image\/png;base64,/, '');
-    res.setHeader('Cache-Control', 'no-store');
-    res.type('png').send(Buffer.from(base64, 'base64'));
-  } catch (err: any) {
-    res.status(500).json({ error: err.message || 'Failed to read WhatsApp QR' });
-  }
-});
+  app.post('/api/whatsapp/webhook/:userId', (req, res) => {
+    try {
+      res.json(waManager!.ingestCloudWebhook(req.params.userId, req.body));
+    } catch (err: any) {
+      res.status(500).json({ error: getMsg(err) });
+    }
+  });
 
-app.get('/api/whatsapp/messages/:userId', (req, res) => {
-  const limit = parseInt(req.query.limit as string) || 20;
-  const messages = waManager.getRecentMessages(req.params.userId, limit);
-  res.json({ messages });
-});
-
-app.post('/api/whatsapp/disconnect', async (req, res) => {
-  try {
-    const { userId } = req.body;
-    if (!userId) { res.status(400).json({ error: 'userId required' }); return; }
-    await waManager.disconnect(userId);
-    res.json({ ok: true });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.post('/api/whatsapp/send', async (req, res) => {
-  try {
-    const { userId, to, text, permissions } = req.body;
-    if (!userId || !to || !text) { res.status(400).json({ error: 'userId, to, text required' }); return; }
-    const effectivePermissions = waManager.getEffectivePermissions(userId, permissions);
-    const result = await waTools.handleSendMessage(waManager, userId, effectivePermissions, to, text);
-    res.json(result);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.post('/api/whatsapp/tool', async (req, res) => {
-  try {
-    const { userId, tool, permissions } = req.body;
-    const params = req.body.params || {};
-    if (!userId || !tool) { res.status(400).json({ error: 'userId and tool required' }); return; }
-    
-    const result = await waTools.handleWhatsAppAction(waManager, userId, tool, params, permissions);
-    res.json(result);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.get('/api/whatsapp/admin/overview/:userId', async (req, res) => {
-  try {
-    res.json(await waManager.getAdminOverview(req.params.userId));
-  } catch (err: any) {
-    res.status(500).json({ error: err.message || 'Failed to load WhatsApp admin overview' });
-  }
-});
-
-app.get('/api/whatsapp/admin/config/:userId', (req, res) => {
-  try {
-    res.json({ config: waManager.getAdminConfigPublic(req.params.userId) });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message || 'Failed to load WhatsApp admin config' });
-  }
-});
-
-app.post('/api/whatsapp/admin/config', (req, res) => {
-  try {
-    const { userId, config } = req.body;
-    if (!userId) { res.status(400).json({ error: 'userId required' }); return; }
-    res.json({ config: waManager.saveAdminConfig(userId, config || {}) });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message || 'Failed to save WhatsApp admin config' });
-  }
-});
-
-app.post('/api/whatsapp/admin/test-message', async (req, res) => {
-  try {
-    const { userId, to, text } = req.body;
-    if (!userId || !to || !text) { res.status(400).json({ error: 'userId, to, text required' }); return; }
-    const permissions = waManager.getEffectivePermissions(userId, {
-      requireUserApproval: true,
-      approvedByUser: true,
-      mode: 'delegated_send',
-    });
-    const result = await waTools.handleSendMessage(waManager, userId, permissions, to, text);
-    res.json(result);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message || 'Failed to send test message' });
-  }
-});
-
-app.get('/api/whatsapp/webhook/:userId', (req, res) => {
-  const mode = req.query['hub.mode'];
-  const token = req.query['hub.verify_token'];
-  const challenge = req.query['hub.challenge'];
-  if (mode === 'subscribe' && waManager.verifyWebhookToken(req.params.userId, token)) {
-    res.status(200).send(String(challenge || ''));
-    return;
-  }
-  res.sendStatus(403);
-});
-
-app.post('/api/whatsapp/webhook/:userId', (req, res) => {
-  try {
-    res.json(waManager.ingestCloudWebhook(req.params.userId, req.body));
-  } catch (err: any) {
-    res.status(500).json({ error: err.message || 'Webhook ingest failed' });
-  }
-});
+}
 
 // ── Web Architect (Website Builder) Routes ──
 
@@ -419,8 +558,8 @@ app.get('/site-build/:userId/:timestamp', async (req, res) => {
 // ── Shutdown hook ──
 
 process.on('SIGTERM', async () => {
-  console.log('Shutting down WhatsApp clients...');
-  await waManager.shutdown();
+  console.log('Shutting down...');
+  if (waManager) await waManager!.shutdown();
   process.exit(0);
 });
 

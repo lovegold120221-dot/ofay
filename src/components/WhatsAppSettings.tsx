@@ -187,7 +187,7 @@ export function WhatsAppSettings({ userId, waPermissions, onTogglePermission }: 
                 <span className="text-[13px] text-zinc-400 font-semibold">Generating WhatsApp connection...</span>
               </div>
               <p className="text-[11px] text-zinc-500 text-center max-w-xs mb-3 font-medium">
-                Starting up WhatsApp session on VPS backend. This might take a few seconds...
+                Generating QR code via WhatsApp server. Please wait...
               </p>
               <button
                 onClick={async () => {
