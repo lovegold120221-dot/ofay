@@ -4074,7 +4074,7 @@ ${historyContext}
         )}
       </AnimatePresence>
 
-      <div className="fixed top-24 left-0 right-0 px-8 z-30 pointer-events-none flex flex-col items-end">
+      <div className="fixed top-24 left-0 right-0 px-8 z-30 pointer-events-none flex flex-col items-center">
         <AnimatePresence>
           {tasks.map(task => (
             <motion.div
