@@ -1951,8 +1951,14 @@ export function BeatriceAgent({
   );
 
 
+  const authLanguageRef = useRef(authLanguage);
+  useEffect(() => { authLanguageRef.current = authLanguage; }, [authLanguage]);
+
   const saveSettings = async (callbacks?: { onSuccess?: () => void; onError?: (msg: string) => void }) => {
     setIsSaving(true);
+
+    // Read latest values from refs to avoid stale closure issues
+    const latestLang = authLanguageRef.current;
 
     try {
       await supabase
@@ -1964,11 +1970,10 @@ export function BeatriceAgent({
           selected_voice: selectedVoice,
           context_size: contextSize,
           user_title: userTitle,
-          language: authLanguage,
+          language: latestLang,
           whatsapp_permissions: waPermissions,
           whatsapp_paired: waStatus === 'paired',
           whatsapp_phone: waPhone || null,
-          theme: themePreference,
           updated_at: new Date().toISOString(),
         });
 
