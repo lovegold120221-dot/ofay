@@ -125,68 +125,6 @@
             /* Fix flexbox child overflow */
         }
 
-        /* Subview 1: Initial Ready State */
-        .desktop-ready-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 24px;
-            width: 100%;
-            height: 100%;
-            transition: opacity 0.3s ease;
-        }
-
-        .monitor-graphic {
-            width: 160px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .monitor-screen {
-            width: 100%;
-            aspect-ratio: 16 / 10;
-            background: linear-gradient(135deg, #1e2025 0%, #0d0e12 100%);
-            border: 4px solid #3f3f46;
-            border-radius: 8px;
-        }
-
-        .monitor-inner {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .monitor-inner::after {
-            content: "";
-            width: 60%;
-            height: 45%;
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 4px;
-        }
-
-        .monitor-stand {
-            width: 32px;
-            height: 24px;
-            background-color: #3f3f46;
-        }
-
-        .monitor-base {
-            width: 60px;
-            height: 4px;
-            background-color: #27272a;
-            border-radius: 2px;
-        }
-
-        .desktop-ready-text {
-            color: #71717a;
-            font-size: 1rem;
-            font-weight: 500;
-        }
-
         /* Subview 2: Document Workspace Viewport (Gen Mode & Ready Mode) */
         .document-workspace {
             position: absolute;
@@ -202,12 +140,6 @@
         }
 
         /* State Switchers */
-        .workspace-card.gen-mode .desktop-ready-state,
-        .workspace-card.doc-ready .desktop-ready-state {
-            opacity: 0;
-            pointer-events: none;
-        }
-
         .workspace-card.gen-mode .document-workspace,
         .workspace-card.doc-ready .document-workspace {
             opacity: 1;
@@ -552,7 +484,6 @@
             body,
             .header,
             .command-bar,
-            .desktop-ready-state,
             .view-header {
                 display: none !important;
             }
@@ -640,18 +571,6 @@
 
             <!-- DOMINANT WORKSPACE CARD (Replaces Desktop + Logs) -->
             <div class="workspace-card" id="workspace-container">
-
-                <!-- Default State: Desktop Monitor UI -->
-                <div class="desktop-ready-state">
-                    <div class="monitor-graphic">
-                        <div class="monitor-screen">
-                            <div class="monitor-inner"></div>
-                        </div>
-                        <div class="monitor-stand"></div>
-                        <div class="monitor-base"></div>
-                    </div>
-                    <p class="desktop-ready-text">Eburon Engine Ready</p>
-                </div>
 
                 <!-- Embedded Document Viewport -->
                 <div class="document-workspace">
