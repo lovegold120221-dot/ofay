@@ -114,11 +114,13 @@ export function WhatsAppSettings({ userId, waPermissions, onTogglePermission }: 
                     return;
                   }
                   setWaPairing(true);
+                  // Reset state to avoid stale data
+                  setWaStatus('init');
+                  setWaPairingCode(null);
+                  setWaQrCode(null);
+                  
                   try {
                     await startWhatsAppPairing(userId, pairingMethod === 'phone' ? phoneInput : undefined);
-                    setWaStatus('init');
-                    setWaPairingCode(null);
-                    setWaQrCode(null);
                     startPolling();
                   } catch (e: any) {
                     setWaPairing(false);

@@ -280,18 +280,25 @@ export class WhatsAppManager {
     }
   }
 
-  async startPairing(userId: string, phoneNumber?: string): Promise<{ pairingCode: string; status: string }> {
+  async startPairing(userId: string, phoneNumber?: string): Promise<{ pairingCode?: string; status: string }> {
     const existing = this.sessions.get(userId);
-    if (existing && ['init', 'qr_ready', 'paired'].includes(existing.status)) {
-      if (phoneNumber) {
-        await this.disconnect(userId);
-      } else {
-        return { pairingCode: safeUserId(userId), status: existing.status };
-      }
+    
+    // If we have an existing session and no new phone number is provided, return current
+    if (existing && !phoneNumber && ['init', 'qr_ready', 'paired'].includes(existing.status)) {
+      return { pairingCode: existing.pairingCode || undefined, status: existing.status };
+    }
+
+    if (existing) {
+       // Clear old pairing data to ensure UI reflects the new request
+       existing.pairingCode = null;
+       existing.qrCode = null;
+       existing.qrRaw = null;
+       if (phoneNumber) await this.disconnect(userId);
     }
 
     await this.startSession(userId, phoneNumber);
-    return { pairingCode: safeUserId(userId), status: this.sessions.get(userId)?.status || 'init' };
+    const entry = this.sessions.get(userId);
+    return { pairingCode: entry?.pairingCode || undefined, status: entry?.status || 'init' };
   }
 
   private async reconnect(userId: string, attempt = 0) {

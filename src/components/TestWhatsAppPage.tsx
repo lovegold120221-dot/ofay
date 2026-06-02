@@ -59,6 +59,8 @@ export function TestWhatsAppPage() {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
+  const [isPhoneMode, setIsPhoneMode] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState('');
 
   const qrUrl = useMemo(() => {
     return `${backend}/api/whatsapp/qr/${encodeURIComponent(userId)}?t=${qrBust}`;
@@ -85,11 +87,19 @@ export function TestWhatsAppPage() {
 
   const startPairing = async () => {
     setError('');
+    setNotice('Initializing session...');
+    // Reset local status to avoid stale data
+    setStatus({ status: 'init' });
+    setChats([]);
+    setSelectedChat(null);
+    
     try {
-      await startWhatsAppPairing(userId);
-      await loadStatus();
+      const result = await startWhatsAppPairing(userId, isPhoneMode ? phoneNumber : undefined);
+      setStatus(result);
+      if (result.status === 'qr_ready') setQrBust(Date.now());
     } catch (err: any) {
       setError(err.message || 'Failed to start pairing');
+      setStatus({ status: 'error' });
     }
   };
 
@@ -334,14 +344,40 @@ export function TestWhatsAppPage() {
           </header>
 
           <ScanBarcode 
-            qrCode={status.qrCode || qrUrl}
+            qrCode={!isPhoneMode ? (status.qrCode || qrUrl) : undefined}
+            pairingCode={status.pairingCode}
             status={status.status}
             onRefresh={loadStatus}
             loading={loadingStatus}
           />
        </div>
 
-       <footer className="z-10 py-8 text-center text-[#667781] text-[14px]">
+       <footer className="z-10 py-8 flex flex-col items-center gap-4 text-[#667781] text-[14px]">
+          <div 
+            onClick={() => setIsPhoneMode(!isPhoneMode)}
+            className="flex items-center gap-2 text-wa-green uppercase text-[12px] font-bold tracking-widest cursor-pointer hover:underline"
+          >
+             <Smartphone className="w-4 h-4" />
+             <span>{isPhoneMode ? 'Switch to QR Code' : 'Link with phone number'}</span>
+          </div>
+
+          {isPhoneMode && !status.pairingCode && (
+            <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-black/5 shadow-sm">
+               <input 
+                 value={phoneNumber}
+                 onChange={(e) => setPhoneNumber(e.target.value)}
+                 placeholder="Phone with country code"
+                 className="px-3 py-1 text-xs border border-gray-200 rounded outline-none focus:border-wa-green"
+               />
+               <button 
+                 onClick={startPairing}
+                 className="bg-wa-green text-white px-3 py-1 rounded text-xs font-bold"
+               >
+                 Get Code
+               </button>
+            </div>
+          )}
+
           <p>This is a secure bridge to your WhatsApp session. Your data is encrypted.</p>
        </footer>
     </div>
