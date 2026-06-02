@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eburon PC - Maximized Document Viewport</title>
+    <title>Eburon Sandbox</title>
     <style>
         /* Global Reset & Base Styling */
         * {
@@ -550,7 +550,7 @@
                     <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
             </button>
-            <h1 class="header-title">Eburon PC</h1>
+            <h1 class="header-title">Eburon Sandbox</h1>
 
             <div class="dropdown-pill">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -622,7 +622,7 @@
                     </svg>
                 </div>
                 <input type="text" id="cmd-input" class="cmd-input-field"
-                    placeholder="Ask Eburon to generate a document..." autocomplete="off" autofocus>
+                    placeholder="Ask Eburon to generate anything..." autocomplete="off" autofocus>
             </div>
 
         </div>
@@ -656,7 +656,7 @@
             liveTarget.innerHTML = "";
             cmdInput.value = "";
             cmdInput.disabled = false;
-            cmdInput.placeholder = "Ask Eburon to generate a document...";
+            cmdInput.placeholder = "Ask Eburon to generate anything...";
             cmdInput.focus();
             isGeneratingLocally = false;
         }
@@ -669,7 +669,7 @@
             workspaceCard.classList.remove('gen-mode');
             workspaceCard.classList.add('doc-ready');
             cmdInput.disabled = false;
-            cmdInput.placeholder = "Ask Eburon to generate a document...";
+            cmdInput.placeholder = "Ask Eburon to generate anything...";
             docSkeleton.scrollTop = 0;
         }
 
@@ -695,7 +695,7 @@
                 workspaceCard.classList.remove('doc-ready');
                 workspaceCard.classList.add('gen-mode');
                 cmdInput.disabled = true;
-                cmdInput.placeholder = "Beatrice is generating your document\u2026";
+                cmdInput.placeholder = "Beatrice is working on your request\u2026";
             }
         })();
 
@@ -782,7 +782,7 @@
                 alert(`Generation error: ${err.message}`);
             } finally {
                 cmdInput.disabled = false;
-                cmdInput.placeholder = "Ask Eburon to generate a document...";
+                cmdInput.placeholder = "Ask Eburon to generate anything...";
                 cmdInput.focus();
                 docSkeleton.scrollTop = 0;
                 isGeneratingLocally = false;

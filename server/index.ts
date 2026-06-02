@@ -204,6 +204,85 @@ app.post('/api/belgian/tool', async (req, res) => {
   }
 });
 
+// ── Ollama Proxy Route ──
+// Proxies generation requests to a local Ollama instance on the VPS.
+// Set OLLAMA_BASE_URL to override (default: http://localhost:11434)
+const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
+
+app.post('/api/ollama/generate', async (req, res) => {
+  const { model, messages, options } = req.body;
+  if (!model || !messages) {
+    res.status(400).json({ error: 'model and messages are required' });
+    return;
+  }
+
+  // Set SSE headers for streaming
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
+
+  try {
+    const ollamaRes = await fetch(`${OLLAMA_BASE_URL}/api/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model,
+        messages,
+        stream: true,
+        options: options || {},
+      }),
+    });
+
+    if (!ollamaRes.ok) {
+      const errBody = await ollamaRes.text().catch(() => '');
+      res.write(`data: ${JSON.stringify({ error: `Ollama error (${ollamaRes.status}): ${errBody}` })}\n\n`);
+      res.end();
+      return;
+    }
+
+    const reader = ollamaRes.body?.getReader();
+    if (!reader) {
+      res.write(`data: ${JSON.stringify({ error: 'No response body from Ollama' })}\n\n`);
+      res.end();
+      return;
+    }
+
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || ''; // keep incomplete line in buffer
+
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        try {
+          const json = JSON.parse(line);
+          if (json.done) {
+            res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+          } else if (json.message?.content) {
+            res.write(`data: ${JSON.stringify({ text: json.message.content })}\n\n`);
+          }
+        } catch {
+          // Skip malformed JSON lines
+        }
+      }
+    }
+
+    res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+    res.end();
+  } catch (err: any) {
+    console.error('Ollama proxy error:', err);
+    res.write(`data: ${JSON.stringify({ error: err.message || 'Ollama proxy failed' })}\n\n`);
+    res.end();
+  }
+});
+
 // ── WhatsApp Routes ──
 // Uses Gowa provider when GOWA_API_URL is set, otherwise falls back to Baileys
 
