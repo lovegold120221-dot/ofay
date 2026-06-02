@@ -14,7 +14,13 @@ app.use(express.json({ limit: '10mb' }));
 const waManager = new WhatsAppManager();
 waManager.resumeExistingSessions();
 
+// ── Serve built frontend (if dist/ exists) ──
+const distPath = path.join(__dirname, '..', 'dist');
+const distIndex = path.join(distPath, 'index.html');
+app.use(express.static(distPath));
+
 app.get('/', (_req, res) => {
+  if (fs.existsSync(distIndex)) return res.sendFile(distIndex);
   res.send('Beatrice Backend API Server is running. To open the application, visit http://localhost:3000');
 });
 
@@ -319,6 +325,14 @@ process.on('SIGTERM', async () => {
   console.log('Shutting down WhatsApp clients...');
   await waManager.shutdown();
   process.exit(0);
+});
+
+// ── SPA fallback — any non-API, non-asset route serves index.html ──
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api/') || req.path.startsWith('/site-build/')) return next();
+  res.sendFile(path.join(distPath, 'index.html'), (err) => {
+    if (err) next();
+  });
 });
 
 app.use((_req, res) => {
