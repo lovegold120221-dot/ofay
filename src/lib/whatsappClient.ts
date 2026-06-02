@@ -67,6 +67,7 @@ async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
     ...init,
     headers: {
       'Content-Type': 'application/json',
+      'ngrok-skip-browser-warning': 'true',
       ...(init?.headers || {}),
     },
   });
@@ -89,7 +90,9 @@ export async function getWhatsAppStatus(userId: string): Promise<{
   error?: string;
   pairingCode?: string;
 }> {
-  const res = await fetch(`${getBackendUrl()}/api/whatsapp/status/${encodeURIComponent(userId)}`);
+  const res = await fetch(`${getBackendUrl()}/api/whatsapp/status/${encodeURIComponent(userId)}`, {
+    headers: { 'ngrok-skip-browser-warning': 'true' }
+  });
   if (!res.ok) return { status: 'error', error: `Server returned ${res.status}` };
   return res.json();
 }
@@ -126,7 +129,9 @@ export async function callWhatsAppTool(
 }
 
 export async function getWhatsAppMessages(userId: string, limit = 20): Promise<{ messages: any[] }> {
-  const res = await fetch(`${getBackendUrl()}/api/whatsapp/messages/${encodeURIComponent(userId)}?limit=${limit}`);
+  const res = await fetch(`${getBackendUrl()}/api/whatsapp/messages/${encodeURIComponent(userId)}?limit=${limit}`, {
+    headers: { 'ngrok-skip-browser-warning': 'true' }
+  });
   if (!res.ok) throw new Error(`Server returned ${res.status}`);
   return res.json();
 }

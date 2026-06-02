@@ -18,7 +18,10 @@ export async function webGlance(query: string, maxResults = 3): Promise<WebGlanc
 
   const res = await fetch(`${getBackendUrl()}/api/web/glance`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+      'Content-Type': 'application/json',
+      'ngrok-skip-browser-warning': 'true'
+    },
     body: JSON.stringify({ query: trimmed, maxResults }),
   });
   const data = await res.json().catch(() => ({}));
