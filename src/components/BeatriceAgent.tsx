@@ -819,6 +819,7 @@ export function BeatriceAgent({
   const [showWebsiteViewer, setShowWebsiteViewer] = useState(false);
   const [activeWebsiteUrl, setActiveWebsiteUrl] = useState<string | null>(null);
   const [personaName, setPersonaName] = useState("Beatrice");
+  const [userAvatarUrl, setUserAvatarUrl] = useState<string | null>(null);
   const [customPrompt, setCustomPrompt] = useState("");
   const [selectedVoice, setSelectedVoice] = useState("Aoede");
   const [themePreference, setThemePreference] = useState<'system' | 'light' | 'dark'>(() => {
@@ -1754,6 +1755,7 @@ export function BeatriceAgent({
 
       if (!settingsError && settingsData) {
         if (settingsData.persona_name) setPersonaName(settingsData.persona_name);
+        if (settingsData.avatar_url) setUserAvatarUrl(settingsData.avatar_url);
         if (settingsData.custom_prompt !== null) setCustomPrompt(settingsData.custom_prompt);
         if (settingsData.selected_voice) setSelectedVoice(settingsData.selected_voice);
         if (settingsData.context_size !== undefined) setContextSize(settingsData.context_size);
@@ -1770,6 +1772,7 @@ export function BeatriceAgent({
           const s = payload.new as any;
           if (!s) return;
           if (s.persona_name) setPersonaName(s.persona_name);
+          if (s.avatar_url) setUserAvatarUrl(s.avatar_url);
           if (s.custom_prompt !== null) setCustomPrompt(s.custom_prompt);
           if (s.selected_voice) setSelectedVoice(s.selected_voice);
           if (s.context_size !== undefined) setContextSize(s.context_size);
@@ -3750,8 +3753,8 @@ ${historyContext}
             className="w-[40px] h-[40px] rounded-full bg-wa-bg-sidebar border border-white/5 overflow-hidden flex items-center justify-center hover:border-white/10 transition-all duration-300 active:scale-90"
             aria-label="User Profile"
           >
-            {user.photoURL ? (
-              <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover" />
+            {userAvatarUrl || user.photoURL ? (
+              <img src={userAvatarUrl || user.photoURL || ''} alt="Profile" className="w-full h-full object-cover" />
             ) : (
               <span className="text-white/70 text-sm font-semibold">{user.displayName?.charAt(0) || 'M'}</span>
             )}
