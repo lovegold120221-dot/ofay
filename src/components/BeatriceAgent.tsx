@@ -12,7 +12,6 @@ import { UnifiedTranscript } from './UnifiedTranscript';
 import { saveOutput, uploadToDrive } from '../lib/workspace';
 import { ChatPage } from './ChatPage';
 import { VideoPage } from './VideoPage';
-import { DocumentViewer } from './DocumentViewer';
 import { WebsiteViewer } from './WebsiteViewer';
 import { ProfilePage } from './ProfilePage';
 import { WhatsAppSettings } from './WhatsAppSettings';
@@ -736,31 +735,31 @@ ${request.historyContext || ''}
 Produce one finished standalone file now.
 `;
 
-  const response = await fetch('http://localhost:4200/api/docs/generate', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      userId: user.uid,
-      title: request.title,
-      prompt: request.prompt,
-      templateKey: preferredTemplateKey,
-      historyContext: request.historyContext,
-      language: request.language || 'en'
-    })
-  });
+  // Call Gemini API directly with the full prompts (systemPrompt + userPrompt with templates)
+  const genResponse = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
+        systemInstruction: { role: 'user', parts: [{ text: systemPrompt }] },
+        generationConfig: { temperature: 0.5, maxOutputTokens: 8192 }
+      })
+    }
+  );
 
-  if (!response.ok) {
-    throw new Error(`Backend Document Generation failed with status ${response.status}`);
+  if (!genResponse.ok) {
+    const errBody = await genResponse.text().catch(() => '');
+    throw new Error(`Gemini API error (${genResponse.status}): ${errBody}`);
   }
 
-  const result = await response.json();
-  
-  if (!result.ok) {
-    throw new Error(result.error || 'Backend generation failed');
-  }
+  const genResult = await genResponse.json();
+  const raw = genResult?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!raw) throw new Error('Gemini returned empty content');
 
-  // Handle the structured data from the backend
-  return result.data;
+  // Strip markdown fences if present
+  return raw.replace(/^```html\s*/i, '').replace(/```\s*$/, '').trim();
 };
 
 function VisualizerBars({ volumes, side }: { volumes: number[], side: 'left' | 'right' }) {
@@ -836,8 +835,7 @@ export function BeatriceAgent({
   const [modelTranscript, setModelTranscript] = useState<string>('');
 
   const [showSettings, setShowSettings] = useState(false);
-  const [showDocumentViewer, setShowDocumentViewer] = useState(false);
-  const [activeDocumentResultId, setActiveDocumentResultId] = useState<string | null>(null);
+  // doc-agent page handles all visual output; no in-app viewer needed
   const [showWebsiteViewer, setShowWebsiteViewer] = useState(false);
   const [activeWebsiteUrl, setActiveWebsiteUrl] = useState<string | null>(null);
   const [personaName, setPersonaName] = useState("Beatrice");
@@ -1399,25 +1397,47 @@ export function BeatriceAgent({
 
     const resultId = await saveToolResult(user.uid, toolName, isError ? (error || result?.error || 'Unknown error') : formattedContent, fileType);
 
-    setActiveDocumentResultId(resultId);
-    setShowDocumentViewer(true);
+    // Route ALL visual output to the doc-agent sandbox page
+    try {
+      window.open('/doc-agent/', 'docgen-output');
+      // Brief delay so the target page can register its BroadcastChannel listener
+      setTimeout(() => {
+        try {
+          const bc = new BroadcastChannel('docgen_channel');
+          bc.postMessage({
+            type: 'show_result',
+            content: formattedContent,
+            title: isError ? `Error: ${title}` : title,
+            toolName,
+            isError,
+          });
+          bc.close();
+        } catch (_) {}
+      }, 300);
+    } catch (_) {
+      // Fallback: if window.open fails, silently skip (caller still has the result)
+    }
   };
 
-
+  const sendResultToDocAgent = (content: string, title: string, toolName: string) => {
+    try {
+      const bc = new BroadcastChannel('docgen_channel');
+      bc.postMessage({ type: 'show_result', content, title, toolName });
+      bc.close();
+    } catch (_) {}
+  };
 
   const setGeneratedDocumentTask = async (id: string, title: string, content: string, status: 'working' | 'done' | 'error' = 'done') => {
     if (status === 'working') {
       // Do nothing to the viewer while working; let the standard task box show "processing"
     } else if (status === 'done') {
-      const resultId = await saveToolResult(user.uid, 'create_document', content, 'html');
-      setActiveDocumentResultId(resultId);
-      setShowDocumentViewer(true);
+      await saveToolResult(user.uid, 'create_document', content, 'html');
+      // Result is already sent via BroadcastChannel from the create_document handler
       setTasks(prev => prev.map(t => (t.id === id ? { ...t, status: 'completed' } : t)));
       setTimeout(() => setTasks(prev => prev.filter(t => t.id !== id)), 8000);
     } else {
-      const resultId = await saveToolResult(user.uid, 'create_document', 'Generation failed.', 'txt');
-      setActiveDocumentResultId(resultId);
-      setShowDocumentViewer(true);
+      await saveToolResult(user.uid, 'create_document', 'Generation failed.', 'txt');
+      sendResultToDocAgent('<div style="padding:40px;text-align:center;color:#ef4444"><h2>Generation Failed</h2><p>Please try again.</p></div>', 'Error', 'create_document');
       setTasks(prev => prev.filter(t => t.id !== id));
     }
   };
@@ -2113,10 +2133,12 @@ When the user asks you to interact with WhatsApp:
      "permissions": { "requireUserApproval": true, "approvedByUser": true, "mode": "delegated_send" }
    }
 
-Advanced Tools Supported:
-- sendMessage, sendMedia (images/video), sendAudio (voice notes), sendReaction (emojis), sendButtons.
-- getCalls, getGroups, getContacts.
-- groupCall (Signaling for group voice/video sessions).
+Full CRUD WhatsApp Tools:
+  READ:   readChats, getContacts, getGroups, getMessageHistory, getCalls, groupMetadata, getStatus
+  CREATE: sendMessage, sendImage, sendContact, sendLocation, sendPoll, sendAudio, sendFile, createGroup
+  UPDATE: markAsRead, archiveChat, muteChat, pinChat, starMessage, blockContact,
+          setGroupName, setGroupTopic, setGroupPhoto, changeAvatar, changePushName
+  DELETE: deleteMessage, revokeMessage, deleteChat, clearChat, leaveGroup, removeGroupPhoto
 
 SAFETY: Never invent contacts. For groups, use @g.us. Always confirm delivery result.
 E2EE BRANDING: Always emphasize that your operations are end-to-end encrypted and authorized via the user's own device.
@@ -2149,9 +2171,9 @@ When the user asks you to build a website, landing page, or blog, you MUST call 
 - Once finished, confirm the site is live.
 
 CRITICAL COMMUNICATION RULE FOR DOCUMENTS:
-1. When you initiate the create_document tool, you MUST use filler words to let the user know you are actively working on it.
-2. Once the tool finishes and returns the result to you, speak again to confirm it is complete.
-Never leave awkward silence while generating.
+1. When you initiate the create_document tool, acknowledge it briefly in one short sentence — then stay silent. The document agent page opens automatically so the user can see progress visually.
+2. When the tool finishes, do NOT speak again unless the user asks about it. The document is already displayed in the open page.
+Never interrupt the user with status updates about documents.
 
 Available /public document templates:
 ${templateReferenceText}
@@ -2687,21 +2709,34 @@ ${historyContext}
                 },
                 {
                   name: "whatsapp_action",
-                  description: "Execute high-fidelity WhatsApp operations. Read-only actions run immediately. Outbound/modifying actions REQUIRE a preview followed by the user replying SEND.",
+                  description: "Full CRUD WhatsApp operations: READ (readChats, getContacts, getGroups, getMessageHistory, getCalls, groupMetadata, getStatus), CREATE (sendMessage, sendImage, sendContact, sendLocation, sendPoll, createGroup), UPDATE (markAsRead, archiveChat, muteChat, pinChat, starMessage, blockContact, setGroupName, setGroupTopic, changeAvatar, changePushName), DELETE (deleteMessage, revokeMessage, deleteChat, clearChat, leaveGroup, removeGroupPhoto). Read-only actions run immediately. Outbound/modifying actions REQUIRE a preview followed by the user replying SEND.",
                   parameters: {
                     type: Type.OBJECT,
                     properties: {
                        action: { 
                          type: Type.STRING, 
-                         enum: [
-                           "readChats", "getContacts", "getGroups", "getMessageHistory", "getCalls",
-                           "sendMessage", "sendImage", "sendFile", "sendVideo", "sendSticker", 
-                           "sendContact", "sendLocation", "sendAudio", "sendPoll", "sendLink",
-                           "sendReaction", "sendButtons", "deleteMessage", "revokeMessage", 
-                           "updateMessage", "markAsRead", "createGroup", "joinGroup", 
-                           "manageParticipants", "setGroupPhoto", "setGroupName", "setGroupTopic",
-                           "groupInfo", "changeAvatar", "changePushName", "userCheck", "pinChat"
-                         ],
+                          enum: [
+                            // ── READ ──
+                            "readChats", "getContacts", "getGroups", "getMessageHistory", "getCalls",
+                            "groupMetadata", "getGroupInviteLink", "getStatus", "getBusinessProfile",
+                            // ── CREATE (SEND) ──
+                            "sendMessage", "sendImage", "sendFile", "sendVideo", "sendSticker", 
+                            "sendContact", "sendLocation", "sendAudio", "sendPoll", "sendLink",
+                            "sendReaction", "sendButtons", "forwardMessage",
+                            // ── DELETE ──
+                            "deleteMessage", "revokeMessage", "deleteChat", "clearChat",
+                            "leaveGroup", "removeGroupPhoto", "revokeGroupInvite",
+                            // ── UPDATE ──
+                            "markAsRead", "markAsUnread", "archiveChat", "unarchiveChat",
+                            "muteChat", "unmuteChat", "pinChat", "starMessage", "unstarMessage",
+                            "blockContact", "unblockContact",
+                            // ── GROUPS ──
+                            "createGroup", "joinGroup", "manageParticipants",
+                            "setGroupPhoto", "setGroupName", "setGroupTopic",
+                            "setGroupSetting",
+                            // ── ACCOUNT ──
+                            "changeAvatar", "changePushName", "sendPresence", "userCheck"
+                          ],
                          description: "The specific WhatsApp capability to execute." 
                        },
                        to: { type: Type.STRING, description: "Recipient JID (e.g. 12345@s.whatsapp.net) or group JID (e.g. 12345@g.us)." },
@@ -2710,10 +2745,18 @@ ${historyContext}
                        ptt: { type: Type.BOOLEAN, description: "True for push-to-talk voice note." },
                        emoji: { type: Type.STRING, description: "Emoji for reaction." },
                        messageId: { type: Type.STRING, description: "ID of the target message." },
-                       pollOptions: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Options for a poll." },
-                       limit: { type: Type.NUMBER, description: "Fetch limit (max 2000 for history)." },
-                       name: { type: Type.STRING, description: "New name for group or user profile." }
-                    },
+                        pollOptions: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Options for a poll." },
+                        limit: { type: Type.NUMBER, description: "Fetch limit (max 2000 for history)." },
+                        name: { type: Type.STRING, description: "New name for group or user profile." },
+                        latitude: { type: Type.NUMBER, description: "Latitude for sendLocation." },
+                        longitude: { type: Type.NUMBER, description: "Longitude for sendLocation." },
+                        duration: { type: Type.NUMBER, description: "Mute duration in seconds (default 86400 for 24h)." },
+                        setting: { type: Type.STRING, description: "Group setting: 'announcement' or 'member_add_mode'." },
+                        value: { type: Type.BOOLEAN, description: "Toggle true/false for group settings." },
+                        contactName: { type: Type.STRING, description: "Contact display name for sendContact." },
+                        phoneNumber: { type: Type.STRING, description: "Phone number for sendContact." },
+                        jid: { type: Type.STRING, description: "Explicit JID for queries." }
+                     },
                     required: ["action"]
                   }
                 },
@@ -3310,62 +3353,75 @@ ${historyContext}
                       const args = call.args as any;
                       const title = String(args.title || 'Document');
                       const prompt = String(args.prompt || 'Create a professional document.');
-                      const generationTaskId = taskId; // Reuse the UI task ID
+                      const generationTaskId = taskId;
 
+                      // ── IMMEDIATELY open doc-agent page (shows "Generating..." blur) ──
                       try {
-                        setGeneratedDocumentTask(generationTaskId, title, '', 'working');
+                        const apiKey = getGeminiApiKey();
+                        localStorage.setItem('docgen_prompt', prompt);
+                        localStorage.setItem('docgen_title', title);
+                        if (apiKey) localStorage.setItem('gemini_api_key', apiKey);
+                        window.open('/doc-agent/', 'docgen-output');
+                      } catch (_) { /* localStorage or window.open may fail in some contexts */ }
 
-                        // Background generation to prevent blocking the Gemini Live API loop
-                        (async () => {
+                      // ── Set UI state ──
+                      setGeneratedDocumentTask(generationTaskId, title, '', 'working');
+
+                      // Create cross-tab channel — result will be sent to the doc-agent page
+                      const docChannel = new BroadcastChannel('docgen_channel');
+
+                      // Background generation
+                      (async () => {
+                        try {
+                          const content = await generateDocumentWithGemini({
+                            title,
+                            prompt,
+                            templateName: args.templateName,
+                            userId: user.uid,
+                            language: authLanguage,
+                            personaName,
+                            historyContext: historyContextRef.current,
+                          });
+
+                          await setGeneratedDocumentTask(generationTaskId, title, content, 'done');
+
+                          // Send result to the already-open doc-agent page
                           try {
-                            const content = await generateDocumentWithGemini({
-                              title,
-                              prompt,
-                              templateName: args.templateName,
-                              userId: user.uid,
-                              language: authLanguage,
-                              personaName,
-                              historyContext: historyContextRef.current,
-                            });
+                            docChannel.postMessage({ type: 'docgen_result', content, title, prompt });
+                          } catch (_) {}
+                          docChannel.close();
 
-                            await setGeneratedDocumentTask(generationTaskId, title, content, 'done');
-
-                            const wsOutput = {
-                              id: `doc_${generationTaskId}`,
-                              userId: user.uid,
-                              type: 'document' as const,
-                              title,
-                              textContent: content,
-                              mimeType: 'text/html',
-                              fileSize: new Blob([content]).size,
-                              createdAt: new Date().toISOString(),
-                            };
-                            saveOutput(wsOutput).catch(() => {});
-                            if (googleTokenRef.current) {
-                              uploadToDrive(gFetch, wsOutput).then(driveResult => {
-                                if (driveResult) {
-                                  saveOutput({ ...wsOutput, driveFileId: driveResult.fileId, driveLink: driveResult.link });
-                                }
-                              }).catch(() => {});
-                            }
-                          } catch (e: any) {
-                            await setGeneratedDocumentTask(generationTaskId, title, '', 'error');
+                          const wsOutput = {
+                            id: `doc_${generationTaskId}`,
+                            userId: user.uid,
+                            type: 'document' as const,
+                            title,
+                            textContent: content,
+                            mimeType: 'text/html',
+                            fileSize: new Blob([content]).size,
+                            createdAt: new Date().toISOString(),
+                          };
+                          saveOutput(wsOutput).catch(() => {});
+                          if (googleTokenRef.current) {
+                            uploadToDrive(gFetch, wsOutput).then(driveResult => {
+                              if (driveResult) {
+                                saveOutput({ ...wsOutput, driveFileId: driveResult.fileId, driveLink: driveResult.link });
+                              }
+                            }).catch(() => {});
                           }
-                        })();
+                        } catch (e: any) {
+                          docChannel.close();
+                          await setGeneratedDocumentTask(generationTaskId, title, '', 'error');
+                        }
+                      })();
 
-                        result = {
-                          ok: true,
-                          title,
-                          message: "Document generation started in the background. It will take a few seconds.",
-                          templateName: args.templateName || inferDocumentTemplate(title, prompt),
-                          generatedBy: 'gemini',
-                        };
-                      } catch (e: any) {
-                        setGeneratedDocumentTask(generationTaskId, title, '', 'error');
-                        result = {
-                          error: e?.message || 'Document generation failed.'
-                        };
-                      }
+                      result = {
+                        ok: true,
+                        title,
+                        // No "message" field — prevents Beatrice from speaking filler
+                        templateName: args.templateName || inferDocumentTemplate(title, prompt),
+                        generatedBy: 'gemini',
+                      };
                     } else if (callName === 'connect_google_account') {
                       const reason = (call.args as any)?.reason || 'User requested Google re-authentication';
                       try {
@@ -3989,19 +4045,6 @@ ${historyContext}
             isSaving={isSaving}
             themePreference={themePreference}
             onSetThemePreference={setThemePreference}
-          />
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {showDocumentViewer && activeDocumentResultId && (
-          <DocumentViewer
-            resultId={activeDocumentResultId}
-            personaName={personaName}
-            onClose={() => {
-              setShowDocumentViewer(false);
-              setActiveDocumentResultId(null);
-            }}
           />
         )}
       </AnimatePresence>

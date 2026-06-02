@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
@@ -55,9 +56,20 @@ if (!useGowa) {
   }, 30 * 60 * 1000);
 }
 
+// ── Root route: serve the frontend if dist/ exists, otherwise show a message ──
+const distPath = path.join(__dirname, '..', 'dist');
+const distIndex = path.join(distPath, 'index.html');
+
 app.get('/', (_req, res) => {
-  res.send('Beatrice Backend API Server is running. To open the application, visit http://localhost:3000');
+  if (fs.existsSync(distIndex)) {
+    res.sendFile(distIndex);
+  } else {
+    res.send('Beatrice Backend API Server is running. To open the application, visit http://localhost:3000');
+  }
 });
+
+// Serve built frontend assets (JS, CSS, images)
+app.use(express.static(distPath));
 
 app.get('/api/health', async (_req, res) => {
   res.json({ status: 'ok', worker: 'client-side' });
@@ -632,11 +644,7 @@ process.on('SIGTERM', async () => {
   process.exit(0);
 });
 
-// ── Serve built frontend for production (same domain) ──
-const distPath = path.join(__dirname, '..', 'dist');
-app.use(express.static(distPath));
-
-// SPA fallback — serve index.html for any non-API route
+// ── SPA fallback — any non-API, non-asset route serves index.html ──
 app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api/') || req.path.startsWith('/site-build/')) return next();
   res.sendFile(path.join(distPath, 'index.html'), (err) => {

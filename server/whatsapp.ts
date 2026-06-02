@@ -899,6 +899,157 @@ export class WhatsAppManager {
     return sock.chatModify({ disappearingMessagesInChat: duration }, chatId);
   }
 
+  // ─── FULL CRUD: Chat operations ──────────────────────────────
+  async archiveWhatsAppChat(userId: string, to: string, archive: boolean): Promise<any> {
+    const sock = this.getClient(userId);
+    if (!sock) return null;
+    const chatId = this.resolveContactJid(userId, to);
+    return sock.chatModify({ archive }, chatId);
+  }
+
+  async muteWhatsAppChat(userId: string, to: string, duration: number | null): Promise<any> {
+    const sock = this.getClient(userId);
+    if (!sock) return null;
+    const chatId = this.resolveContactJid(userId, to);
+    // null = unmute, number = mute for that many seconds
+    return sock.chatModify({ mute: duration }, chatId);
+  }
+
+  async deleteWhatsAppChat(userId: string, to: string): Promise<any> {
+    const sock = this.getClient(userId);
+    if (!sock) return null;
+    const chatId = this.resolveContactJid(userId, to);
+    // Delete entire chat (for me only)
+    return sock.chatModify({ delete: true }, chatId);
+  }
+
+  async clearWhatsAppChat(userId: string, to: string): Promise<any> {
+    const sock = this.getClient(userId);
+    if (!sock) return null;
+    const chatId = this.resolveContactJid(userId, to);
+    // Clear all messages in the chat
+    return sock.chatModify({ clear: { type: 'message', timer: null } }, chatId);
+  }
+
+  async markWhatsAppUnread(userId: string, to: string): Promise<any> {
+    const sock = this.getClient(userId);
+    if (!sock) return null;
+    const chatId = this.resolveContactJid(userId, to);
+    return sock.chatModify({ markAsUnread: true }, chatId);
+  }
+
+  // ─── FULL CRUD: Contact operations ───────────────────────────
+  async blockWhatsAppContact(userId: string, to: string, block: boolean): Promise<any> {
+    const sock = this.getClient(userId);
+    if (!sock) return null;
+    const jid = this.resolveContactJid(userId, to);
+    return sock.updateBlockStatus(jid, block ? 'block' : 'unblock');
+  }
+
+  // ─── FULL CRUD: Message operations ───────────────────────────
+  async sendWhatsAppContact(userId: string, to: string, contactName: string, phoneNumber: string): Promise<any> {
+    const sock = this.getClient(userId);
+    if (!sock) return { ok: false, error: 'WhatsApp not connected' };
+    const chatId = this.resolveContactJid(userId, to);
+    const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN:${contactName}\nTEL;type=CELL;type=VOICE;waid=${phoneNumber.replace(/\D/g, '')}:${phoneNumber}\nEND:VCARD`;
+    return sock.sendMessage(chatId, {
+      contacts: { displayName: contactName, contacts: [{ vcard }] }
+    });
+  }
+
+  async sendWhatsAppLocation(userId: string, to: string, latitude: number, longitude: number, name?: string): Promise<any> {
+    const sock = this.getClient(userId);
+    if (!sock) return { ok: false, error: 'WhatsApp not connected' };
+    const chatId = this.resolveContactJid(userId, to);
+    return sock.sendMessage(chatId, {
+      location: { degreesLatitude: latitude, degreesLongitude: longitude, name: name || '' }
+    });
+  }
+
+  // ─── FULL CRUD: Group operations ─────────────────────────────
+  async leaveWhatsAppGroup(userId: string, groupId: string): Promise<any> {
+    const sock = this.getClient(userId);
+    if (!sock) return null;
+    return sock.groupLeave(groupId);
+  }
+
+  async getWhatsAppGroupMetadata(userId: string, groupId: string): Promise<any> {
+    const sock = this.getClient(userId);
+    if (!sock) return null;
+    return sock.groupMetadata(groupId);
+  }
+
+  async updateWhatsAppGroupPhoto(userId: string, groupId: string, url: string): Promise<any> {
+    const sock = this.getClient(userId);
+    if (!sock) return null;
+    return sock.updateProfilePicture(groupId, { url });
+  }
+
+  async removeWhatsAppGroupPhoto(userId: string, groupId: string): Promise<any> {
+    const sock = this.getClient(userId);
+    if (!sock) return null;
+    return sock.removeProfilePicture(groupId);
+  }
+
+  async getWhatsAppGroupInviteLink(userId: string, groupId: string): Promise<string> {
+    const sock = this.getClient(userId);
+    if (!sock) return '';
+    const code = await sock.groupInviteCode(groupId);
+    return `https://chat.whatsapp.com/${code}`;
+  }
+
+  async revokeWhatsAppGroupInvite(userId: string, groupId: string): Promise<any> {
+    const sock = this.getClient(userId);
+    if (!sock) return null;
+    return sock.groupRevokeInvite(groupId);
+  }
+
+  async getWhatsAppBusinessProfile(userId: string, jid: string): Promise<any> {
+    const sock = this.getClient(userId);
+    if (!sock) return null;
+    try {
+      return await sock.getBusinessProfile(jid);
+    } catch { return null; }
+  }
+
+  async setWhatsAppGroupSetting(userId: string, groupId: string, setting: 'announcement' | 'member_add_mode', value: boolean): Promise<any> {
+    const sock = this.getClient(userId);
+    if (!sock) return null;
+    return sock.groupSettingUpdate(groupId, setting, value ? 'on' : 'off');
+  }
+
+  async getWhatsAppStatus(userId: string, jid: string): Promise<any> {
+    const sock = this.getClient(userId);
+    if (!sock) return null;
+    try {
+      return await sock.fetchStatus(jid);
+    } catch { return null; }
+  }
+
+  async starWhatsAppMessage(userId: string, to: string, messageId: string, starred: boolean): Promise<any> {
+    const sock = this.getClient(userId);
+    if (!sock) return null;
+    const chatId = this.resolveContactJid(userId, to);
+    return sock.chatModify({
+      star: { messages: [{ id: messageId, fromMe: true, remoteJid: chatId }], star: starred }
+    }, chatId);
+  }
+
+  async getWhatsAppCommunityParticipants(userId: string, groupId: string): Promise<any> {
+    const sock = this.getClient(userId);
+    if (!sock) return null;
+    try {
+      return await sock.groupMetadata(groupId);
+    } catch { return null; }
+  }
+
+  async sendWhatsAppReactionToMessage(userId: string, to: string, messageId: string, emoji: string): Promise<any> {
+    const sock = this.getClient(userId);
+    if (!sock) return { ok: false, error: 'WhatsApp not connected' };
+    const chatId = this.resolveContactJid(userId, to);
+    return sock.sendMessage(chatId, { react: { text: emoji, key: { remoteJid: chatId, fromMe: true, id: messageId } } });
+  }
+
   async getAdminOverview(userId: string) {
     const status = await this.getStatusOrStart(userId);
     const config = this.getAdminConfigPublic(userId);

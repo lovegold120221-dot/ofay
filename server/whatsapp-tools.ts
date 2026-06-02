@@ -129,13 +129,70 @@ export async function handleWhatsAppAction(
       case 'setGroupTopic':
         return { ok: true, result: await wa.setWhatsAppGroupTopic(userId, params.groupId, params.text || params.topic) };
 
-      // ─── ACCOUNT ───────────────────────────────────────────────────
+      // ─── FULL CRUD: Chats ──────────────────────────────────────────
+      case 'archiveChat':
+        return { ok: true, result: await wa.archiveWhatsAppChat(userId, params.to, true) };
+      case 'unarchiveChat':
+        return { ok: true, result: await wa.archiveWhatsAppChat(userId, params.to, false) };
+      case 'muteChat':
+        return { ok: true, result: await wa.muteWhatsAppChat(userId, params.to, params.duration || 86400) };
+      case 'unmuteChat':
+        return { ok: true, result: await wa.muteWhatsAppChat(userId, params.to, null) };
+      case 'deleteChat':
+        return { ok: true, result: await wa.deleteWhatsAppChat(userId, params.to) };
+      case 'clearChat':
+        return { ok: true, result: await wa.clearWhatsAppChat(userId, params.to) };
+      case 'markAsUnread':
+        return { ok: true, result: await wa.markWhatsAppUnread(userId, params.to) };
+
+      // ─── FULL CRUD: Contacts ────────────────────────────────────────
+      case 'blockContact':
+        return { ok: true, result: await wa.blockWhatsAppContact(userId, params.to, true) };
+      case 'unblockContact':
+        return { ok: true, result: await wa.blockWhatsAppContact(userId, params.to, false) };
+      case 'sendContact':
+        const contactApproval = requireDelegatedSendApproval(effectivePermissions);
+        if (contactApproval) return { ok: false, error: contactApproval };
+        return { ok: true, result: await wa.sendWhatsAppContact(userId, params.to, params.contactName || params.name, params.phoneNumber || params.to) };
+
+      // ─── FULL CRUD: Messages ────────────────────────────────────────
+      case 'sendLocation':
+        return { ok: true, result: await wa.sendWhatsAppLocation(userId, params.to, params.latitude, params.longitude, params.name) };
+      case 'starMessage':
+        return { ok: true, result: await wa.starWhatsAppMessage(userId, params.to, params.messageId, true) };
+      case 'unstarMessage':
+        return { ok: true, result: await wa.starWhatsAppMessage(userId, params.to, params.messageId, false) };
+      case 'forwardMessage':
+        // Forward as a regular text message with forwarding context
+        return handleSendMessage(wa, userId, effectivePermissions, params.to, params.text || '', undefined, undefined, undefined);
+
+      // ─── FULL CRUD: Groups ─────────────────────────────────────────
+      case 'leaveGroup':
+        return { ok: true, result: await wa.leaveWhatsAppGroup(userId, params.to || params.groupId) };
+      case 'setGroupPhoto':
+        return { ok: true, result: await wa.updateWhatsAppGroupPhoto(userId, params.to || params.groupId, params.mediaUrl || params.url) };
+      case 'removeGroupPhoto':
+        return { ok: true, result: await wa.removeWhatsAppGroupPhoto(userId, params.to || params.groupId) };
+      case 'getGroupInviteLink':
+        return { ok: true, link: await wa.getWhatsAppGroupInviteLink(userId, params.to || params.groupId) };
+      case 'revokeGroupInvite':
+        return { ok: true, result: await wa.revokeWhatsAppGroupInvite(userId, params.to || params.groupId) };
+      case 'groupMetadata':
+        return { ok: true, metadata: await wa.getWhatsAppGroupMetadata(userId, params.to || params.groupId) };
+      case 'setGroupSetting':
+        return { ok: true, result: await wa.setWhatsAppGroupSetting(userId, params.to || params.groupId, params.setting, params.value) };
+
+      // ─── FULL CRUD: Account ────────────────────────────────────────
       case 'changeAvatar':
         return { ok: true, result: await wa.updateWhatsAppAvatar(userId, params.mediaUrl || params.url) };
       case 'changePushName':
         return { ok: true, result: await wa.updateWhatsAppPushName(userId, params.name) };
       case 'sendPresence':
         return { ok: true, result: await wa.setWhatsAppPresence(userId, params.text === 'available' ? 'available' : 'unavailable') };
+      case 'getStatus':
+        return { ok: true, status: await wa.getWhatsAppStatus(userId, params.to || params.jid) };
+      case 'getBusinessProfile':
+        return { ok: true, profile: await wa.getWhatsAppBusinessProfile(userId, params.to || params.jid) };
 
       default:
         return { ok: false, error: `Unknown WhatsApp tool: ${tool}` };

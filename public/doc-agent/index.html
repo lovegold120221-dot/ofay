@@ -379,62 +379,6 @@
             border-radius: 10px;
         }
 
-        /* Skeleton Loading Placeholders */
-        .doc-sk-header {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            margin-bottom: 8px;
-        }
-
-        .doc-sk-icon {
-            width: 14px;
-            height: 14px;
-            border-radius: 3px;
-            background: #3b82f6;
-        }
-
-        .doc-sk-title {
-            height: 6px;
-            width: 60%;
-            background: #64748b;
-            border-radius: 2px;
-        }
-
-        .doc-sk-divider {
-            height: 1px;
-            background: rgba(0, 0, 0, 0.1);
-            width: 100%;
-            margin: 4px 0;
-        }
-
-        .doc-sk-line {
-            height: 4px;
-            background: #e2e8f0;
-            border-radius: 2px;
-            margin-bottom: 6px;
-        }
-
-        .doc-sk-line.short {
-            width: 45%;
-        }
-
-        .doc-sk-line.medium {
-            width: 75%;
-        }
-
-        .doc-sk-line.long {
-            width: 100%;
-        }
-
-        .doc-sk-visual {
-            height: 40px;
-            background: rgba(59, 130, 246, 0.05);
-            border: 1px dashed rgba(59, 130, 246, 0.25);
-            border-radius: 4px;
-            margin: 6px 0;
-        }
-
         /* --- HTML Render Styling: Micro scale for blur (Gen Mode) --- */
         .workspace-card.gen-mode .document-skeleton .rendered-document {
             font-size: 5px;
@@ -740,24 +684,9 @@
                         </div>
                     </div>
 
-                    <!-- Document Rendering Container -->
+                    <!-- Document Rendering Container (universal sandbox output) -->
                     <div class="document-preview-wrapper">
                         <div class="document-skeleton" id="doc-skeleton">
-                            <!-- Outline Skeletons -->
-                            <div class="doc-sk-header" id="skeleton-placeholders-header">
-                                <div class="doc-sk-icon"></div>
-                                <div class="doc-sk-title"></div>
-                            </div>
-                            <div class="doc-sk-divider" id="skeleton-placeholders-div"></div>
-                            <div id="skeleton-placeholders-lines">
-                                <div class="doc-sk-line long"></div>
-                                <div class="doc-sk-line medium"></div>
-                                <div class="doc-sk-visual"></div>
-                                <div class="doc-sk-line long"></div>
-                                <div class="doc-sk-line short"></div>
-                            </div>
-
-                            <!-- Target for API Generated HTML -->
                             <div id="live-render-target"></div>
                         </div>
                     </div>
@@ -781,118 +710,173 @@
     </div>
 
     <script>
-        const API_KEY = "AIzaSyCKlazUBd4Cj6JmRVCx6fHxuS2w6P_PGyg";
+        // ── Config ──
         const MODEL_ID = "gemini-flash-lite-latest";
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_ID}:streamGenerateContent?key=${API_KEY}`;
+        // Try localStorage key (set by Beatrice), fall back to hardcoded key for standalone use
+        const GEMINI_API_KEY = localStorage.getItem('gemini_api_key') || "AIzaSyCKlazUBd4Cj6JmRVCx6fHxuS2w6P_PGyg";
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_ID}:streamGenerateContent?key=${GEMINI_API_KEY}`;
 
+        // ── DOM refs ──
         const workspaceCard = document.getElementById('workspace-container');
         const cmdInput = document.getElementById('cmd-input');
         const liveTarget = document.getElementById('live-render-target');
         const docSkeleton = document.getElementById('doc-skeleton');
 
-        const skHeader = document.getElementById('skeleton-placeholders-header');
-        const skDiv = document.getElementById('skeleton-placeholders-div');
-        const skLines = document.getElementById('skeleton-placeholders-lines');
+        // ── State ──
+        let isGeneratingLocally = false;
+        let abortController = null;
 
-        // Resets the page state back to Idle
+        // ── Cross-tab channel from Beatrice ──
+        const bc = new BroadcastChannel('docgen_channel');
+
+        // ── Reset ──
         function resetPage() {
+            if (abortController) { abortController.abort(); abortController = null; }
             workspaceCard.classList.remove('gen-mode');
             workspaceCard.classList.remove('doc-ready');
             liveTarget.innerHTML = "";
-
-            skHeader.style.display = 'flex';
-            skDiv.style.display = 'block';
-            skLines.style.display = 'block';
-
             cmdInput.value = "";
             cmdInput.disabled = false;
             cmdInput.placeholder = "Ask Eburon to generate a document...";
             cmdInput.focus();
+            isGeneratingLocally = false;
         }
 
         function triggerPrint() { window.print(); }
 
-        // Input command listener
-        cmdInput.addEventListener('keydown', async (e) => {
+        // ── Show content (from Beatrice or API) ──
+        function displayDocument(htmlContent) {
+            liveTarget.innerHTML = htmlContent;
+            workspaceCard.classList.remove('gen-mode');
+            workspaceCard.classList.add('doc-ready');
+            cmdInput.disabled = false;
+            cmdInput.placeholder = "Ask Eburon to generate a document...";
+            docSkeleton.scrollTop = 0;
+        }
+
+        // ── Listen for results from Beatrice (any tool → universal sandbox) ──
+        bc.onmessage = (e) => {
+            const data = e.data;
+            if (data.type === 'docgen_result' || data.type === 'show_result') {
+                // Update header title to reflect what's being displayed
+                const titleEl = document.querySelector('.header-title');
+                if (titleEl && data.title) titleEl.textContent = data.title;
+                displayDocument(data.content);
+            }
+        };
+
+        // ── On load: check localStorage for prompt from Beatrice ──
+        (function checkIncomingFromBeatrice() {
+            const prompt = localStorage.getItem('docgen_prompt');
+            if (prompt) {
+                cmdInput.value = prompt;
+                localStorage.removeItem('docgen_prompt');
+                localStorage.removeItem('docgen_title');
+                // Show "Generating..." blur immediately — result will arrive via BroadcastChannel
+                workspaceCard.classList.remove('doc-ready');
+                workspaceCard.classList.add('gen-mode');
+                cmdInput.disabled = true;
+                cmdInput.placeholder = "Beatrice is generating your document\u2026";
+            }
+        })();
+
+        // ── Stream generation from Gemini (for direct typing) ──
+        async function startGeneration(query) {
+            if (isGeneratingLocally) return;
+            isGeneratingLocally = true;
+
+            workspaceCard.classList.remove('doc-ready');
+            cmdInput.disabled = true;
+            cmdInput.value = "";
+            cmdInput.placeholder = "Generating\u2026";
+            workspaceCard.classList.add('gen-mode');
+
+            abortController = new AbortController();
+
+            const requestPayload = {
+                contents: [{
+                    role: "user",
+                    parts: [{
+                        text: `${query}\n\nStrictly provide your output as clean, semantic HTML inside a wrapper div with class 'rendered-document'. Match an executive, print-ready document structure. You can use headers (h1, h2), paragraphs (p), meta grids (<div class="meta-grid">), and signature sections (<div class="signature-grid"><div class="signature-box">...</div></div>). Do not wrap the response in markdown code blocks like \`\`\`html or write any leading/trailing explanations.`
+                    }]
+                }],
+                generationConfig: { temperature: 0.7 }
+            };
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestPayload),
+                    signal: abortController.signal
+                });
+
+                if (!response.ok) throw new Error(`HTTP Error Status: ${response.status}`);
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder("utf-8");
+
+                // ── Efficient streaming with position tracking ──
+                // Avoids O(n²) by only parsing newly arrived data per chunk
+                let accumulatedJSON = "";
+                let lastTextEnd = 0;
+                let displayedText = "";
+
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value, { stream: true });
+                    accumulatedJSON += chunk;
+
+                    // Scan only the portion we haven't parsed yet
+                    const textPattern = /"text"\s*:\s*"((?:[^"\\]|\\.)*)"/g;
+                    textPattern.lastIndex = Math.max(0, lastTextEnd);
+
+                    let match;
+                    while ((match = textPattern.exec(accumulatedJSON)) !== null) {
+                        const rawToken = match[1];
+                        try {
+                            displayedText += JSON.parse('"' + rawToken + '"');
+                        } catch (_) {
+                            displayedText += rawToken.replace(/\\n/g, '\n').replace(/\\"/g, '"');
+                        }
+                        lastTextEnd = textPattern.lastIndex;
+                    }
+
+                    // Only touch the DOM when content actually changes
+                    const clean = displayedText
+                        .replace(/^```html\s*/i, '')
+                        .replace(/```\s*$/, '')
+                        .trim();
+
+                    if (clean && clean !== liveTarget.innerHTML) {
+                        liveTarget.innerHTML = clean;
+                    }
+                }
+
+                workspaceCard.classList.remove('gen-mode');
+                workspaceCard.classList.add('doc-ready');
+            } catch (err) {
+                if (err.name === 'AbortError') return;
+                console.error(err);
+                alert(`Generation error: ${err.message}`);
+            } finally {
+                cmdInput.disabled = false;
+                cmdInput.placeholder = "Ask Eburon to generate a document...";
+                cmdInput.focus();
+                docSkeleton.scrollTop = 0;
+                isGeneratingLocally = false;
+                abortController = null;
+            }
+        }
+
+        // ── Input listener (manual typing) ──
+        cmdInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 const query = cmdInput.value.trim();
                 if (!query) return;
-
-                // Clean slate
-                workspaceCard.classList.remove('doc-ready');
-
-                // Disable input to show processing
-                cmdInput.disabled = true;
-                cmdInput.value = "";
-                cmdInput.placeholder = "Processing your request...";
-
-                // Activate Generation Blur Mode
-                workspaceCard.classList.add('gen-mode');
-
-                const requestPayload = {
-                    contents: [{
-                        role: "user",
-                        parts: [{
-                            text: `${query}\n\nStrictly provide your output as clean, semantic HTML inside a wrapper div with class 'rendered-document'. Match an executive, print-ready document structure. You can use headers (h1, h2), paragraphs (p), meta grids (<div class="meta-grid">), and signature sections (<div class="signature-grid"><div class="signature-box">...</div></div>). Do not wrap the response in markdown code blocks like \`\`\`html or write any leading/trailing explanations.`
-                        }]
-                    }],
-                    generationConfig: { temperature: 0.7 }
-                };
-
-                try {
-                    const response = await fetch(API_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(requestPayload)
-                    });
-
-                    if (!response.ok) throw new Error(`HTTP Error Status: ${response.status}`);
-
-                    const reader = response.body.getReader();
-                    const decoder = new TextDecoder("utf-8");
-                    let accumulatedJSON = "";
-
-                    // Hide skeleton placeholders once streaming starts
-                    skHeader.style.display = 'none';
-                    skDiv.style.display = 'none';
-                    skLines.style.display = 'none';
-
-                    while (true) {
-                        const { value, done } = await reader.read();
-                        if (done) break;
-
-                        accumulatedJSON += decoder.decode(value, { stream: true });
-
-                        const textPattern = /"text":\s*"((?:[^"\\]|\\.)*)"/g;
-                        let regexMatch;
-                        let combinedTextOutput = "";
-
-                        while ((regexMatch = textPattern.exec(accumulatedJSON)) !== null) {
-                            const rawStringToken = regexMatch[1];
-                            try { combinedTextOutput += JSON.parse(`"${rawStringToken}"`); }
-                            catch (parseErr) { combinedTextOutput += rawStringToken.replace(/\\n/g, '\n').replace(/\\"/g, '"'); }
-                        }
-
-                        liveTarget.innerHTML = combinedTextOutput.replace(/^```html\s*/i, '').replace(/```\s*$/, '').trim();
-                    }
-
-                    // FINISHED: Switch from Blurry Gen Mode to Clear Ready Mode
-                    workspaceCard.classList.remove('gen-mode');
-                    workspaceCard.classList.add('doc-ready');
-
-                    // Re-enable text input
-                    cmdInput.disabled = false;
-                    cmdInput.placeholder = "Ask Eburon to generate a document...";
-                    cmdInput.focus();
-
-                    // Reset the inner scrollbar of the embedded document wrapper
-                    docSkeleton.scrollTop = 0;
-
-                } catch (err) {
-                    console.error(err);
-                    alert(`Engine communication error: ${err.message}`);
-                    resetPage();
-                }
+                startGeneration(query);
             }
         });
     </script>
